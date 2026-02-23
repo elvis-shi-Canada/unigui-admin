@@ -260,8 +260,29 @@ end;
 
 function TPlugin.CreateForm(const FormName: string; AOwner: TComponent): TUniForm;
 begin
-  var LInfo := GetForm(FormName);
-  Result := LInfo.FormClass.Create(AOwner) as TUniForm;
+  FLock.Enter;
+  try
+    // 查找表单信息
+    var LInfo: TFormInfo;
+    var LFound: Boolean;
+    for var LFormInfo in FForms do
+    begin
+      if LFormInfo.FormName = FormName then
+      begin
+        LInfo := LFormInfo;
+        LFound := True;
+        Break;
+      end;
+    end;
+
+    if not LFound then
+      raise EPluginException.CreateFmt('Form %s not found in plugin %s', [FormName, FInfo.Name]);
+
+    // 在锁保护下创建表单实例
+    Result := LInfo.FormClass.Create(AOwner) as TUniForm;
+  finally
+    FLock.Leave;
+  end;
 end;
 
 function TPlugin.GetDataModule(const DataModuleName: string): TDataModule;
@@ -320,5 +341,3 @@ begin
 end;
 
 end;
-
-end.
