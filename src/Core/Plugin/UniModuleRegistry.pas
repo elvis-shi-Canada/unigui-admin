@@ -64,6 +64,10 @@ type
       const Visited: TDictionary<string, Boolean>;
       const RecursionStack: TDictionary<string, Boolean>;
       out Path: TStringList): Boolean;
+    function DetectCircularDependencyInternal(const LVisited: TDictionary<string, Boolean>;
+      const LRecursionStack: TDictionary<string, Boolean>;
+      const LPath: TStringList;
+      const StartPluginID: string): Boolean;
     function TopologicalSort: TArray<string>;
     procedure CheckPluginExists(const PluginID: string);
   public
@@ -388,7 +392,7 @@ begin
       begin
         if not LVisited[LPluginID] then
         begin
-          if DepthFirstSearch(LPluginID, LVisited, LRecursionStack, LPath) then
+          if DetectCircularDependencyInternal(LVisited, LRecursionStack, LPath, LPluginID) then
           begin
             CircularPath := LPath.Text;
             Exit(True);
@@ -406,6 +410,19 @@ begin
   finally
     FLock.Leave;
   end;
+end;
+
+function TUniModuleRegistry.DetectCircularDependencyInternal(
+  const LVisited: TDictionary<string, Boolean>;
+  const LRecursionStack: TDictionary<string, Boolean>;
+  const LPath: TStringList;
+  const StartPluginID: string): Boolean;
+begin
+  Result := False;
+  LPath.Clear;
+
+  if DepthFirstSearch(StartPluginID, LVisited, LRecursionStack, LPath) then
+    Result := True;
 end;
 
 function TUniModuleRegistry.DepthFirstSearch(const PluginID: string;
@@ -462,13 +479,38 @@ var
   LPluginID: string;
   LDepLevels: TDictionary<string, Integer>;
   LVisited: TList<string>;
+  LVisitedDict: TDictionary<string, Boolean>;
+  LRecursionStack: TDictionary<string, Boolean>;
+  LCircularPath: TStringList;
 begin
   FLock.Enter;
   try
-    // 首先检查循环依赖
-    var LCircularPath: string;
-    if DetectCircularDependency(LCircularPath) then
-      raise ECircularDependencyException.Create(LCircularPath);
+    // 首先检查循环依赖（使用内部方法避免死锁）
+    LVisitedDict := TDictionary<string, Boolean>.Create;
+    LRecursionStack := TDictionary<string, Boolean>.Create;
+    LCircularPath := TStringList.Create;
+    try
+      // 初始化所有插件为未访问
+      for LPluginID in FPluginRegistry.Keys do
+      begin
+        LVisitedDict.Add(LPluginID, False);
+        LRecursionStack.Add(LPluginID, False);
+      end;
+
+      // 检查每个插件
+      for LPluginID in FPluginRegistry.Keys do
+      begin
+        if not LVisitedDict[LPluginID] then
+        begin
+          if DetectCircularDependencyInternal(LVisitedDict, LRecursionStack, LCircularPath, LPluginID) then
+            raise ECircularDependencyException.Create(LCircularPath.Text);
+        end;
+      end;
+    finally
+      LVisitedDict.Free;
+      LRecursionStack.Free;
+      LCircularPath.Free;
+    end;
 
     // 执行拓扑排序
     LSortedIDs := TopologicalSort;
@@ -528,23 +570,29 @@ begin
   LQueue := TQueue<string>.Create;
   LResult := TList<string>.Create;
   try
-    // 计算入度
+    // 计算入度：A依赖B，则A的入度增加1（A需要等待B先加载）
     for LPluginID in FPluginRegistry.Keys do
       LInDegree.Add(LPluginID, 0);
 
-    for LPluginID in FPluginRegistry.Keys do
+    // 反向依赖图用于计算入度：谁依赖我，我就让谁的入度增加
+    if FReverseDependencyGraph.Count > 0 then
     begin
-      if FDependencyGraph.TryGetValue(LPluginID, LDepList) then
+      for LPluginID in FPluginRegistry.Keys do
       begin
-        for var LDepID in LDepList do
+        if FReverseDependencyGraph.TryGetValue(LPluginID, LDepList) then
         begin
-          if LInDegree.ContainsKey(LDepID) then
-            LInDegree[LDepID] := LInDegree[LDepID] + 1;
+          // LDepList中存储的是依赖LPluginID的所有插件
+          // 这些插件的入度需要增加1
+          for var LDependentID in LDepList do
+          begin
+            if LInDegree.ContainsKey(LDependentID) then
+              LInDegree[LDependentID] := LInDegree[LDependentID] + 1;
+          end;
         end;
       end;
     end;
 
-    // 将入度为0的节点加入队列
+    // 将入度为0的节点加入队列（没有依赖或所有依赖都已处理）
     for LPluginID in FPluginRegistry.Keys do
     begin
       if LInDegree[LPluginID] = 0 then
@@ -557,15 +605,16 @@ begin
       LCurrent := LQueue.Dequeue;
       LResult.Add(LCurrent);
 
-      if FDependencyGraph.TryGetValue(LCurrent, LDepList) then
+      // 查找依赖LCurrent的所有插件，减少它们的入度
+      if FReverseDependencyGraph.TryGetValue(LCurrent, LDepList) then
       begin
-        for var LDepID in LDepList do
+        for var LDependentID in LDepList do
         begin
-          if LInDegree.ContainsKey(LDepID) then
+          if LInDegree.ContainsKey(LDependentID) then
           begin
-            LInDegree[LDepID] := LInDegree[LDepID] - 1;
-            if LInDegree[LDepID] = 0 then
-              LQueue.Enqueue(LDepID);
+            LInDegree[LDependentID] := LInDegree[LDependentID] - 1;
+            if LInDegree[LDependentID] = 0 then
+              LQueue.Enqueue(LDependentID);
           end;
         end;
       end;
