@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "application": {
+    "name": "UniAdmin 管理系统",
+    "title": "UniAdmin",
+    "copyright": "© 2025 UniAdmin Team"
+  },
+  "server": {
+    "port": 8077,
+    "host": "0.0.0.0",
+    "sessionTimeout": 1800,
+    "maxSessions": 1000
+  },
+  "database": {
+    "type": "MSSQL",
+    "connectionString": "Server=localhost;Port=1433;Database=UniAdmin;User_Name=sa;Password=your_password",
+    "connectionTimeout": 30
+  }
+}
