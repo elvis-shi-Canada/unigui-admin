@@ -1,0 +1,50 @@
+{
+  "id": "dictionary",
+  "name": "数据字典管理",
+  "version": "1.0.0",
+  "description": "提供系统数据字典的管理功能，包括字典类型和字典项的增删改查。",
+  "author": "UniAdmin Team",
+  "category": "System",
+  "autoStart": true,
+  "dependencies": [],
+  "permissions": [
+    "dictionary.view",
+    "dictionary.add",
+    "dictionary.edit",
+    "dictionary.delete"
+  ],
+  "menus": [
+    {
+      "id": "system.dictionary",
+      "parent": "system",
+      "text": "数据字典",
+      "icon": "dict.png",
+      "route": "/system/dictionary",
+      "sortOrder": 100
+    }
+  ],
+  "forms": [
+    {
+      "name": "DictionaryListFrame",
+      "displayName": "数据字典列表",
+      "icon": "dict.png",
+      "routePath": "/system/dictionary",
+      "sortOrder": 100
+    }
+  ],
+  "dataModules": [
+    {
+      "name": "DictionaryDataModule",
+      "description": "数据字典数据访问模块",
+      "isShared": true
+    }
+  ],
+  "config": {
+    "database": {
+      "tables": [
+        "sys_dictionaries",
+        "sys_dictionary_items"
+      ]
+    }
+  }
+}
