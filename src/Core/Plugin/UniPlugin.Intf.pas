@@ -4,13 +4,13 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  UniContext;
+  UniContext, UniPlugin.Types;
 
 type
-  // 2??t¡Á¡ä¨¬????¨´
+  // 2??tï¿½ï¿½ï¿½ä¨¬????ï¿½ï¿½
   TPluginState = (psUninitialized, psInitializing, psInitialized, psActivated, psDeactivated, psError);
 
-  // ¡ä¡ã¨¬?D??¡é
+  // ï¿½ï¿½ã¨¬?D??ï¿½ï¿½
   TFormInfo = record
     FormName: string;
     FormClass: TFormClass;
@@ -20,7 +20,7 @@ type
     SortOrder: Integer;
   end;
 
-  // DataModule D??¡é
+  // DataModule D??ï¿½ï¿½
   TDataModuleInfo = record
     DataModuleName: string;
     DataModuleClass: TDataModuleClass;
@@ -28,7 +28,7 @@ type
     IsShared: Boolean;
   end;
 
-  // 2??tD??¡é
+  // 2??tD??ï¿½ï¿½
   TPluginInfo = record
     Name: string;
     DisplayName: string;
@@ -40,7 +40,7 @@ type
     ConfigFile: string;
   end;
 
-  // 2??t?¨®?¨²
+  // 2??t?ï¿½ï¿½?ï¿½ï¿½
   IPlugin = interface(IInterface)
     ['{UNI-PLUGIN-001}']
     function GetInfo: TPluginInfo;

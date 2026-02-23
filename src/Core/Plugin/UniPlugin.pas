@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.SyncObjs,
-  UniContext, UniPlugin.Intf;
+  UniContext, UniPlugin.Intf, UniPlugin.Types;
 
 type
   /// <summary>
