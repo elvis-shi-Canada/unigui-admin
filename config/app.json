@@ -13,7 +13,8 @@
   },
   "database": {
     "type": "MSSQL",
-    "connectionString": "Server=localhost;Port=1433;Database=UniAdmin;User_Name=sa;Password=your_password",
-    "connectionTimeout": 30
+    "connectionString": "Server=localhost;Port=1433;Database=UniAdmin;User_Name=sa;Password=请在此配置实际密码",
+    "connectionTimeout": 30,
+    "note": "警告：生产环境请勿在配置文件中存储明文密码，建议使用环境变量或密钥管理服务"
   }
 }
