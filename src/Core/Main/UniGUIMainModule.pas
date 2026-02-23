@@ -103,19 +103,19 @@ end;
 procedure TUniGUIMainModule.OnDestroy(Sender: TObject);
 var
   LPair: TPair<string, TUniSession>;
+  LSessionList: TList<TUniSession>;
   LSession: TUniSession;
 begin
-  // 清理所有会话
+  LSessionList := TList<TUniSession>.Create;
+
+  // 收集所有会话对象
   FSessionLock.Acquire;
   try
-    // 释放所有会话对象
     for LPair in FSessions do
     begin
       LSession := LPair.Value;
       if LSession <> nil then
-      begin
-        LSession.Free;
-      end;
+        LSessionList.Add(LSession);
     end;
 
     // 清空会话字典
@@ -123,6 +123,14 @@ begin
   finally
     FSessionLock.Release;
   end;
+
+  // 在锁外释放会话对象，避免潜在回调问题
+  for LSession in LSessionList do
+  begin
+    if LSession <> nil then
+      LSession.Free;
+  end;
+  LSessionList.Free;
 
   // 释放会话字典
   FSessions.Free;
@@ -275,6 +283,14 @@ begin
   if PluginID.IsEmpty or SessionID.IsEmpty then
     raise EArgumentException.Create('PluginID and SessionID cannot be empty');
 
+  // 首先获取会话，避免在持有其他资源时获取锁
+  LSession := GetOrCreateSession(SessionID);
+  if not LSession.IsAuthenticated then
+  begin
+    WriteLn(Format('Session not authenticated: %s', [SessionID]));
+    Exit(False);
+  end;
+
   // 检查插件是否已注册
   if not FModuleRegistry.IsPluginRegistered(PluginID) then
   begin
@@ -285,14 +301,6 @@ begin
   // 获取插件信息
   LPluginInfo := FModuleRegistry.GetPluginClassInfo(PluginID);
   LPluginClass := LPluginInfo.PluginClass;
-
-  // 获取会话
-  LSession := GetOrCreateSession(SessionID);
-  if not LSession.IsAuthenticated then
-  begin
-    WriteLn(Format('Session not authenticated: %s', [SessionID]));
-    Exit(False);
-  end;
 
   // 创建插件实例
   if Supports(LPluginClass, IPlugin, LPlugin) then
@@ -317,11 +325,13 @@ var
   LSession: TUniSession;
   LSessionInfo: TSessionInfo;
   LTimeoutMinutes: Integer;
+  LSessionID: string;
 begin
   LInactiveSessions := TList<string>.Create;
   LNow := Now;
   LTimeoutMinutes := GetSessionTimeoutMinutes;
 
+  // 第一阶段：收集不活动会话ID
   FSessionLock.Acquire;
   try
     // 查找不活动会话
@@ -338,17 +348,18 @@ begin
         end;
       end;
     end;
-
-    // 清理不活动会话
-    for var LSessionID in LInactiveSessions do
-    begin
-      WriteLn(Format('Cleaning up inactive session: %s', [LSessionID]));
-      RemoveSession(LSessionID);
-    end;
   finally
     FSessionLock.Release;
-    LInactiveSessions.Free;
   end;
+
+  // 第二阶段：释放锁后，逐个清理不活动会话
+  for LSessionID in LInactiveSessions do
+  begin
+    WriteLn(Format('Cleaning up inactive session: %s', [LSessionID]));
+    RemoveSession(LSessionID);
+  end;
+
+  LInactiveSessions.Free;
 end;
 
 function TUniGUIMainModule.GetSessionTimeoutMinutes: Integer;
