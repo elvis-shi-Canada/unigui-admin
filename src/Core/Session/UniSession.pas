@@ -3,7 +3,7 @@ unit UniSession;
 interface
 
 uses
-  System.SysUtils, System.SyncObjs, System.Generics.Collections,
+  System.SysUtils, System.SyncObjs, System.Generics.Collections, System.Types,
   UniContext, UniPlugin.Intf;
 
 type
@@ -371,15 +371,16 @@ begin
   // 清理插件
   DeactivateAllPlugins;
   FLoadedPlugins.Clear;
+  FLoadedPlugins.Dispose;
 
-  // 清理会话数据
+  // 清理会话数据（修复 P0-1：正确释放 Data 字典）
   if FSessionInfo.Data <> nil then
   begin
     FSessionInfo.Data.Clear;
     FSessionInfo.Data.Dispose;
+    FSessionInfo.Data := nil;
   end;
 
-  FLoadedPlugins.Dispose;
   FLock.Dispose;
   inherited;
 end;
@@ -390,6 +391,7 @@ var
   LUserContext: IUserContext;
   LPermissions: TArray<string>;
   LDataScopes: TDictionary<string, string>;
+  LGUID: TGUID;
 begin
   FLock.Acquire;
   try
@@ -402,14 +404,26 @@ begin
 
     SetSessionState(ssAuthenticating);
 
-    // 生成会话ID
-    LSessionID := FormatDateTime('yyyymmddhhnnsszzz', Now) + '-' + AUserName;
+    // 修复 P0-2：使用 GUID 生成会话 ID 提高安全性
+    if CreateGUID(LGUID) = 0 then
+      LSessionID := GUIDToString(LGUID)
+    else
+      // 如果 GUID 生成失败，使用时间戳 + 随机数作为后备方案
+      LSessionID := FormatDateTime('yyyymmddhhnnsszzz', Now) + '-' + IntToStr(Random(MaxInt));
 
     // 创建用户上下文
     LPermissions := TArray<string>.Create('read', 'write', 'delete');
     LDataScopes := TDictionary<string, string>.Create;
     try
       LDataScopes.Add('default', 'all');
+
+      // 修复 P0-1：在重新创建 FSessionInfo 前，先释放旧的 Data 字典
+      if FSessionInfo.Data <> nil then
+      begin
+        FSessionInfo.Data.Clear;
+        FSessionInfo.Data.Dispose;
+      end;
+
       FSessionInfo := TSessionInfo.Create(LSessionID, 1, AUserName, AUserName, AClientIP);
       LUserContext := TUserContextImpl.Create(FSessionInfo, LPermissions, LDataScopes);
 
