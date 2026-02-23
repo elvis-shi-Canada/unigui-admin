@@ -59,6 +59,7 @@ type
 
     function GetCurrentUserID: Integer;
     procedure SetConnectionProperties;
+    procedure EnsureConnected;
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
@@ -92,40 +93,74 @@ begin
 
   // 创建数据库连接组件
   FDConnection := TFDConnection.Create(nil);
-  FDConnection.DriverName := 'MySQL';
-  FDConnection.LoginPrompt := False;
+  try
+    FDConnection.DriverName := 'MySQL';
+    FDConnection.LoginPrompt := False;
 
-  // 创建查询组件
-  qryDictionaries := TFDQuery.Create(nil);
-  qryDictionaries.Connection := FDConnection;
+    // 创建查询组件
+    qryDictionaries := TFDQuery.Create(nil);
+    qryDictionaries.Connection := FDConnection;
 
-  qryDictionaryItems := TFDQuery.Create(nil);
-  qryDictionaryItems.Connection := FDConnection;
+    qryDictionaryItems := TFDQuery.Create(nil);
+    qryDictionaryItems.Connection := FDConnection;
 
-  qryInsertDict := TFDQuery.Create(nil);
-  qryInsertDict.Connection := FDConnection;
+    qryInsertDict := TFDQuery.Create(nil);
+    qryInsertDict.Connection := FDConnection;
 
-  qryUpdateDict := TFDQuery.Create(nil);
-  qryUpdateDict.Connection := FDConnection;
+    qryUpdateDict := TFDQuery.Create(nil);
+    qryUpdateDict.Connection := FDConnection;
 
-  qryDeleteDict := TFDQuery.Create(nil);
-  qryDeleteDict.Connection := FDConnection;
+    qryDeleteDict := TFDQuery.Create(nil);
+    qryDeleteDict.Connection := FDConnection;
 
-  // 设置连接属性
-  SetConnectionProperties;
+    // 设置连接属性
+    SetConnectionProperties;
+  except
+    // 发生异常时释放已创建的资源
+    on E: Exception do
+    begin
+      qryDeleteDict.Free;
+      qryUpdateDict.Free;
+      qryInsertDict.Free;
+      qryDictionaryItems.Free;
+      qryDictionaries.Free;
+      FDConnection.Free;
+
+      // 清除引用，防止 BeforeDestruction 中重复释放
+      qryDeleteDict := nil;
+      qryUpdateDict := nil;
+      qryInsertDict := nil;
+      qryDictionaryItems := nil;
+      qryDictionaries := nil;
+      FDConnection := nil;
+
+      // 重新抛出异常
+      raise;
+    end;
+  end;
 end;
 
 procedure TDictionaryDataModule.BeforeDestruction;
 begin
-  // 释放查询组件
-  qryDictionaries.Free;
-  qryDictionaryItems.Free;
-  qryInsertDict.Free;
-  qryUpdateDict.Free;
-  qryDeleteDict.Free;
+  // 释放查询组件（安全检查，防止 nil 引用）
+  if Assigned(qryDictionaries) then
+    FreeAndNil(qryDictionaries);
+  if Assigned(qryDictionaryItems) then
+    FreeAndNil(qryDictionaryItems);
+  if Assigned(qryInsertDict) then
+    FreeAndNil(qryInsertDict);
+  if Assigned(qryUpdateDict) then
+    FreeAndNil(qryUpdateDict);
+  if Assigned(qryDeleteDict) then
+    FreeAndNil(qryDeleteDict);
 
   // 释放连接组件
-  FDConnection.Free;
+  if Assigned(FDConnection) then
+  begin
+    if FDConnection.Connected then
+      FDConnection.Connected := False;
+    FreeAndNil(FDConnection);
+  end;
 
   inherited;
 end;
@@ -138,6 +173,22 @@ begin
   FDConnection.Params.DriverName := 'MySQL';
   FDConnection.Params.Database := 'uniadmin';
   // 其他参数在运行时设置
+end;
+
+procedure TDictionaryDataModule.EnsureConnected;
+begin
+  if not Assigned(FDConnection) then
+    raise Exception.Create('数据库连接组件未初始化');
+
+  if not FDConnection.Connected then
+  begin
+    try
+      FDConnection.Connected := True;
+    except
+      on E: Exception do
+        raise Exception.Create('无法连接到数据库: ' + E.Message);
+    end;
+  end;
 end;
 
 procedure TDictionaryDataModule.SetContext(const Context: IExecutionContext);
@@ -168,6 +219,8 @@ var
   LDict: TDictionary;
   LSQL: string;
 begin
+  EnsureConnected;  // 确保数据库已连接
+
   LList := TList<TDictionary>.Create;
   try
     LSQL := 'SELECT * FROM sys_dictionaries WHERE is_active = 1';
@@ -260,6 +313,11 @@ end;
 
 function TDictionaryDataModule.GetDictionaryByCode(const DictCode: string): TDictionary;
 begin
+  // 使用 FillChar 初始化所有字段为 0
+  FillChar(Result, SizeOf(TDictionary), 0);
+
+  EnsureConnected;  // 确保数据库已连接
+
   with qryDictionaries do
   begin
     Close;
@@ -281,11 +339,6 @@ begin
       Result.CreatedBy := FieldByName('created_by').AsInteger;
       Result.UpdatedAt := FieldByName('updated_at').AsDateTime;
       Result.UpdatedBy := FieldByName('updated_by').AsInteger;
-    end
-    else
-    begin
-      Result.ID := 0;
-      Result.DictCode := '';
     end;
 
     Close;

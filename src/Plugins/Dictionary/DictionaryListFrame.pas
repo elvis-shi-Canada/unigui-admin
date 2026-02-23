@@ -204,8 +204,20 @@ var
   Row: Integer;
 begin
   Result := 0;
+
+  // 检查网格是否已初始化
+  if not Assigned(grdDictionaries) then
+    Exit;
+
+  // 检查是否有数据
+  if Length(FDictionaries) = 0 then
+    Exit;
+
   Row := grdDictionaries.Row;
-  if (Row > 0) and (Row <= Length(FDictionaries)) then
+
+  // 修复边界检查：Row 必须大于 FixedRows（标题行）且在有效范围内
+  // Row - 1 是数组索引，所以检查 Row - 1 < Length(FDictionaries)
+  if (Row > grdDictionaries.FixedRows) and (Row - 1 < Length(FDictionaries)) then
     Result := FDictionaries[Row - 1].ID;
 end;
 
@@ -214,8 +226,19 @@ var
   Row: Integer;
 begin
   Result := 0;
+
+  // 检查网格是否已初始化
+  if not Assigned(grdDictionaryItems) then
+    Exit;
+
+  // 检查是否有数据
+  if Length(FDictionaryItems) = 0 then
+    Exit;
+
   Row := grdDictionaryItems.Row;
-  if (Row > 0) and (Row <= Length(FDictionaryItems)) then
+
+  // 修复边界检查：Row 必须大于 FixedRows（标题行）且在有效范围内
+  if (Row > grdDictionaryItems.FixedRows) and (Row - 1 < Length(FDictionaryItems)) then
     Result := FDictionaryItems[Row - 1].ID;
 end;
 
