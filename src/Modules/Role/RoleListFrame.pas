@@ -7,7 +7,8 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniGrid, uniToolBar, uniPanel,
   UniContext, UniPlugin.Types, UniModelAdmin,
-  BaseCrudFrame, RoleDataModule;
+  BaseCrudFrame, RoleDataModule,
+  RolePermissionDialog, RoleUserDialog;
 
 type
   /// <summary>
@@ -345,15 +346,85 @@ begin
 end;
 
 procedure TRoleListFrame.OpenPermissionDialog;
+var
+  LDialog: TRolePermissionDialog;
+  LRoleInfo: TDataSet;
+  LRoleName: string;
 begin
-  // TODO: Task 61 - 打开权限分配对话框
-  ShowMessage('权限分配对话框将在 Task 61 中实现');
+  try
+    LDialog := TRolePermissionDialog.Create(UniGUIApplication.UniApplication);
+    try
+      LDialog.SetContext(Context);
+      LDialog.SetConnection(ModelAdmin.Connection);
+
+      // 获取角色名称
+      LRoleInfo := FRoleDM.GetRoleByID(FSelectedRoleID);
+      try
+        if not LRoleInfo.Eof then
+          LRoleName := LRoleInfo.FieldByName('RoleName').AsString
+        else
+          LRoleName := '未知角色';
+      finally
+        LRoleInfo.Free;
+      end;
+
+      LDialog.SetRole(FSelectedRoleID, LRoleName);
+
+      if LDialog.Execute = mrOK then
+      begin
+        // 刷新列表
+        LoadRoles;
+      end;
+    finally
+      LDialog.Free;
+    end;
+  except
+    on E: Exception do
+    begin
+      ShowMessage('打开权限对话框失败: ' + E.Message);
+    end;
+  end;
 end;
 
 procedure TRoleListFrame.OpenUserDialog;
+var
+  LDialog: TRoleUserDialog;
+  LRoleInfo: TDataSet;
+  LRoleName: string;
 begin
-  // TODO: Task 62 - 打开用户分配对话框
-  ShowMessage('用户分配对话框将在 Task 62 中实现');
+  try
+    LDialog := TRoleUserDialog.Create(UniGUIApplication.UniApplication);
+    try
+      LDialog.SetContext(Context);
+      LDialog.SetConnection(ModelAdmin.Connection);
+
+      // 获取角色名称
+      LRoleInfo := FRoleDM.GetRoleByID(FSelectedRoleID);
+      try
+        if not LRoleInfo.Eof then
+          LRoleName := LRoleInfo.FieldByName('RoleName').AsString
+        else
+          LRoleName := '未知角色';
+      finally
+        LRoleInfo.Free;
+      end;
+
+      LDialog.SetRole(FSelectedRoleID, LRoleName);
+
+      if LDialog.Execute = mrOK then
+      begin
+        // 刷新列表
+        LoadRoles;
+      end;
+    finally
+      LDialog.Free;
+    end;
+  except
+    on E: Exception do
+    begin
+      ShowMessage('打开用户对话框失败: ' + E.Message);
+    end;
+  end;
 end;
 
 end.
