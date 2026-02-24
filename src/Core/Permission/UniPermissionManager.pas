@@ -43,6 +43,8 @@ type
 
     /// <summary>
     /// 获取用户的最大数据范围（取所有角色中的最大范围）
+    /// 注意: 当前实现未按资源区分数据范围，返回用户所有角色中的最大范围
+    /// TODO: 未来版本支持按资源区分数据权限
     /// </summary>
     function GetMaxDataScope(const UserID: Integer; const Resource: string): TDataScopeType;
   public
@@ -181,9 +183,14 @@ var
   LList: TList<TPermissionInfo>;
   LPermission: TPermissionInfo;
 begin
-  // 检查缓存
-  if FCacheEnabled and FPermissionCache.ContainsKey(UserID) then
-    Exit(FPermissionCache[UserID]);
+  // 检查缓存（线程安全）
+  TMonitor.Enter(FLock);
+  try
+    if FCacheEnabled and FPermissionCache.ContainsKey(UserID) then
+      Exit(FPermissionCache[UserID]);
+  finally
+    TMonitor.Exit(FLock);
+  end;
 
   LList := TList<TPermissionInfo>.Create;
   try
@@ -226,9 +233,14 @@ begin
 
       Result := LList.ToArray;
 
-      // 缓存结果
-      if FCacheEnabled then
-        FPermissionCache.AddOrSetValue(UserID, Result);
+      // 缓存结果（线程安全）
+      TMonitor.Enter(FLock);
+      try
+        if FCacheEnabled then
+          FPermissionCache.AddOrSetValue(UserID, Result);
+      finally
+        TMonitor.Exit(FLock);
+      end;
     finally
       LQuery.Free;
     end;
@@ -243,9 +255,14 @@ var
   LList: TList<TRoleInfo>;
   LRole: TRoleInfo;
 begin
-  // 检查缓存
-  if FCacheEnabled and FRoleCache.ContainsKey(UserID) then
-    Exit(FRoleCache[UserID]);
+  // 检查缓存（线程安全）
+  TMonitor.Enter(FLock);
+  try
+    if FCacheEnabled and FRoleCache.ContainsKey(UserID) then
+      Exit(FRoleCache[UserID]);
+  finally
+    TMonitor.Exit(FLock);
+  end;
 
   LList := TList<TRoleInfo>.Create;
   try
@@ -284,9 +301,14 @@ begin
 
       Result := LList.ToArray;
 
-      // 缓存结果
-      if FCacheEnabled then
-        FRoleCache.AddOrSetValue(UserID, Result);
+      // 缓存结果（线程安全）
+      TMonitor.Enter(FLock);
+      try
+        if FCacheEnabled then
+          FRoleCache.AddOrSetValue(UserID, Result);
+      finally
+        TMonitor.Exit(FLock);
+      end;
     finally
       LQuery.Free;
     end;
@@ -300,6 +322,12 @@ var
   LQuery: TFDQuery;
 begin
   Result := False;
+
+  // 输入验证
+  if UserID <= 0 then
+    raise Exception.Create('UserID must be greater than 0');
+  if RoleID <= 0 then
+    raise Exception.Create('RoleID must be greater than 0');
 
   if not Assigned(FConnection) then
     Exit;
@@ -363,6 +391,12 @@ var
   LQuery: TFDQuery;
 begin
   Result := False;
+
+  // 输入验证
+  if UserID <= 0 then
+    raise Exception.Create('UserID must be greater than 0');
+  if RoleID <= 0 then
+    raise Exception.Create('RoleID must be greater than 0');
 
   if not Assigned(FConnection) then
     Exit;

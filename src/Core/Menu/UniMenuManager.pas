@@ -65,9 +65,14 @@ type
     function DeleteMenuRecursive(const MenuID: Integer): Boolean;
 
     /// <summary>
-    /// 清空缓存
+    /// 清空缓存（内部方法，不加锁）
     /// </summary>
     procedure ClearCache;
+
+    /// <summary>
+    /// 清空缓存（线程安全版本）
+    /// </summary>
+    procedure ClearCacheLocked;
   public
     constructor Create(const Connection: TFDConnection);
     destructor Destroy; override;
@@ -122,7 +127,12 @@ end;
 
 destructor TUniMenuManager.Destroy;
 begin
-  ClearCache;
+  TMonitor.Enter(FLock);
+  try
+    ClearCache;
+  finally
+    TMonitor.Exit(FLock);
+  end;
   FMenuCache.Free;
   FMenuTreeCache.Free;
   inherited;
@@ -139,6 +149,19 @@ begin
   end;
   FMenuCache.Clear;
   FMenuTreeCache.Clear;
+end;
+
+/// <summary>
+/// 清空缓存（线程安全版本）
+/// </summary>
+procedure TUniMenuManager.ClearCacheLocked;
+begin
+  TMonitor.Enter(FLock);
+  try
+    ClearCache;
+  finally
+    TMonitor.Exit(FLock);
+  end;
 end;
 
 function TUniMenuManager.LoadAllMenus: TArray<TMenuItem>;
@@ -214,40 +237,38 @@ end;
 
 function TUniMenuManager.BuildMenuTree(const FlatMenus: TArray<TMenuItem>): TArray<TMenuItem>;
 var
-  I: Integer;
   LRootMenus: TArray<TMenuItem>;
-  LMenuStack: TList<TPair<TMenuItem, Integer>>;
-  LCurrentPair: TPair<TMenuItem, Integer>;
+  LMenuQueue: TQueue<TMenuItem>;
+  LCurrent: TMenuItem;
   LChildren: TArray<TMenuItem>;
   LChild: TMenuItem;
 begin
   // 找到所有根菜单（ParentID = 0 或 ParentID 不存在于列表中）
   LRootMenus := FindChildren(0, FlatMenus);
 
-  // 构建树形结构
-  LMenuStack := TList<TPair<TMenuItem, Integer>>.Create;
+  // 构建树形结构 - 使用队列代替栈+Delete(0)以获得O(n)性能
+  LMenuQueue := TQueue<TMenuItem>.Create;
   try
-    // 初始化：将所有根菜单加入栈
+    // 初始化：将所有根菜单加入队列
     for LChild in LRootMenus do
-      LMenuStack.Add(TPair.Create(LChild, 0));
+      LMenuQueue.Enqueue(LChild);
 
-    while LMenuStack.Count > 0 do
+    while LMenuQueue.Count > 0 do
     begin
-      LCurrentPair := LMenuStack[0];
-      LMenuStack.Delete(0);
+      LCurrent := LMenuQueue.Dequeue;
 
       // 查找当前菜单的子菜单
-      LChildren := FindChildren(LCurrentPair.Key.MenuID, FlatMenus);
+      LChildren := FindChildren(LCurrent.MenuID, FlatMenus);
       if Length(LChildren) > 0 then
       begin
-        LCurrentPair.Key.Children := LChildren;
-        // 将子菜单加入栈继续处理
+        LCurrent.Children := LChildren;
+        // 将子菜单加入队列继续处理
         for LChild in LChildren do
-          LMenuStack.Add(TPair.Create(LChild, LCurrentPair.Value + 1));
+          LMenuQueue.Enqueue(LChild);
       end;
     end;
   finally
-    LMenuStack.Free;
+    LMenuQueue.Free;
   end;
 
   Result := LRootMenus;
@@ -313,10 +334,13 @@ begin
     begin
       LMenu := Menus[I];
 
-      // 检查菜单权限（如果没有权限码，则默认允许访问）
+      // 检查菜单权限：
+      // 1. 如果菜单没有权限码要求，默认允许访问
+      // 2. 如果用户有权限列表且菜单权限码在列表中，则允许访问
+      // 注意：修复了原逻辑错误 - 当用户权限为空时不应该显示所有菜单
       LHasPermission := (LMenu.PermissionCode = '') or
-                       (Length(UserPermissions) = 0) or
-                       (System.SysUtils.MatchText(LMenu.PermissionCode, UserPermissions));
+                       ((Length(UserPermissions) > 0) and
+                        (System.SysUtils.MatchText(LMenu.PermissionCode, UserPermissions)));
 
       if LHasPermission then
       begin
@@ -348,9 +372,14 @@ var
   LAllMenus: TArray<TMenuItem>;
   LUserPermissions: TArray<string>;
 begin
-  // 检查缓存
-  if FCacheEnabled and FMenuTreeCache.ContainsKey(UserID) then
-    Exit(FMenuTreeCache[UserID]);
+  // 检查缓存（线程安全）
+  TMonitor.Enter(FLock);
+  try
+    if FCacheEnabled and FMenuTreeCache.ContainsKey(UserID) then
+      Exit(FMenuTreeCache[UserID]);
+  finally
+    TMonitor.Exit(FLock);
+  end;
 
   if not Assigned(FConnection) then
     raise Exception.Create('Database connection is not assigned');
@@ -367,9 +396,14 @@ begin
   // 过滤菜单
   Result := FilterMenusByPermission(LAllMenus, LUserPermissions);
 
-  // 缓存结果
-  if FCacheEnabled then
-    FMenuTreeCache.AddOrSetValue(UserID, Result);
+  // 缓存结果（线程安全）
+  TMonitor.Enter(FLock);
+  try
+    if FCacheEnabled then
+      FMenuTreeCache.AddOrSetValue(UserID, Result);
+  finally
+    TMonitor.Exit(FLock);
+  end;
 end;
 
 function TUniMenuManager.GetMenuByID(const MenuID: Integer): TMenuItem;
@@ -390,9 +424,14 @@ begin
   if not Assigned(FConnection) then
     Exit;
 
-  // 检查缓存
-  if FCacheEnabled and FMenuCache.ContainsKey(MenuID) then
-    Exit(FMenuCache[MenuID]);
+  // 检查缓存（线程安全）
+  TMonitor.Enter(FLock);
+  try
+    if FCacheEnabled and FMenuCache.ContainsKey(MenuID) then
+      Exit(FMenuCache[MenuID]);
+  finally
+    TMonitor.Exit(FLock);
+  end;
 
   LQuery := TFDQuery.Create(nil);
   try
@@ -420,9 +459,14 @@ begin
         Result.IsVisible := LQuery.FieldByName('IsVisible').AsBoolean;
         SetLength(Result.Children, 0);
 
-        // 缓存结果
-        if FCacheEnabled then
-          FMenuCache.AddOrSetValue(MenuID, Result);
+        // 缓存结果（线程安全）
+        TMonitor.Enter(FLock);
+        try
+          if FCacheEnabled then
+            FMenuCache.AddOrSetValue(MenuID, Result);
+        finally
+          TMonitor.Exit(FLock);
+        end;
       end;
     except
       on E: Exception do
@@ -439,6 +483,12 @@ var
   LNewMenuID: Integer;
 begin
   Result := False;
+
+  // 输入验证
+  if Trim(Menu.MenuName) = '' then
+    raise Exception.Create('MenuName cannot be empty');
+  if Trim(Menu.MenuCode) = '' then
+    raise Exception.Create('MenuCode cannot be empty');
 
   if not Assigned(FConnection) then
     Exit;
@@ -480,6 +530,14 @@ var
   LQuery: TFDQuery;
 begin
   Result := False;
+
+  // 输入验证
+  if Menu.MenuID <= 0 then
+    raise Exception.Create('MenuID must be greater than 0');
+  if Trim(Menu.MenuName) = '' then
+    raise Exception.Create('MenuName cannot be empty');
+  if Trim(Menu.MenuCode) = '' then
+    raise Exception.Create('MenuCode cannot be empty');
 
   if not Assigned(FConnection) then
     Exit;
@@ -581,6 +639,10 @@ end;
 
 function TUniMenuManager.DeleteMenu(const MenuID: Integer): Boolean;
 begin
+  // 输入验证
+  if MenuID <= 0 then
+    raise Exception.Create('MenuID must be greater than 0');
+
   Result := DeleteMenuRecursive(MenuID);
 
   if Result then
