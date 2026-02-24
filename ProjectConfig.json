@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UniAdmin Project Configuration",
+  "description": "UniAdmin 通用后台管理系统框架配置文件",
+  "version": "1.0.0",
+
+  "application": {
+    "name": "UniAdmin",
+    "displayName": "UniAdmin 管理系统",
+    "version": "1.0.0",
+    "environment": "development",
+    "debug": true,
+    "logLevel": "debug"
+  },
+
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8077,
+    "ssl": false,
+    "sslPort": 8078,
+    "sessionTimeout": 30,
+    "maxConnections": 100,
+    "compression": true
+  },
+
+  "database": {
+    "driver": "MSSQL",
+    "server": "localhost",
+    "port": 1433,
+    "database": "UniAdmin",
+    "username": "sa",
+    "password": "",
+    "charset": "utf8",
+    "connectionTimeout": 30,
+    "maxPoolSize": 50,
+    "minPoolSize": 5,
+    "connectionLifetime": 0,
+    "pooling": true,
+
+    "备份": {
+      "enabled": false,
+      "path": "./backups",
+      "retentionDays": 7
+    }
+  },
+
+  "security": {
+    "authentication": {
+      "provider": "database",
+      "sessionExpiry": 1800,
+      "rememberMeDays": 30,
+      "maxLoginAttempts": 5,
+      "lockoutDuration": 900,
+      "passwordPolicy": {
+        "minLength": 8,
+        "requireUppercase": true,
+        "requireLowercase": true,
+        "requireDigit": true,
+        "requireSpecialChar": false,
+        "historyCount": 5
+      }
+    },
+
+    "authorization": {
+      "mode": "RBAC",
+      "superAdminRole": "admin",
+      "cacheEnabled": true,
+      "cacheDuration": 300
+    },
+
+    "encryption": {
+      "algorithm": "AES256",
+      "keySize": 256,
+      "blockMode": "CBC"
+    },
+
+    "csrf": {
+      "enabled": true,
+      "tokenLength": 32,
+      "expiry": 3600
+    },
+
+    "headers": {
+      "contentSecurityPolicy": "default-src 'self'",
+      "strictTransportSecurity": "max-age=31536000",
+      "xFrameOptions": "DENY",
+      "xContentTypeOptions": "nosniff"
+    }
+  },
+
+  "plugins": {
+    "autoLoad": true,
+    "loadOrder": [
+      "UniConnectionManager",
+      "UniMetadataCache",
+      "UniAuthService",
+      "UniPermissionManager",
+      "UniMenuManager"
+    ],
+    "disabledPlugins": [],
+    "pluginPaths": [
+      "./src/Core/Plugin",
+      "./src/Plugins",
+      "./src/Modules"
+    ]
+  },
+
+  "ui": {
+    "theme": "default",
+    "themesPath": "./assets/themes",
+    "defaultTheme": "light",
+    "availableThemes": ["light", "dark", "blue"],
+    "language": "zh-CN",
+    "languagesPath": "./assets/i18n",
+    "dateFormat": "YYYY-MM-DD",
+    "timeFormat": "HH:mm:ss",
+    "timezone": "Asia/Shanghai",
+    "pageSize": 20,
+    "pageSizes": [10, 20, 50, 100],
+
+    "layout": {
+      "sidebar": {
+        "width": 240,
+        "collapsedWidth": 64,
+        "collapsible": true,
+        "defaultCollapsed": false
+      },
+      "header": {
+        "height": 60,
+        "showLogo": true,
+        "showBreadcrumb": true,
+        "showUserMenu": true
+      },
+      "footer": {
+        "show": true,
+        "text": "© 2026 UniAdmin Team"
+      }
+    },
+
+    "components": {
+      "dataGrid": {
+        "striped": true,
+        "bordered": false,
+        "hover": true,
+        "size": "middle"
+      },
+      "form": {
+        "labelCol": 6,
+        "wrapperCol": 18,
+        "labelAlign": "right",
+        "colon": true
+      }
+    }
+  },
+
+  "features": {
+    "userManagement": {
+      "enabled": true,
+      "allowSelfRegister": false,
+      "requireEmailVerification": false,
+      "defaultStatus": 1
+    },
+
+    "roleManagement": {
+      "enabled": true,
+      "allowRoleCreation": true,
+      "maxRolesPerUser": 10
+    },
+
+    "menuManagement": {
+      "enabled": true,
+      "maxMenuDepth": 3,
+      "allowCustomMenus": true
+    },
+
+    "auditLog": {
+      "enabled": true,
+      "retentionDays": 90,
+      "logLevel": "INFO",
+      "async": true
+    },
+
+    "scheduler": {
+      "enabled": true,
+      "maxConcurrentTasks": 5,
+      "defaultRetryCount": 3,
+      "logExecution": true
+    },
+
+    "cache": {
+      "enabled": true,
+      "provider": "memory",
+      "defaultDuration": 3600,
+      "maxSize": 1000
+    }
+  },
+
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "outputs": ["console", "file"],
+    "file": {
+      "path": "./logs",
+      "maxSize": "100MB",
+      "maxFiles": 10,
+      "compress": true
+    },
+    "categories": {
+      "sql": "WARN",
+      "network": "ERROR"
+    }
+  },
+
+  "upload": {
+    "enabled": true,
+    "maxFileSize": "10MB",
+    "allowedTypes": [".jpg", ".jpeg", ".png", ".gif", ".pdf", ".doc", ".docx", ".xls", ".xlsx"],
+    "uploadPath": "./uploads",
+    "tempPath": "./temp",
+    "thumbnail": {
+      "enabled": true,
+      "width": 200,
+      "height": 200
+    }
+  },
+
+  "export": {
+    "enabled": true,
+    "maxRows": 10000,
+    "formats": ["csv", "excel", "pdf"],
+    "path": "./exports",
+    "retentionDays": 7
+  },
+
+  "email": {
+    "enabled": false,
+    "host": "smtp.example.com",
+    "port": 587,
+    "secure": true,
+    "from": "noreply@uniadmin.com",
+    "fromName": "UniAdmin",
+    "username": "",
+    "password": ""
+  },
+
+  "sms": {
+    "enabled": false,
+    "provider": "aliyun",
+    "accessKey": "",
+    "secretKey": "",
+    "signName": "UniAdmin",
+    "templateCode": "SMS_123456789"
+  },
+
+  "storage": {
+    "provider": "local",
+    "local": {
+      "path": "./storage"
+    },
+    "oss": {
+      "enabled": false,
+      "provider": "aliyun",
+      "bucket": "",
+      "region": "",
+      "accessKey": "",
+      "secretKey": "",
+      "endpoint": ""
+    }
+  },
+
+  "development": {
+    "hotReload": true,
+    "showStackTrace": true,
+    "debugMode": true,
+    "mockData": false,
+    "profiling": false
+  },
+
+  "meta": {
+    "created": "2026-02-24",
+    "updated": "2026-02-24",
+    "author": "UniAdmin Team",
+    "description": "UniAdmin 项目配置文件"
+  }
+}
