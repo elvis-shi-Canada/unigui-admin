@@ -39,9 +39,13 @@ class function TUniConnectionManager.GetInstance: IUniConnectionManager;
 begin
   if FInstance = nil then
   begin
-    // Use lock for thread safety
-    if FInstance = nil then
-      FInstance := TUniConnectionManager.Create;
+    TMonitor.Enter(FLock);
+    try
+      if FInstance = nil then
+        FInstance := TUniConnectionManager.Create;
+    finally
+      TMonitor.Exit(FLock);
+    end;
   end;
   Result := FInstance;
 end;
