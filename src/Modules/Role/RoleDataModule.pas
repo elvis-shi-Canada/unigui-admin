@@ -238,12 +238,12 @@ begin
 
     LQuery.Open;
     Result := LQuery;
-  except
-    LQuery.Free;
+    LQuery := nil;  // Transfer ownership to caller
+  finally
     LWhereList.Free;
-    raise;
+    if Assigned(LQuery) then
+      LQuery.Free;
   end;
-  LWhereList.Free;
 end;
 
 function TRoleDataModule.CreateRole(const RoleCode, RoleName, Description: string;
@@ -295,6 +295,9 @@ var
   LQuery: TFDQuery;
   LSQL: TStringList;
   LUpdates: TStringList;
+  LNeedRoleName: Boolean;
+  LNeedSortOrder: Boolean;
+  LNeedStatus: Boolean;
 begin
   // 验证输入
   if RoleName.Trim.IsEmpty then
@@ -309,16 +312,20 @@ begin
     LQuery.Connection := Connection;
 
     // 构建更新语句
-    if RoleName <> '' then
+    LNeedRoleName := (RoleName <> '');
+    LNeedSortOrder := (SortOrder >= 0);
+    LNeedStatus := (Status >= 0);
+
+    if LNeedRoleName then
       LUpdates.Add('RoleName = :RoleName');
 
     LUpdates.Add('Description = :Description');
     LUpdates.Add('DataScope = :DataScope');
 
-    if SortOrder >= 0 then
+    if LNeedSortOrder then
       LUpdates.Add('SortOrder = :SortOrder');
 
-    if Status >= 0 then
+    if LNeedStatus then
       LUpdates.Add('Status = :Status');
 
     LUpdates.Add('ModifiedDate = GETDATE()');
@@ -331,14 +338,18 @@ begin
       LQuery.SQL.Text := LSQL.Text.Replace(#13#10, ' ');
 
       LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
-      LQuery.Params.ParamByName('RoleName').AsString := RoleName;
+
+      // 只在需要时设置参数
+      if LNeedRoleName then
+        LQuery.Params.ParamByName('RoleName').AsString := RoleName;
+
       LQuery.Params.ParamByName('Description').AsString := Description;
       LQuery.Params.ParamByName('DataScope').AsString := DataScope;
 
-      if SortOrder >= 0 then
+      if LNeedSortOrder then
         LQuery.Params.ParamByName('SortOrder').AsInteger := SortOrder;
 
-      if Status >= 0 then
+      if LNeedStatus then
         LQuery.Params.ParamByName('Status').AsInteger := Status;
 
       LQuery.ExecSQL;
@@ -361,24 +372,38 @@ begin
   if LUserCount > 0 then
     raise Exception.CreateFmt('该角色下有 %d 个用户，无法删除', [LUserCount]);
 
-  LQuery := TFDQuery.Create(nil);
+  if not Assigned(Connection) or not Connection.Connected then
+    raise Exception.Create('Database not connected');
+
+  Connection.StartTransaction;
   try
-    LQuery.Connection := Connection;
+    LQuery := TFDQuery.Create(nil);
+    try
+      LQuery.Connection := Connection;
 
-    // 删除角色权限关联
-    LQuery.SQL.Text := 'DELETE FROM UniAdmin_RolePermissions WHERE RoleID = :RoleID';
-    LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
-    LQuery.ExecSQL;
+      // 删除角色权限关联
+      LQuery.SQL.Text := 'DELETE FROM UniAdmin_RolePermissions WHERE RoleID = :RoleID';
+      LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
+      LQuery.ExecSQL;
 
-    // 删除角色用户关联
-    LQuery.SQL.Text := 'DELETE FROM UniAdmin_UserRoles WHERE RoleID = :RoleID';
-    LQuery.ExecSQL;
+      // 删除角色用户关联
+      LQuery.SQL.Text := 'DELETE FROM UniAdmin_UserRoles WHERE RoleID = :RoleID';
+      LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
+      LQuery.ExecSQL;
 
-    // 删除角色
-    LQuery.SQL.Text := 'DELETE FROM UniAdmin_Roles WHERE RoleID = :RoleID';
-    LQuery.ExecSQL;
-  finally
-    LQuery.Free;
+      // 删除角色
+      LQuery.SQL.Text := 'DELETE FROM UniAdmin_Roles WHERE RoleID = :RoleID';
+      LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
+      LQuery.ExecSQL;
+
+      Connection.Commit;
+    finally
+      LQuery.Free;
+    end;
+  except
+    if Connection.InTransaction then
+      Connection.Rollback;
+    raise;
   end;
 end;
 
