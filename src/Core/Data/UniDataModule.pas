@@ -22,6 +22,7 @@ type
     /// <summary>
     /// 设置数据库连接
     /// </summary>
+    /// <param name="Value">要设置的连接对象。如果为 nil，将创建新的空连接对象</param>
     procedure SetConnection(const Value: TFDConnection); virtual;
     /// <summary>
     /// 设置审计字段（创建时间、创建人、修改时间、修改人）
@@ -142,6 +143,8 @@ end;
 
 procedure TUniDataModule.ApplyDataScope(const Query: TFDQuery; const Resource: string);
 begin
+  if not Assigned(Query) then
+    Exit;
   // 应用数据权限过滤
   // TODO: 实现数据范围过滤逻辑
 end;
@@ -159,7 +162,8 @@ end;
 
 procedure TUniDataModule.Close;
 begin
-  FConnection.Connected := False;
+  if Assigned(FConnection) and FConnection.Connected then
+    FConnection.Connected := False;
 end;
 
 end.
