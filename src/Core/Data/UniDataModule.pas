@@ -65,8 +65,12 @@ end;
 
 destructor TUniDataModule.Destroy;
 begin
-  Close;
-  FConnection.Free;
+  if Assigned(FConnection) then
+  begin
+    if FConnection.Connected then
+      FConnection.Connected := False;
+    FreeAndNil(FConnection);
+  end;
   inherited;
 end;
 
@@ -101,11 +105,24 @@ end;
 
 procedure TUniDataModule.SetConnection(const Value: TFDConnection);
 begin
-  FConnection := Value;
+  if Assigned(FConnection) and (FConnection <> Value) then
+  begin
+    if FConnection.Connected then
+      FConnection.Connected := False;
+    FreeAndNil(FConnection);
+  end;
+
+  if Assigned(Value) then
+    FConnection := Value
+  else
+    FConnection := TFDConnection.Create(nil);
 end;
 
 procedure TUniDataModule.SetAuditFields(const Query: TFDQuery; const IsInsert: Boolean);
 begin
+  if not Assigned(Query) then
+    Exit;
+
   // 自动填充审计字段
   if Query.FindField('CreatedDate') <> nil then
     Query.FieldByName('CreatedDate').AsDateTime := GetCurrentTime;
@@ -132,7 +149,12 @@ end;
 procedure TUniDataModule.Open;
 begin
   if not FConnection.Connected then
+  try
     FConnection.Connected := True;
+  except
+    on E: Exception do
+      raise Exception.CreateFmt('无法连接到数据库: %s', [E.Message]);
+  end;
 end;
 
 procedure TUniDataModule.Close;
