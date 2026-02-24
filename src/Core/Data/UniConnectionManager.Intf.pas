@@ -21,7 +21,6 @@ type
     Database: string;
     UserName: string;
     Password: string;
-    AdditionalParams: string;
   end;
 
   /// <summary>

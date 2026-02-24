@@ -11,6 +11,7 @@ type
   TUniConnectionManager = class(TInterfacedObject, IUniConnectionManager)
   private
     class var FInstance: IUniConnectionManager;
+    class var FLock: TObject;
     FConnections: TObjectList<TFDConnection>;
     FDefaultConnection: TFDConnection;
     FConfigService: IUniConfigService;
@@ -37,7 +38,11 @@ implementation
 class function TUniConnectionManager.GetInstance: IUniConnectionManager;
 begin
   if FInstance = nil then
-    FInstance := TUniConnectionManager.Create;
+  begin
+    // Use lock for thread safety
+    if FInstance = nil then
+      FInstance := TUniConnectionManager.Create;
+  end;
   Result := FInstance;
 end;
 
@@ -45,7 +50,7 @@ constructor TUniConnectionManager.Create;
 begin
   inherited Create;
   FConnections := TObjectList<TFDConnection>.Create;
-  FConfigService := TUniConfigService.Instance;
+  FConfigService := TUniConfigService.GetInstance;
 end;
 
 destructor TUniConnectionManager.Destroy;
@@ -170,9 +175,11 @@ begin
 end;
 
 initialization
+  FLock := TObject.Create;
   TUniConnectionManager.GetInstance;
 
 finalization
   TUniConnectionManager.FInstance := nil;
+  FreeAndNil(TUniConnectionManager.FLock);
 
 end.
