@@ -1,0 +1,27 @@
+# Git worktrees
+.worktrees/
+worktrees/
+
+# IDE
+.vscode/
+.claude/
+
+# Build artifacts
+*.dcu
+*.dpu
+*.dcp
+*.exe
+*.dll
+*.obj
+*.o
+
+# Delphi
+__history/
+__recovery/
+*.dsk
+*.dproj.local
+*.~*
+
+# OS
+.DS_Store
+Thumbs.db
