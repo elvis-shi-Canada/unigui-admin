@@ -946,11 +946,483 @@ UI 层依赖
 
 ---
 
+---
+
+## Phase 3 系统模块 API
+
+### IUniUserService
+用户管理服务接口，提供用户业务的完整功能。
+
+**单元位置**：`src/Modules/User/UserService.Intf.pas`
+
+```pascal
+IUniUserService = interface(IInterface)
+  ['{UNI-USER-SERVICE-001}']
+
+  /// <summary>获取用户列表（分页）</summary>
+  function GetUsers(const Filter: string; Status: Integer;
+    Page, PageSize: Integer): TArray<TUserInfo>;
+
+  /// <summary>获取用户总数</summary>
+  function GetUsersCount(const Filter: string; Status: Integer): Integer;
+
+  /// <summary>根据ID获取用户</summary>
+  function GetUserByID(UserID: Integer): TUserInfo;
+
+  /// <summary>根据用户名获取用户</summary>
+  function GetUserByName(const UserName: string): TUserInfo;
+
+  /// <summary>创建用户</summary>
+  function CreateUser(const UserName, Password, RealName,
+    Email, Phone: string): Integer;
+
+  /// <summary>更新用户信息</summary>
+  procedure UpdateUser(UserID: Integer; const RealName, Email, Phone: string);
+
+  /// <summary>删除用户</summary>
+  procedure DeleteUser(UserID: Integer);
+
+  /// <summary>设置用户状态</summary>
+  procedure SetUserStatus(UserID, Status: Integer);
+
+  /// <summary>检查用户是否可用</summary>
+  function IsUserAvailable(UserID: Integer): Boolean;
+
+  /// <summary>修改密码</summary>
+  procedure ChangePassword(UserID: Integer; const OldPassword,
+    NewPassword: string);
+
+  /// <summary>重置密码</summary>
+  procedure ResetPassword(UserID: Integer; const NewPassword: string);
+
+  /// <summary>验证密码</summary>
+  function VerifyPassword(const UserName, Password: string): Boolean;
+
+  /// <summary>检查用户名是否存在</summary>
+  function UserNameExists(const UserName: string): Boolean;
+
+  /// <summary>检查邮箱是否存在</summary>
+  function EmailExists(const Email: string): Boolean;
+end;
+```
+
+**使用示例**：
+```pascal
+var
+  UserService: IUniUserService;
+  Users: TArray<TUserInfo>;
+begin
+  UserService := TUniUserService.Create(ExecutionContext);
+
+  // 获取用户列表
+  Users := UserService.GetUsers('admin', -1, 1, 20);
+
+  // 创建用户
+  var UserID := UserService.CreateUser('newuser', 'Pass123',
+    '新用户', 'new@example.com', '13800138000');
+
+  // 修改密码
+  UserService.ChangePassword(UserID, 'Pass123', 'NewPass456');
+end;
+```
+
+---
+
+### TDictionaryService
+数据字典服务类，提供字典类型和字典项的管理功能。
+
+**单元位置**：`src/Modules/Dictionary/DictionaryService.pas`
+
+```pascal
+TDictionaryService = class(TInterfacedObject, IDictionaryService)
+public
+  /// <summary>获取所有字典类型</summary>
+  function GetDictTypes: TArray<TDictTypeInfo>;
+
+  /// <summary>根据编码获取字典类型</summary>
+  function GetDictTypeByCode(const Code: string): TDictTypeInfo;
+
+  /// <summary>获取字典项列表（带缓存）</summary>
+  function GetDictItems(const DictTypeCode: string): TArray<TDictItemInfo>;
+
+  /// <summary>刷新字典缓存</summary>
+  procedure RefreshCache;
+
+  /// <summary>获取字典项显示名称</summary>
+  function GetDictItemDisplay(const DictTypeCode,
+    ItemCode: string): string;
+end;
+```
+
+**使用示例**：
+```pascal
+var
+  DictService: TDictionaryService;
+  Items: TArray<TDictItemInfo>;
+begin
+  DictService := TDictionaryService.Create(ExecutionContext);
+
+  // 获取用户状态字典
+  Items := DictService.GetDictItems('user_status');
+
+  // 显示字典项
+  for var Item in Items do
+  begin
+    ComboBox.Items.Add(Item.ItemName);
+    ComboBox.ItemIndex := ComboBox.Items.AddObject(Item.ItemName,
+      TObject(Item.ItemValue));
+  end;
+end;
+```
+
+---
+
+### TConfigService
+系统配置服务类，提供配置参数的管理和缓存功能。
+
+**单元位置**：`src/Modules/Config/ConfigService.pas`
+
+```pascal
+TConfigService = class(TInterfacedObject, IConfigService)
+public
+  /// <summary>获取字符串配置</summary>
+  function GetGlobalString(const ConfigKey: string): string;
+
+  /// <summary>获取整数配置</summary>
+  function GetGlobalInteger(const ConfigKey: string): Integer;
+
+  /// <summary>获取布尔配置</summary>
+  function GetGlobalBoolean(const ConfigKey: string): Boolean;
+
+  /// <summary>获取分类配置</summary>
+  function GetCategoryConfigs(const Category: string): TArray<TConfigInfo>;
+
+  /// <summary>设置配置值</summary>
+  procedure SetConfig(const ConfigKey, ConfigValue: string);
+
+  /// <summary>刷新配置缓存</summary>
+  procedure RefreshCache;
+end;
+```
+
+**支持的配置值类型**：
+- `string` - 字符串
+- `integer` - 整数
+- `boolean` - 布尔值
+- `json` - JSON 对象
+- `encrypted` - 加密字符串
+- `file` - 文件路径
+
+**使用示例**：
+```pascal
+var
+  ConfigService: TConfigService;
+begin
+  ConfigService := TConfigService.Create(ExecutionContext);
+
+  // 获取系统配置
+  var SiteName := ConfigService.GetGlobalString('site.name');
+  var MaxUploadSize := ConfigService.GetGlobalInteger('upload.maxsize');
+  var EnableRegister := ConfigService.GetGlobalBoolean('user.register.enabled');
+
+  // 设置配置
+  ConfigService.SetConfig('site.name', 'UniAdmin 管理系统');
+end;
+```
+
+---
+
+### TLogService
+日志审计服务类，提供日志记录和查询功能。
+
+**单元位置**：`src/Modules/Log/LogService.pas`
+
+```pascal
+TLogService = class(TInterfacedObject, ILogService)
+public
+  /// <summary>记录登录日志</summary>
+  procedure LogLogin(const UserName, LoginIP, UserAgent: string;
+    Status: Integer);
+
+  /// <summary>记录操作日志</summary>
+  procedure LogOperation(const Module, Operation, Description: string;
+    const RequestData, ResponseData: string; const IP: string);
+
+  /// <summary>记录数据变更日志</summary>
+  procedure LogDataChange(const TableName: string; RecordID: Integer;
+    const Operation, OldValue, NewValue: string);
+
+  /// <summary>获取登录日志</summary>
+  function GetLoginLogs(const StartTime, EndTime: TDateTime;
+    Page, PageSize: Integer): TArray<TLoginLogInfo>;
+
+  /// <summary>获取操作日志</summary>
+  function GetOperationLogs(const StartTime, EndTime: TDateTime;
+    const Module: string; Page, PageSize: Integer): TArray<TOperationLogInfo>;
+
+  /// <summary>导出日志（CSV/Excel）</summary>
+  function ExportLogs(const LogType: string;
+    const StartTime, EndTime: TDateTime; const Format: string): string;
+end;
+```
+
+**使用示例**：
+```pascal
+var
+  LogService: TLogService;
+begin
+  LogService := TLogService.Create(ExecutionContext);
+
+  // 记录登录
+  LogService.LogLogin('admin', '192.168.1.100',
+    'Mozilla/5.0...', 1);
+
+  // 记录操作
+  LogService.LogOperation('User', 'Delete',
+    '删除用户 testuser', '{"UserID": 123}', '{"Success": true}', '192.168.1.100');
+
+  // 导出日志
+  var FilePath := LogService.ExportLogs('login',
+    EncodeDateTime(2026, 2, 1, 0, 0, 0),
+    EncodeDateTime(2026, 2, 28, 23, 59, 59), 'csv');
+end;
+```
+
+---
+
+### TUniScheduler
+定时任务调度器类，提供基于 Cron 表达式的任务调度功能。
+
+**单元位置**：`src/Modules/Scheduler/UniScheduler.pas`
+
+```pascal
+TUniScheduler = class(TInterfacedObject, ISchedulerService)
+public
+  /// <summary>启动调度器</summary>
+  procedure Start;
+
+  /// <summary>停止调度器</summary>
+  procedure Stop;
+
+  /// <summary>添加任务</summary>
+  function AddTask(const TaskName, CronExpression: string;
+    const HandlerClass: string; const Parameters: string): Integer;
+
+  /// <summary>移除任务</summary>
+  procedure RemoveTask(TaskID: Integer);
+
+  /// <summary>暂停任务</summary>
+  procedure PauseTask(TaskID: Integer);
+
+  /// <summary>恢复任务</summary>
+  procedure ResumeTask(TaskID: Integer);
+
+  /// <summary>获取任务状态</summary>
+  function GetTaskStatus(TaskID: Integer): TTaskStatus;
+
+  /// <summary>手动触发任务执行</summary>
+  procedure ExecuteTask(TaskID: Integer);
+end;
+```
+
+**Cron 表达式格式**：
+```
+* * * * * *
+│ │ │ │ │ │
+│ │ │ │ │ └─ 星期几 (0-6, 0=周日)
+│ │ │ │ └─── 月份 (1-12)
+│ │ │ └───── 日期 (1-31)
+│ │ └─────── 小时 (0-23)
+│ └───────── 分钟 (0-59)
+└─────────── 秒 (0-59)
+```
+
+**使用示例**：
+```pascal
+var
+  Scheduler: TUniScheduler;
+begin
+  Scheduler := TUniScheduler.Create;
+  Scheduler.Start;
+
+  // 添加每天凌晨 2 点执行的任务
+  var TaskID := Scheduler.AddTask('数据清理',
+    '0 0 2 * * ?', 'TCleanupTaskHandler', '{"Days": 30}');
+
+  // 添加每 5 分钟执行的任务
+  TaskID := Scheduler.AddTask('系统监控',
+    '0 */5 * * * ?', 'TMonitorTaskHandler', '');
+
+  // 手动触发任务
+  Scheduler.ExecuteTask(TaskID);
+end;
+```
+
+---
+
+### TSystemModuleRegistrar
+系统模块注册器类，负责注册所有 Phase 3 模块到插件系统。
+
+**单元位置**：`src/Core/Plugin/UniModuleRegistration.pas`
+
+```pascal
+TSystemModuleRegistrar = class
+public
+  /// <summary>注册所有系统模块</summary>
+  class procedure RegisterAllModules;
+
+  /// <summary>注册用户管理模块</summary>
+  class procedure RegisterUserModule;
+
+  /// <summary>注册角色管理模块</summary>
+  class procedure RegisterRoleModule;
+
+  /// <summary>注册菜单管理模块</summary>
+  class procedure RegisterMenuModule;
+
+  /// <summary>注册数据字典模块</summary>
+  class procedure RegisterDictionaryModule;
+
+  /// <summary>注册系统配置模块</summary>
+  class procedure RegisterConfigModule;
+
+  /// <summary>注册日志审计模块</summary>
+  class procedure RegisterLogModule;
+
+  /// <summary>注册定时任务模块</summary>
+  class procedure RegisterSchedulerModule;
+end;
+```
+
+**使用示例**：
+```pascal
+// 应用程序启动时注册所有模块
+procedure TUniServerModule.UniServerModuleCreate(Sender: TObject);
+begin
+  // 注册所有 Phase 3 系统模块
+  TSystemModuleRegistrar.RegisterAllModules;
+end;
+```
+
+---
+
+### TSystemMenuSetup
+系统菜单设置器类，负责初始化系统管理菜单。
+
+**单元位置**：`src/Core/Menu/SystemMenuSetup.pas`
+
+```pascal
+TSystemMenuSetup = class
+public
+  /// <summary>初始化系统管理菜单</summary>
+  class procedure InitializeSystemMenus(const ADataModule: TDataModule);
+
+  /// <summary>获取系统管理菜单定义</summary>
+  class function GetSystemMenuDefinitions: TList<TMenuItemInfo>;
+
+  /// <summary>获取权限定义</summary>
+  class function GetPermissionDefinitions: TList<TPermissionInfo>;
+end;
+```
+
+**菜单结构**：
+```
+系统管理 (system)
+├── 用户管理 (system:user)
+├── 角色管理 (system:role)
+├── 菜单管理 (system:menu)
+├── 数据字典 (system:dictionary)
+├── 系统配置 (system:config)
+├── 日志审计 (system:log)
+└── 定时任务 (system:scheduler)
+```
+
+---
+
+## Phase 3 数据类型
+
+### TUserInfo
+用户信息记录。
+
+```pascal
+TUserInfo = record
+  UserID: Integer;
+  UserName: string;
+  RealName: string;
+  Email: string;
+  Phone: string;
+  Status: Integer;
+  LastLoginDate: TDateTime;
+  LastLoginIP: string;
+  CreatedDate: TDateTime;
+  ModifiedDate: TDateTime;
+end;
+```
+
+### TDictTypeInfo
+字典类型信息记录。
+
+```pascal
+TDictTypeInfo = record
+  TypeID: Integer;
+  TypeCode: string;
+  TypeName: string;
+  Description: string;
+  SortOrder: Integer;
+end;
+```
+
+### TDictItemInfo
+字典项信息记录。
+
+```pascal
+TDictItemInfo = record
+  ItemID: Integer;
+  ItemCode: string;
+  ItemName: string;
+  ItemValue: string;
+  SortOrder: Integer;
+  Status: Integer;
+end;
+```
+
+### TConfigInfo
+配置信息记录。
+
+```pascal
+TConfigInfo = record
+  ConfigID: Integer;
+  ConfigKey: string;
+  ConfigValue: string;
+  Category: string;
+  Description: string;
+  ValueType: string;
+end;
+```
+
+### TLoginLogInfo
+登录日志信息记录。
+
+```pascal
+TLoginLogInfo = record
+  LogID: Integer;
+  UserID: Integer;
+  UserName: string;
+  LoginIP: string;
+  LoginTime: TDateTime;
+  Status: Integer;
+  UserAgent: string;
+end;
+```
+
+---
+
 ## 更新日志
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
 | 1.0 | 2026-02-24 | 初始版本，Phase 2 API 文档 |
+| 1.1 | 2026-02-24 | 添加 Phase 3 系统模块 API |
 
 ---
 
