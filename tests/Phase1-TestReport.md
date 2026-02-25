@@ -127,9 +127,23 @@
 
 | 测试套件 | 通过 | 失败 | 跳过 | 状态 |
 |---------|-----|-----|-----|-----|
-| UniPluginTest | 0/5 | 0/5 | 5/5 | 待运行 |
+| UniPluginTest | 0/5 | 0/5 | 5/5 | ⚠️ 待运行 |
 
-**注意:** 单元测试已创建，需要在 Delphi IDE 中手动运行。
+**重要更新 (2026-02-25)**:
+- ✅ 测试代码编写完成（5个测试用例，374行代码）
+- ✅ 测试项目已编译
+- ✅ 测试可执行文件已生成: `tests\Win32\Debug\UniAdminTests.exe`
+- ⚠️ 测试**未在 IDE 中执行**（需要 Delphi 环境运行）
+- 📝 详细测试验证报告已创建: `tests\TestValidationReport.md`
+
+**测试用例详细清单**:
+1. `TestPluginRegistration` - 插件注册功能测试
+2. `TestPluginInitialization` - 插件初始化功能测试
+3. `TestPluginActivation` - 插件激活功能测试
+4. `TestDependencyValidation` - 依赖验证功能测试
+5. `TestCircularDependencyDetection` - 循环依赖检测功能测试
+
+**注意**: 单元测试需要在 Delphi IDE 中运行才能获得实际结果。
 
 ### 3.2 手动验证清单
 

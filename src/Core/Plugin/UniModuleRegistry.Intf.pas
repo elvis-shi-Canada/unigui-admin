@@ -74,7 +74,8 @@ type
   /// 提供插件类的注册、查找和依赖管理功能
   /// </summary>
   IUniModuleRegistry = interface(IInterface)
-    ['{UNI-MODULE-REGISTRY-001}']
+    ['{C7D8E5A2-9F4B-3E7C-D1A8-8B9F2E4C6A7D}']
+
 
     /// <summary>注册插件类</summary>
     /// <param name="PluginClass">插件类</param>

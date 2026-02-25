@@ -27,7 +27,8 @@ type
   /// 提供菜单树的查询、管理和缓存功能
   /// </summary>
   IUniMenuManager = interface(IInterface)
-    ['{UNI-MENU-MGR-001}']
+    ['{E1C9A8F2-D7B5-7E3C-A4F8-8B9D1E2F5C7A}']
+
 
     /// <summary>
     /// 获取用户的完整菜单树（带权限过滤）

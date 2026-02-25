@@ -1,0 +1,34 @@
+# UniAdmin 测试覆盖率配置
+
+# 覆盖率目标
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+  threshold: 80
+
+# 忽略的文件
+ignore:
+  - "src/Core/UI/Templates/**"
+  - "tests/**"
+  - "**/*.dfm"
+  - "**/DataModule.pas"
+
+# 覆盖率类型
+coverage_by_target:
+  Unit: 80
+  Integration: 70
+
+# 报告格式
+report:
+  format: html
+  output: tests/coverage/
+  threshold: 80
+
+# CLI 输出
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
