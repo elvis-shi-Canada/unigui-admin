@@ -21,6 +21,7 @@ __recovery/
 *.dsk
 *.dproj.local
 *.~*
+*.identcache
 
 # OS
 .DS_Store
