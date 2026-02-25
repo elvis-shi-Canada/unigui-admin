@@ -147,6 +147,18 @@ type
 
     /// <summary>清空所有注册信息</summary>
     procedure Clear;
+
+    /// <summary>获取插件加载顺序（仅插件ID列表）</summary>
+    /// <returns>按加载顺序排列的插件ID数组</returns>
+    function GetLoadOrder: TArray<string>;
+
+    /// <summary>创建插件实例</summary>
+    /// <param name="PluginID">插件唯一标识符</param>
+    /// <param name="UserContext">用户上下文</param>
+    /// <param name="ExecutionContext">执行上下文</param>
+    /// <returns>插件实例接口</returns>
+    function CreatePlugin(const PluginID: string; const UserContext: IUserContext;
+      const ExecutionContext: IExecutionContext): IPlugin;
   end;
 
 implementation

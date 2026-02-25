@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.SyncObjs,
-  UniModuleRegistry.Intf;
+  UniModuleRegistry.Intf, UniPlugin.Intf, UniPlugin, UniContext;
 
 type
   /// <summary>
@@ -704,6 +704,60 @@ begin
     for LList in FReverseDependencyGraph.Values do
       LList.Free;
     FReverseDependencyGraph.Clear;
+  finally
+    FLock.Leave;
+  end;
+end;
+
+function TUniModuleRegistry.GetLoadOrder: TArray<string>;
+var
+  LLoadOrderInfo: TArray<TLoadOrderInfo>;
+  I: Integer;
+begin
+  FLock.Enter;
+  try
+    LLoadOrderInfo := CalculateLoadOrder;
+    SetLength(Result, Length(LLoadOrderInfo));
+    for I := 0 to High(LLoadOrderInfo) do
+      Result[I] := LLoadOrderInfo[I].PluginID;
+  finally
+    FLock.Leave;
+  end;
+end;
+
+function TUniModuleRegistry.CreatePlugin(const PluginID: string;
+  const UserContext: IUserContext; const ExecutionContext: IExecutionContext): IPlugin;
+var
+  LClassInfo: TPluginClassInfo;
+  LPluginClass: TClass;
+  LInfo: TPluginInfo;
+begin
+  FLock.Enter;
+  try
+    CheckPluginExists(PluginID);
+
+    LClassInfo := GetPluginClassInfo(PluginID);
+    if not Assigned(LClassInfo.PluginClass) then
+      raise ERegistryException.CreateFmt('Plugin %s class is not available', [PluginID]);
+
+    // 创建插件实例 - 假设所有插件都继承自 TPlugin
+    // 并使用标准构造函数签名
+    LPluginClass := LClassInfo.PluginClass;
+    if not LPluginClass.InheritsFrom(TPlugin) then
+      raise ERegistryException.CreateFmt('Plugin %s must inherit from TPlugin', [PluginID]);
+
+    // 构建插件信息
+    LInfo.Name := LClassInfo.PluginID;
+    LInfo.DisplayName := LClassInfo.DisplayName;
+    LInfo.Version := LClassInfo.Version;
+    LInfo.Description := LClassInfo.Description;
+    LInfo.Author := LClassInfo.Author;
+    LInfo.Category := LClassInfo.Category;
+    LInfo.AutoStart := LClassInfo.AutoStart;
+    LInfo.ConfigFile := LClassInfo.ConfigFile;
+
+    // 使用类型安全的类型转换创建插件实例
+    Result := TPluginClass(LPluginClass).Create(LInfo, UserContext, ExecutionContext) as IPlugin;
   finally
     FLock.Leave;
   end;

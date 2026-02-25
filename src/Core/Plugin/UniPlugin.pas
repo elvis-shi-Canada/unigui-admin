@@ -26,6 +26,11 @@ type
     constructor Create(const CurrentState, ExpectedState, Operation: string);
   end;
 
+  /// <summary>
+  /// 插件类引用类型
+  /// </summary>
+  TPluginClass = class of TPlugin;
+
   TPlugin = class(TInterfacedObject, IPlugin)
   private
     FInfo: TPluginInfo;

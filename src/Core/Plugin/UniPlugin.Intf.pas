@@ -40,6 +40,12 @@ type
     ConfigFile: string;
   end;
 
+  // 前向声明
+  TPlugin = class;
+
+  // 插件类引用类型
+  TPluginClass = class of TPlugin;
+
   // 插件接口
   IPlugin = interface(IInterface)
     ['{B5A3C7F1-8D4A-2E6B-C1D8-8F3E5A7B9C2D}']
