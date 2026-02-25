@@ -34,7 +34,8 @@ type
   /// 用户服务接口 - 提供用户业务逻辑
   /// </summary>
   IUniUserService = interface(IInterface)
-    ['{UNI-USER-SERVICE-001}']
+    ['{E5C9A7D3-8F6B-4C2E-A1F9-9D8B2E4C7F6A}']
+
     
     /// <summary>
     /// 获取用户分页列表

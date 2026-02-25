@@ -40,9 +40,9 @@ type
     ConfigFile: string;
   end;
 
-  // 2??t?��?��
+  // 插件接口
   IPlugin = interface(IInterface)
-    ['{UNI-PLUGIN-001}']
+    ['{B5A3C7F1-8D4A-2E6B-C1D8-8F3E5A7B9C2D}']
     function GetInfo: TPluginInfo;
     function GetState: TPluginState;
     procedure Initialize;

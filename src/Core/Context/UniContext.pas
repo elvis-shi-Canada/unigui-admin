@@ -1,4 +1,4 @@
-unit UniContext;
+Ôªøunit UniContext;
 
 interface
 
@@ -6,18 +6,18 @@ uses
   System.SysUtils;
 
 type
-  // ®∫y?Y?a?????®Æ?®≤
+  // ?ÊçÆ?ÈÖçÁΩÆÊé•Âè£
   IDatabaseConfig = interface(IInterface)
-    ['{UNI-DB-CONFIG-001}']
+    ['{5D762A2D-F75D-481E-8696-22A1CBF147BD}']
     function GetConnectionDefName: string;
     function GetConnectionString: string;
     function GetDatabaseName: string;
     function GetServerName: string;
   end;
 
-  // ®Æ??°Ï®¶??????®Æ?®≤
+  // Áî®Êà∑‰∏ä‰∏ãÊñáÊé•Âè£
   IUserContext = interface(IInterface)
-    ['{UNI-USER-CONTEXT-001}']
+    ['{A2C8E4B1-7F5A-3D4B-C2DA-8A7E9F1B4C6D}']
     function GetUserID: Integer;
     function GetUserName: string;
     function GetRealName: string;
@@ -28,9 +28,9 @@ type
     function GetClientIP: string;
   end;
 
-  // ?°‰DD®¶??????®Æ?®≤
+  // ?Ë°å‰∏ä‰∏ãÊñáÊé•Âè£
   IExecutionContext = interface(IInterface)
-    ['{UNI-EXECUTION-CONTEXT-001}']
+    ['{E3D9F5C2-B4A8-5C3D-D7EA-1B8C4E9A2F6B}']
     function GetUserContext: IUserContext;
     function GetCurrentUserID: Integer;
     function GetCurrentUserName: string;

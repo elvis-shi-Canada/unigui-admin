@@ -50,7 +50,8 @@ type
   /// 字典服务接口
   /// </summary>
   IDictionaryService = interface(IInterface)
-    ['{UNI-DICT-SERVICE-001}']
+    ['{C8E9D7B4-A5F6-3E8C-D2A7-7B9F1E3D6C8A}']
+
 
     // 字典类型操作
     function GetDictTypes(const Filter: string; Status: Integer): TArray<TDictTypeInfo>;

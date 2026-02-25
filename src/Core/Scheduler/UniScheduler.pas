@@ -51,7 +51,7 @@ type
   /// 任务调度器接口
   /// </summary>
   ITaskProcessor = interface(IInterface)
-    ['{UNI-TASK-PROCESSOR-001}']
+    ['{A9C8E5D2-F7B4-6C3E-B1D9-9A8F3E2D7C5B}']
     function GetProcessorName: string;
     function GetProcessorDescription: string;
     procedure Initialize(const Parameters: string);

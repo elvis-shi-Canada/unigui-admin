@@ -47,7 +47,8 @@ type
   /// 配置服务接口
   /// </summary>
   IConfigService = interface(IInterface)
-    ['{UNI-CONFIG-SERVICE-001}']
+    ['{F9D0C8B2-A7E5-6D4F-B2C8-8A9F1D3E5C7B}']
+
 
     // 配置操作
     function GetConfigs(const Filter, Category: string; Status: Integer): TArray<TConfigInfo>;
