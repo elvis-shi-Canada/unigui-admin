@@ -25,7 +25,7 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Width = 72
         Height = 13
         Hint = ''
-        Caption = '可用权限'
+        Caption = #21487#29992#26435#38480
         TabOrder = 1
       end
       object lstAvailable: TUniListBox
@@ -55,7 +55,7 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Width = 60
         Height = 13
         Hint = ''
-        Caption = '已分配'
+        Caption = #24050#20998#37197
         TabOrder = 1
       end
       object lstAssigned: TUniListBox
@@ -134,7 +134,7 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Width = 75
         Height = 25
         Hint = ''
-        Caption = '保存'
+        Caption = #20445#23384
         ModalResult = 1
         TabOrder = 0
         OnClick = btnSaveClick
@@ -145,7 +145,7 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Width = 75
         Height = 25
         Hint = ''
-        Caption = '取消'
+        Caption = #21462#28040
         ModalResult = 2
         TabOrder = 1
         OnClick = btnCancelClick
@@ -156,7 +156,7 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Width = 36
         Height = 13
         Hint = ''
-        Caption = '角色: '
+        Caption = #35282#33394: 
         TabOrder = 2
       end
     end

@@ -1,11 +1,11 @@
-unit UniConfigService;
+﻿unit UniConfigService;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.IOUtils,
   System.JSON, System.SyncObjs, System.Variants,
-  UniConfigService.Intf;
+  UniConfigService.Intf, System.VarUtils;
 
 type
   /// <summary>
@@ -174,11 +174,11 @@ begin
     cvtString:
       Result := TJSONString.Create(VarToStr(Value));
     cvtInteger:
-      Result := TJSONNumber.Create(VarToInt(Value));
+      Result := TJSONNumber.Create(Integer(Value));
     cvtBoolean:
-      Result := TJSONBool.Create(VarToBool(Value));
+      Result := TJSONBool.Create(Boolean(Value));
     cvtFloat:
-      Result := TJSONNumber.Create(VarToFloat(Value));
+      Result := TJSONNumber.Create(Double(Value));
     cvtDateTime:
       Result := TJSONString.Create(FormatDateTime('yyyy-mm-dd hh:nn:ss', VarToDateTime(Value)));
     cvtStringList:
@@ -203,7 +203,7 @@ begin
         end;
       end;
     cvtObject:
-      Result := TJSONObject.Parse(TEncoding.UTF8.GetBytes(VarToStr(Value)), 0) as TJSONValue;
+      Result := TJSONObject.ParseJSONValue(VarToStr(Value));
   end;
 
   if Result = nil then
@@ -309,11 +309,13 @@ begin
 end;
 
 function TModuleConfig.GetString(const Key: string; const DefaultValue: string): string;
+var
+  Value: Variant;
 begin
   FCriticalSection.Enter;
   try
-    if FConfigValues.TryGetValue(Key, Result) then
-      Result := VarToStr(Result)
+    if FConfigValues.TryGetValue(Key, Value) then
+      Result := VarToStr(Value)
     else
       Result := DefaultValue;
   finally
@@ -322,39 +324,51 @@ begin
 end;
 
 function TModuleConfig.GetInteger(const Key: string; const DefaultValue: Integer): Integer;
+var
+  Value: Variant;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Result) then
+    if not FConfigValues.TryGetValue(Key, Value) then
       Result := DefaultValue
-    else if VarType(Result) <> varInteger then
-      Result := StrToIntDef(VarToStr(Result), DefaultValue);
+    else if VarType(Value) <> varInteger then
+      Result := StrToIntDef(VarToStr(Value), DefaultValue)
+    else
+      Result := Value;
   finally
     FCriticalSection.Leave;
   end;
 end;
 
 function TModuleConfig.GetBoolean(const Key: string; const DefaultValue: Boolean): Boolean;
+var
+  Value: Variant;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Result) then
+    if not FConfigValues.TryGetValue(Key, Value) then
       Result := DefaultValue
-    else if VarType(Result) <> varBoolean then
-      Result := StrToBoolDef(VarToStr(Result), DefaultValue);
+    else if VarType(Value) <> varBoolean then
+      Result := StrToBoolDef(VarToStr(Value), DefaultValue)
+    else
+      Result := Value;
   finally
     FCriticalSection.Leave;
   end;
 end;
 
 function TModuleConfig.GetFloat(const Key: string; const DefaultValue: Double): Double;
+var
+  Value: Variant;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Result) then
+    if not FConfigValues.TryGetValue(Key, Value) then
       Result := DefaultValue
-    else if VarType(Result) <> varDouble then
-      Result := StrToFloatDef(VarToStr(Result), DefaultValue);
+    else if VarType(Value) <> varDouble then
+      Result := StrToFloatDef(VarToStr(Value), DefaultValue)
+    else
+      Result := Value;
   finally
     FCriticalSection.Leave;
   end;
@@ -363,21 +377,24 @@ end;
 function TModuleConfig.GetDateTime(const Key: string; const DefaultValue: TDateTime): TDateTime;
 var
   StrValue: string;
+  Value: Variant;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Result) then
+    if not FConfigValues.TryGetValue(Key, Value) then
       Result := DefaultValue
     else
     begin
-      if VarType(Result) = varDate then
-        Exit;
-
-      StrValue := VarToStr(Result);
-      if TryStrToDateTime(StrValue, Result) then
-        Exit
+      if VarType(Value) = varDate then
+        Result := Value
       else
-        Result := DefaultValue;
+      begin
+        StrValue := VarToStr(Value);
+        if TryStrToDateTime(StrValue, Result) then
+          Exit
+        else
+          Result := DefaultValue;
+      end;
     end;
   finally
     FCriticalSection.Leave;
@@ -386,7 +403,7 @@ end;
 
 function TModuleConfig.GetStringList(const Key: string): TStringList;
 var
-  Value: string;
+  Value: Variant;
 begin
   Result := TStringList.Create;
   try
@@ -499,7 +516,7 @@ var
   NewValue: string;
 begin
   if Value = nil then
-    raise EArgumentNullException.Create('Value cannot be nil');
+    raise EArgumentException.Create('Value cannot be nil');
 
   NewValue := Value.CommaText;
 
@@ -571,9 +588,9 @@ begin
     if JSONString.Trim.IsEmpty then
       Exit(True);
 
-    JSONObject := TJSONObject.ParseJSONObject(JSONString);
+    JSONObject := TJSONObject.ParseJSONValue(JSONString) as TJSONObject;
     if JSONObject = nil then
-      raise EFormatException.Create('Invalid JSON format in config file: ' + FConfigFile);
+      raise EConvertError.Create('Invalid JSON format in config file: ' + FConfigFile);
 
     FCriticalSection.Enter;
     try

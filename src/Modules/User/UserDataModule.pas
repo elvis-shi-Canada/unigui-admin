@@ -5,29 +5,10 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Hash,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniDataModule,
+  UserService.Intf;
 
 type
-  /// <summary>
-  /// 用户信息记录
-  /// </summary>
-  TUserInfo = record
-    UserID: Integer;
-    UserName: string;
-    Password: string;
-    RealName: string;
-    Email: string;
-    Phone: string;
-    Avatar: string;
-    Status: Integer;
-    LastLoginDate: TDateTime;
-    LastLoginIP: string;
-    CreatedDate: TDateTime;
-    CreatedBy: Integer;
-    ModifiedDate: TDateTime;
-    ModifiedBy: Integer;
-  end;
-
   /// <summary>
   /// 用户数据模块 - 提供用户表的 CRUD 操作
   /// </summary>
@@ -502,11 +483,7 @@ var
   LHash: THashSHA2;
 begin
   LHash := THashSHA2.Create;
-  try
-    Result := LHash.GetHashString(Password);
-  finally
-    LHash.Free;
-  end;
+  Result := LHash.GetHashString(Password);
 end;
 
 function TUserDataModule.ValidateEmail(const Email: string): Boolean;

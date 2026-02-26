@@ -3,7 +3,7 @@ object WizardTemplate: TWizardTemplate
   Top = 0
   Width = 600
   Height = 450
-  Caption = '向导'
+  Caption = #21521#23548
   ClientHeight = 450
   ClientWidth = 600
   OnCreate = FormCreate
@@ -24,11 +24,11 @@ object WizardTemplate: TWizardTemplate
       Top = 16
       Width = 200
       Height = 24
-      Caption = '向导标题'
+      Caption = #21521#23548#26631#39064
       ParentFont = False
       Font.Color = clHighlight
       Font.Height = -19
-      Font.Name = 'Segoe UI'
+      Font.Name = Segoe UI'
       Font.Style = [fsBold]
     end
   end
@@ -46,7 +46,7 @@ object WizardTemplate: TWizardTemplate
       Top = 16
       Width = 100
       Height = 13
-      Caption = '步骤 1'
+      Caption = #27493#39588 1
       Font.Color = clHighlight
       Font.Style = [fsBold]
       ParentFont = False
@@ -65,7 +65,7 @@ object WizardTemplate: TWizardTemplate
       Top = 16
       Width = 100
       Height = 13
-      Caption = '步骤 2'
+      Caption = #27493#39588 2
       Font.Color = clGrayText
       ParentFont = False
     end
@@ -83,7 +83,7 @@ object WizardTemplate: TWizardTemplate
       Top = 16
       Width = 100
       Height = 13
-      Caption = '步骤 3'
+      Caption = #27493#39588 3
       Font.Color = clGrayText
       ParentFont = False
     end
@@ -103,7 +103,7 @@ object WizardTemplate: TWizardTemplate
       Width = 568
       Height = 24
       AutoSize = False
-      Caption = '步骤 1 说明'
+      Caption = #27493#39588 1 #35828#26126
       ParentFont = False
       Font.Color = clHighlight
       Font.Height = -16
@@ -117,7 +117,7 @@ object WizardTemplate: TWizardTemplate
       Height = 216
       TabOrder = 0
       Lines.Strings = (
-        '步骤 1 内容')
+        #27493#39588 1 #20869#23481)
     end
   end
   object pnlFooter: TUniPanel
@@ -143,7 +143,7 @@ object WizardTemplate: TWizardTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '上一步(&B)'
+        Caption = #19978#19968#27493(&B)
         Enabled = False
         TabOrder = 0
         OnClick = btnBackClick
@@ -153,7 +153,7 @@ object WizardTemplate: TWizardTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '下一步(&N)'
+        Caption = #19979#19968#27493(&N)
         TabOrder = 1
         OnClick = btnNextClick
       end
@@ -162,7 +162,7 @@ object WizardTemplate: TWizardTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '完成(&F)'
+        Caption = #23436#25104(&F)
         Enabled = False
         TabOrder = 2
         OnClick = btnFinishClick
@@ -173,7 +173,7 @@ object WizardTemplate: TWizardTemplate
       Top = 15
       Width = 75
       Height = 30
-      Caption = '取消(&C)'
+      Caption = '#21462#28040(&C)
       TabOrder = 1
       OnClick = btnCancelClick
     end

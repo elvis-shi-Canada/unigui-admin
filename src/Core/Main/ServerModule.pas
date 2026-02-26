@@ -1,18 +1,18 @@
-unit UniGUIServerModule;
+unit ServerModule;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.IOUtils,
   UniGUIServer, UniGUIApplication, UniGUIClasses,
-  UniConfigService, UniModuleRegistry;
+  UniConfigService.Intf, UniModuleRegistry.Intf;
 
 type
   /// <summary>
   /// UniGUI 服务器模块
   /// 继承自 TUniGUIServerModule，负责服务器级别的初始化和配置管理
   /// </summary>
-  TUniGUIServerModule = class(TUniGUIServerModule)
+  TServerModule = class(TUniGUIServerModule)
   private
     FConfigService: IUniConfigService;
     FModuleRegistry: IUniModuleRegistry;
@@ -38,26 +38,29 @@ type
     function GetConfigRoot: string;
   end;
 
-function UniServerModule: TUniGUIServerModule;
+function GetServerModule: TServerModule;
 
 implementation
 
 {$R *.dfm}
 
-var
-  GUniServerModule: TUniGUIServerModule;
+uses
+  UniConfigService, UniModuleRegistry;
 
-function UniServerModule: TUniGUIServerModule;
+var
+  GServerModule: TServerModule;
+
+function GetServerModule: TServerModule;
 begin
-  Result := GUniServerModule;
+  Result := GServerModule;
 end;
 
-{ TUniGUIServerModule }
+{ TServerModule }
 
-procedure TUniGUIServerModule.OnCreate(Sender: TObject);
+procedure TServerModule.OnCreate(Sender: TObject);
 begin
   // 设置全局实例引用
-  GUniServerModule := Self;
+  GServerModule := Self;
 
   // 确定配置根目录（相对于可执行文件）
   FConfigRoot := TPath.Combine(ExtractFilePath(ParamStr(0)), 'config');
@@ -78,7 +81,7 @@ begin
   WriteLn('Config Root: ' + FConfigRoot);
 end;
 
-procedure TUniGUIServerModule.OnDestroy(Sender: TObject);
+procedure TServerModule.OnDestroy(Sender: TObject);
 begin
   // 清理插件注册表（通过接口引用计数自动释放）
   FModuleRegistry := nil;
@@ -87,12 +90,12 @@ begin
   FConfigService := nil;
 
   // 清理全局实例引用
-  GUniServerModule := nil;
+  GServerModule := nil;
 
   WriteLn('UniGUI Server Module destroyed.');
 end;
 
-procedure TUniGUIServerModule.InitializeConfigService;
+procedure TServerModule.InitializeConfigService;
 begin
   // 获取配置服务单例实例
   FConfigService := TUniConfigService.GetInstance;
@@ -115,7 +118,7 @@ begin
   end;
 end;
 
-procedure TUniGUIServerModule.InitializeModuleRegistry;
+procedure TServerModule.InitializeModuleRegistry;
 begin
   // 获取插件注册表单例实例
   FModuleRegistry := TUniModuleRegistry.GetInstance;
@@ -125,7 +128,7 @@ begin
   WriteLn('Module Registry initialized.');
 end;
 
-procedure TUniGUIServerModule.LoadApplicationConfig;
+procedure TServerModule.LoadApplicationConfig;
 var
   AppConfigFile: string;
   AppName, AppTitle: string;
@@ -151,25 +154,19 @@ begin
   WriteLn(Format('Server Port: %d', [ServerPort]));
 end;
 
-function TUniGUIServerModule.GetConfigService: IUniConfigService;
+function TServerModule.GetConfigService: IUniConfigService;
 begin
   Result := FConfigService;
 end;
 
-function TUniGUIServerModule.GetModuleRegistry: IUniModuleRegistry;
+function TServerModule.GetModuleRegistry: IUniModuleRegistry;
 begin
   Result := FModuleRegistry;
 end;
 
-function TUniGUIServerModule.GetConfigRoot: string;
+function TServerModule.GetConfigRoot: string;
 begin
   Result := FConfigRoot;
 end;
-
-initialization
-  RegisterModule(TUniGUIServerModule);
-
-finalization
-  // 清理资源
 
 end.

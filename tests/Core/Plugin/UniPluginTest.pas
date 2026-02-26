@@ -1,4 +1,4 @@
-unit UniPluginTest;
+﻿unit UniPluginTest;
 
 interface
 
@@ -6,6 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   DUnitX.TestFramework,
   UniPlugin, UniPlugin.Intf, UniPlugin.Types, UniContext,
+  UniSession,
   UniModuleRegistry, UniModuleRegistry.Intf;
 
 type
@@ -145,13 +146,12 @@ var
   LPluginClass: TClass;
 begin
   // 准备插件信息
-  LInfo.Name := 'TestPlugin';
+  LInfo.PluginID := 'TestPlugin';
   LInfo.DisplayName := '测试插件';
   LInfo.Version := '1.0.0';
   LInfo.Description := '用于单元测试的插件';
   LInfo.Author := 'Test Suite';
   LInfo.Category := 'Test';
-  LInfo.Dependencies := TArray<string>.Create();
   LInfo.AutoStart := False;
 
   LPluginClass := TTestPlugin;
@@ -165,7 +165,7 @@ begin
 
   // 验证插件信息
   var LRetrievedInfo := FRegistry.GetPluginClassInfo('test-plugin-001');
-  Assert.AreEqual(LInfo.Name, LRetrievedInfo.Name, '插件名称应该匹配');
+  Assert.AreEqual(LInfo.PluginID, LRetrievedInfo.PluginID, '插件名称应该匹配');
   Assert.AreEqual(LInfo.Version, LRetrievedInfo.Version, '插件版本应该匹配');
 
   // 验证插件计数
@@ -249,37 +249,35 @@ var
   LIsValid: Boolean;
 begin
   // 注册第一个插件（无依赖）
-  LInfo1.Name := 'BasePlugin';
+  LInfo1.PluginID := 'BasePlugin';
   LInfo1.DisplayName := '基础插件';
   LInfo1.Version := '1.0.0';
   LInfo1.Description := '基础功能插件';
   LInfo1.Author := 'Test Suite';
   LInfo1.Category := 'Base';
-  LInfo1.Dependencies := TArray<string>.Create();
   LInfo1.AutoStart := False;
 
   FRegistry.RegisterPluginClass(TTestPlugin, 'base-plugin', LInfo1);
 
   // 注册第二个插件（依赖第一个插件）
-  LInfo2.Name := 'DependentPlugin';
+  LInfo2.PluginID := 'DependentPlugin';
   LInfo2.DisplayName := '依赖插件';
   LInfo2.Version := '1.0.0';
   LInfo2.Description := '依赖基础插件的插件';
   LInfo2.Author := 'Test Suite';
   LInfo2.Category := 'Business';
-  LInfo2.Dependencies := TArray<string>.Create('base-plugin');
   LInfo2.AutoStart := False;
 
   FRegistry.RegisterPluginClass(TTestPlugin, 'dependent-plugin', LInfo2);
+  FRegistry.AddDependency('dependent-plugin', 'base-plugin', '');
 
   // 注册第三个插件（依赖不存在的插件）
-  LInfo3.Name := 'InvalidPlugin';
+  LInfo3.PluginID := 'InvalidPlugin';
   LInfo3.DisplayName := '无效依赖插件';
   LInfo3.Version := '1.0.0';
   LInfo3.Description := '依赖不存在的插件';
   LInfo3.Author := 'Test Suite';
   LInfo3.Category := 'Test';
-  LInfo3.Dependencies := TArray<string>.Create('non-existent-plugin');
   LInfo3.AutoStart := False;
 
   FRegistry.RegisterPluginClass(TTestPlugin, 'invalid-plugin', LInfo3);
@@ -308,40 +306,40 @@ begin
   // 创建循环依赖: PluginA -> PluginB -> PluginC -> PluginA
 
   // 注册 PluginA
-  LInfo1.Name := 'PluginA';
+  LInfo1.PluginID := 'PluginA';
   LInfo1.DisplayName := '插件 A';
   LInfo1.Version := '1.0.0';
   LInfo1.Description := '循环依赖测试插件 A';
   LInfo1.Author := 'Test Suite';
   LInfo1.Category := 'Test';
-  LInfo1.Dependencies := TArray<string>.Create('plugin-c');
   LInfo1.AutoStart := False;
 
   FRegistry.RegisterPluginClass(TTestPlugin, 'plugin-a', LInfo1);
+  FRegistry.AddDependency('plugin-a', 'plugin-c', '');
 
   // 注册 PluginB
-  LInfo2.Name := 'PluginB';
+  LInfo2.PluginID := 'PluginB';
   LInfo2.DisplayName := '插件 B';
   LInfo2.Version := '1.0.0';
   LInfo2.Description := '循环依赖测试插件 B';
   LInfo2.Author := 'Test Suite';
   LInfo2.Category := 'Test';
-  LInfo2.Dependencies := TArray<string>.Create('plugin-a');
   LInfo2.AutoStart := False;
 
   FRegistry.RegisterPluginClass(TTestPlugin, 'plugin-b', LInfo2);
+  FRegistry.AddDependency('plugin-b', 'plugin-a', '');
 
   // 注册 PluginC
-  LInfo3.Name := 'PluginC';
+  LInfo3.PluginID := 'PluginC';
   LInfo3.DisplayName := '插件 C';
   LInfo3.Version := '1.0.0';
   LInfo3.Description := '循环依赖测试插件 C';
   LInfo3.Author := 'Test Suite';
   LInfo3.Category := 'Test';
-  LInfo3.Dependencies := TArray<string>.Create('plugin-b');
   LInfo3.AutoStart := False;
 
   FRegistry.RegisterPluginClass(TTestPlugin, 'plugin-c', LInfo3);
+  FRegistry.AddDependency('plugin-c', 'plugin-b', '');
 
   // 检测循环依赖
   LHasCircular := FRegistry.DetectCircularDependency(LCircularPath);

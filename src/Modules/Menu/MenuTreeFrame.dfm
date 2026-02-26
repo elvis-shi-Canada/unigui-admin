@@ -6,7 +6,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
     Top = 0
     Width = 900
     Height = 600
-    Hint = ''
+    Hint = '
     Align = alClient
     TabOrder = 0
     object pnlLeft: TUniPanel
@@ -30,8 +30,8 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 60
           Height = 13
-          Hint = ''
-          Caption = '菜单树'
+          Hint = '
+          Caption = #33756#21333#26641
           TabOrder = 1
         end
         object treeMenus: TUniTreeMenu
@@ -39,7 +39,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 27
           Width = 332
           Height = 523
-          Hint = ''
+          Hint = '
           Align = alCustom
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 0
@@ -61,8 +61,8 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 6
           Width = 80
           Height = 25
-          Hint = ''
-          Caption = '全部展开'
+          Hint = '
+          Caption = #20840#37096#23637#24320
           TabOrder = 0
           OnClick = btnExpandAllClick
         end
@@ -71,8 +71,8 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 6
           Width = 80
           Height = 25
-          Hint = ''
-          Caption = '全部折叠'
+          Hint = 
+          Caption = #20840#37096#25240#21472
           TabOrder = 1
           OnClick = btnCollapseAllClick
         end
@@ -83,7 +83,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
       Top = 1
       Width = 4
       Height = 598
-      Hint = ''
+      Hint = '
       Align = alLeft
     end
     object pnlRight: TUniPanel
@@ -108,7 +108,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Width = 60
           Height = 13
           Hint = ''
-          Caption = '搜索:'
+          Caption = #25628#32034:
           TabOrder = 1
         end
         object edtSearch: TUniEdit
@@ -116,8 +116,8 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 150
           Height = 22
-          Hint = ''
-          TextHint = '菜单编码或名称'
+          Hint = '
+          TextHint = #33756#21333#32534#30721#25110#21517#31216
           TabOrder = 2
           OnKeyPress = edtSearchKeyPress
         end
@@ -126,14 +126,14 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 80
           Height = 21
-          Hint = ''
+          Hint = 
           Style = csDropDown
           ItemIndex = 0
           TabOrder = 3
           Items.Strings = (
-            '全部'
-            '启用'
-            '禁用')
+            #20840#37096
+            #21551#29992
+            #31105#29992)
           OnChange = cmbStatusChange
         end
         object btnSearch: TUniButton
@@ -141,8 +141,8 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 60
           Height = 25
-          Hint = ''
-          Caption = '搜索'
+          Hint = 
+          Caption = #25628#32034
           TabOrder = 4
           OnClick = btnSearchClick
         end
@@ -152,7 +152,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
         Top = 41
         Width = 542
         Height = 556
-        Hint = ''
+        Hint = 
         Align = alClient
         TabOrder = 0
         DataSource = UniDataSource

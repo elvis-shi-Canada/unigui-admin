@@ -10,22 +10,6 @@ uses
 
 type
   /// <summary>
-  /// 系统菜单设置器
-  /// 负责初始化和设置系统管理主菜单
-  /// </summary>
-  TSystemMenuSetup = class
-  public
-    /// <summary>初始化系统管理菜单</summary>
-    class procedure InitializeSystemMenus(const ADataModule: TDataModule);
-
-    /// <summary>获取系统管理菜单定义</summary>
-    class function GetSystemMenuDefinitions: TList<TMenuItemInfo>;
-
-    /// <summary>获取权限定义</summary>
-    class function GetPermissionDefinitions: TList<TPermissionInfo>;
-  end;
-
-  /// <summary>
   /// 菜单项信息记录
   /// </summary>
   TMenuItemInfo = record
@@ -48,6 +32,22 @@ type
     PermissionName: string;
     Category: string;
     Description: string;
+  end;
+
+  /// <summary>
+  /// 系统菜单设置器
+  /// 负责初始化和设置系统管理主菜单
+  /// </summary>
+  TSystemMenuSetup = class
+  public
+    /// <summary>初始化系统管理菜单</summary>
+    class procedure InitializeSystemMenus(const ADataModule: TDataModule);
+
+    /// <summary>获取系统管理菜单定义</summary>
+    class function GetSystemMenuDefinitions: TList<TMenuItemInfo>;
+
+    /// <summary>获取权限定义</summary>
+    class function GetPermissionDefinitions: TList<TPermissionInfo>;
   end;
 
 implementation

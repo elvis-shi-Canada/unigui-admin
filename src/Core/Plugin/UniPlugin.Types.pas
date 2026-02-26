@@ -1,4 +1,4 @@
-unit UniPlugin.Types;
+﻿unit UniPlugin.Types;
 
 interface
 
@@ -11,7 +11,7 @@ type
   /// 上下文感知接口 - 用于组件注入执行上下文
   /// </summary>
   IContextAware = interface(IInterface)
-    ['{UNI-CONTEXT-AWARE-001}']
+    ['{7A3F9C2E-1B5D-4E8A-9C6F-2D4E8B1A5C3F}']
     procedure SetContext(const Context: IExecutionContext);
   end;
 

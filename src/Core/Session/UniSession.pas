@@ -255,7 +255,7 @@ end;
 
 destructor TUserContextImpl.Destroy;
 begin
-  FDataScopes.Dispose;
+  FDataScopes.Free;
   inherited;
 end;
 
@@ -371,17 +371,17 @@ begin
   // 清理插件
   DeactivateAllPlugins;
   FLoadedPlugins.Clear;
-  FLoadedPlugins.Dispose;
+  FLoadedPlugins.Free;
 
   // 清理会话数据（修复 P0-1：正确释放 Data 字典）
   if FSessionInfo.Data <> nil then
   begin
     FSessionInfo.Data.Clear;
-    FSessionInfo.Data.Dispose;
+    FSessionInfo.Data.Free;
     FSessionInfo.Data := nil;
   end;
 
-  FLock.Dispose;
+  FLock.Free;
   inherited;
 end;
 
@@ -421,7 +421,7 @@ begin
       if FSessionInfo.Data <> nil then
       begin
         FSessionInfo.Data.Clear;
-        FSessionInfo.Data.Dispose;
+        FSessionInfo.Data.Free;
       end;
 
       FSessionInfo := TSessionInfo.Create(LSessionID, 1, AUserName, AUserName, AClientIP);
@@ -436,7 +436,7 @@ begin
 
       Result := True;
     except
-      LDataScopes.Dispose;
+      LDataScopes.Free;
       raise;
     end;
   finally

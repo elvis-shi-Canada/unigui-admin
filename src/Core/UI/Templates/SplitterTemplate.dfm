@@ -3,7 +3,7 @@ object SplitterTemplate: TSplitterTemplate
   Top = 0
   Width = 800
   Height = 400
-  Caption = 'SplitterTemplate'
+  Caption = SplitterTemplate
   TabOrder = 0
   object pnlLeft: TUniPanel
     Left = 0
@@ -19,11 +19,11 @@ object SplitterTemplate: TSplitterTemplate
       Top = 16
       Width = 200
       Height = 24
-      Caption = '左侧面板'
+      Caption = #24038#20391#38754#26495
       ParentFont = False
       Font.Color = clHighlight
       Font.Height = -19
-      Font.Name = 'Segoe UI'
+      Font.Name = Segoe UI
       Font.Style = [fsBold]
     end
     object treeLeft: TUniTreeView
@@ -55,11 +55,11 @@ object SplitterTemplate: TSplitterTemplate
       Top = 16
       Width = 200
       Height = 24
-      Caption = '右侧面板'
+      Caption = #21491#20391#38754#26495
       ParentFont = False
       Font.Color = clHighlight
       Font.Height = -19
-      Font.Name = 'Segoe UI'
+      Font.Name = Segoe UI'
       Font.Style = [fsBold]
     end
     object memoRight: TUniMemo
@@ -69,7 +69,7 @@ object SplitterTemplate: TSplitterTemplate
       Height = 336
       TabOrder = 0
       Lines.Strings = (
-        '右侧内容区域')
+        '#21491#20391#20869#23481#21306#22495)
     end
   end
 end

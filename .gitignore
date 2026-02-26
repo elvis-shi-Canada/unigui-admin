@@ -3,7 +3,7 @@
 worktrees/
 
 # IDE
-.vscode/
+# .vscode/
 .claude/
 
 # Build artifacts
@@ -22,7 +22,16 @@ __recovery/
 *.dproj.local
 *.~*
 *.identcache
+dcu/
+bin/
+*.py
 
 # OS
 .DS_Store
 Thumbs.db
+
+# custom
+*.log
+AGENTS.md
+app.json
+ProjectConfig.json

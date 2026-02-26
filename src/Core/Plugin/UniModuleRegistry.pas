@@ -4,6 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.SyncObjs,
+  System.Math,
   UniModuleRegistry.Intf, UniPlugin.Intf, UniPlugin, UniContext;
 
 type
@@ -57,16 +58,15 @@ type
     FPluginRegistry: TDictionary<string, TPluginClassRegistry>;
     FDependencyGraph: TDictionary<string, TList<string>>;  // 邻接表表示的图
     FReverseDependencyGraph: TDictionary<string, TList<string>>;  // 反向依赖图
-    FLock: TCriticalSection;
+    FInstanceLock: TCriticalSection;  // 实例级锁，与类级锁 FLock 区分
 
-    procedure BuildDependencyGraphs;
     function DepthFirstSearch(const PluginID: string;
       const Visited: TDictionary<string, Boolean>;
       const RecursionStack: TDictionary<string, Boolean>;
       out Path: TStringList): Boolean;
     function DetectCircularDependencyInternal(const LVisited: TDictionary<string, Boolean>;
       const LRecursionStack: TDictionary<string, Boolean>;
-      const LPath: TStringList;
+      LPath: TStringList;
       const StartPluginID: string): Boolean;
     function TopologicalSort: TArray<string>;
     procedure CheckPluginExists(const PluginID: string);
@@ -95,6 +95,9 @@ type
     function ValidateDependencies(out MissingPlugins: TArray<string>): Boolean;
     function GetPluginCount: Integer;
     procedure Clear;
+    function GetLoadOrder: TArray<string>;
+    function CreatePlugin(const PluginID: string; const UserContext: IUserContext;
+      const ExecutionContext: IExecutionContext): IPlugin;
   end;
 
 implementation
@@ -154,7 +157,7 @@ begin
   FPluginRegistry := TDictionary<string, TPluginClassRegistry>.Create;
   FDependencyGraph := TDictionary<string, TList<string>>.Create;
   FReverseDependencyGraph := TDictionary<string, TList<string>>.Create;
-  FLock := TCriticalSection.Create;
+  FInstanceLock := TCriticalSection.Create;
 end;
 
 destructor TUniModuleRegistry.Destroy;
@@ -163,7 +166,7 @@ begin
   FPluginRegistry.Free;
   FDependencyGraph.Free;
   FReverseDependencyGraph.Free;
-  FLock.Free;
+  FInstanceLock.Free;
   inherited;
 end;
 
@@ -171,8 +174,9 @@ procedure TUniModuleRegistry.RegisterPluginClass(const PluginClass: TClass;
   const PluginID: string; const Info: TPluginClassInfo);
 var
   LRegistry: TPluginClassRegistry;
+  LDepID: string;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     if FPluginRegistry.ContainsKey(PluginID) then
       raise ERegistryException.CreateFmt('Plugin %s is already registered', [PluginID]);
@@ -187,10 +191,10 @@ begin
       FReverseDependencyGraph.Add(PluginID, TList<string>.Create);
 
     // 注册插件的依赖关系
-    for var LDepID in Info.Dependencies do
+    for LDepID in Info.Dependencies do
       AddDependency(PluginID, LDepID, '');
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -198,22 +202,23 @@ procedure TUniModuleRegistry.UnregisterPluginClass(const PluginID: string);
 var
   LRegistry: TPluginClassRegistry;
   LDepList, LRevDepList: TList<string>;
+  LDepID, LRevDepID: string;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     CheckPluginExists(PluginID);
 
     // 移除所有相关依赖
     if FDependencyGraph.TryGetValue(PluginID, LDepList) then
     begin
-      for var LDepID in LDepList do
+      for LDepID in LDepList do
         RemoveDependency(PluginID, LDepID);
     end;
 
     // 移除反向依赖
     if FReverseDependencyGraph.TryGetValue(PluginID, LRevDepList) then
     begin
-      for var LRevDepID in LRevDepList do
+      for LRevDepID in LRevDepList do
         RemoveDependency(LRevDepID, PluginID);
     end;
 
@@ -226,50 +231,51 @@ begin
     FPluginRegistry.Remove(PluginID);
     LRegistry.Free;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.IsPluginRegistered(const PluginID: string): Boolean;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     Result := FPluginRegistry.ContainsKey(PluginID);
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.GetPluginClassInfo(const PluginID: string): TPluginClassInfo;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     CheckPluginExists(PluginID);
     Result := FPluginRegistry[PluginID].Info;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.GetAllPluginIDs: TArray<string>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     Result := FPluginRegistry.Keys.ToArray;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.GetPluginsByCategory(const Category: string): TArray<string>;
 var
   LList: TList<string>;
+  LPair: TPair<string, TPluginClassRegistry>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     LList := TList<string>.Create;
     try
-      for var LPair in FPluginRegistry do
+      for LPair in FPluginRegistry do
         if LPair.Value.Info.Category = Category then
           LList.Add(LPair.Key);
       Result := LList.ToArray;
@@ -277,7 +283,7 @@ begin
       LList.Free;
     end;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -286,7 +292,7 @@ var
   LDepInfo: TDependencyInfo;
   LDepList: TList<string>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     CheckPluginExists(FromPluginID);
     // ToPluginID 可以暂时不存在，在验证时检查
@@ -308,7 +314,7 @@ begin
     LDepInfo.MinVersion := MinVersion;
     FPluginRegistry[FromPluginID].Dependencies.Add(LDepInfo);
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -316,17 +322,19 @@ procedure TUniModuleRegistry.RemoveDependency(const FromPluginID, ToPluginID: st
 var
   LRegistry: TPluginClassRegistry;
   I: Integer;
+  LDepList: TList<string>;
+  LRevDepList: TList<string>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     CheckPluginExists(FromPluginID);
 
     // 从依赖图移除
-    if FDependencyGraph.TryGetValue(FromPluginID, var LDepList) then
+    if FDependencyGraph.TryGetValue(FromPluginID, LDepList) then
       LDepList.Remove(ToPluginID);
 
     // 从反向依赖图移除
-    if FReverseDependencyGraph.TryGetValue(ToPluginID, var LRevDepList) then
+    if FReverseDependencyGraph.TryGetValue(ToPluginID, LRevDepList) then
       LRevDepList.Remove(FromPluginID);
 
     // 从插件依赖列表移除
@@ -336,34 +344,38 @@ begin
          (LRegistry.Dependencies[I].ToPluginID = ToPluginID) then
         LRegistry.Dependencies.Delete(I);
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.GetDependencies(const PluginID: string): TArray<string>;
+var
+  LDepList: TList<string>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     CheckPluginExists(PluginID);
-    if FDependencyGraph.TryGetValue(PluginID, var LDepList) then
+    if FDependencyGraph.TryGetValue(PluginID, LDepList) then
       Result := LDepList.ToArray
     else
       Result := nil;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.GetDependents(const PluginID: string): TArray<string>;
+var
+  LRevDepList: TList<string>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
-    if FReverseDependencyGraph.TryGetValue(PluginID, var LRevDepList) then
+    if FReverseDependencyGraph.TryGetValue(PluginID, LRevDepList) then
       Result := LRevDepList.ToArray
     else
       Result := nil;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -374,7 +386,7 @@ var
   LPath: TStringList;
   LPluginID: string;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     LVisited := TDictionary<string, Boolean>.Create;
     LRecursionStack := TDictionary<string, Boolean>.Create;
@@ -408,14 +420,14 @@ begin
       LPath.Free;
     end;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.DetectCircularDependencyInternal(
   const LVisited: TDictionary<string, Boolean>;
   const LRecursionStack: TDictionary<string, Boolean>;
-  const LPath: TStringList;
+  LPath: TStringList;
   const StartPluginID: string): Boolean;
 begin
   Result := False;
@@ -482,8 +494,11 @@ var
   LVisitedDict: TDictionary<string, Boolean>;
   LRecursionStack: TDictionary<string, Boolean>;
   LCircularPath: TStringList;
+  LDepList: TList<string>;
+  LDepID: string;
+  LDepLevel: Integer;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     // 首先检查循环依赖（使用内部方法避免死锁）
     LVisitedDict := TDictionary<string, Boolean>.Create;
@@ -521,12 +536,12 @@ begin
     try
       for LPluginID in LSortedIDs do
       begin
-        if FDependencyGraph.TryGetValue(LPluginID, var LDepList) then
+        if FDependencyGraph.TryGetValue(LPluginID, LDepList) then
         begin
           LLevel := 0;
-          for var LDepID in LDepList do
+          for LDepID in LDepList do
           begin
-            if LDepLevels.TryGetValue(LDepID, var LDepLevel) then
+            if LDepLevels.TryGetValue(LDepID, LDepLevel) then
               LLevel := Max(LLevel, LDepLevel + 1);
           end;
           LDepLevels.Add(LPluginID, LLevel);
@@ -554,7 +569,7 @@ begin
       LVisited.Free;
     end;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -565,6 +580,7 @@ var
   LResult: TList<string>;
   LPluginID, LCurrent: string;
   LDepList: TList<string>;
+  LDependentID: string;
 begin
   LInDegree := TDictionary<string, Integer>.Create;
   LQueue := TQueue<string>.Create;
@@ -583,7 +599,7 @@ begin
         begin
           // LDepList中存储的是依赖LPluginID的所有插件
           // 这些插件的入度需要增加1
-          for var LDependentID in LDepList do
+          for LDependentID in LDepList do
           begin
             if LInDegree.ContainsKey(LDependentID) then
               LInDegree[LDependentID] := LInDegree[LDependentID] + 1;
@@ -608,7 +624,7 @@ begin
       // 查找依赖LCurrent的所有插件，减少它们的入度
       if FReverseDependencyGraph.TryGetValue(LCurrent, LDepList) then
       begin
-        for var LDependentID in LDepList do
+        for LDependentID in LDepList do
         begin
           if LInDegree.ContainsKey(LDependentID) then
           begin
@@ -639,7 +655,7 @@ var
   LPluginID, LDepID: string;
   LDepList: TList<string>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     LMList := TList<string>.Create;
     try
@@ -669,17 +685,17 @@ begin
       LMList.Free;
     end;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
 function TUniModuleRegistry.GetPluginCount: Integer;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     Result := FPluginRegistry.Count;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -688,7 +704,7 @@ var
   LPair: TPair<string, TPluginClassRegistry>;
   LList: TList<string>;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     // 释放所有注册表项
     for LPair in FPluginRegistry do
@@ -705,7 +721,7 @@ begin
       LList.Free;
     FReverseDependencyGraph.Clear;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -714,14 +730,14 @@ var
   LLoadOrderInfo: TArray<TLoadOrderInfo>;
   I: Integer;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     LLoadOrderInfo := CalculateLoadOrder;
     SetLength(Result, Length(LLoadOrderInfo));
     for I := 0 to High(LLoadOrderInfo) do
       Result[I] := LLoadOrderInfo[I].PluginID;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 
@@ -732,7 +748,7 @@ var
   LPluginClass: TClass;
   LInfo: TPluginInfo;
 begin
-  FLock.Enter;
+  FInstanceLock.Enter;
   try
     CheckPluginExists(PluginID);
 
@@ -759,7 +775,7 @@ begin
     // 使用类型安全的类型转换创建插件实例
     Result := TPluginClass(LPluginClass).Create(LInfo, UserContext, ExecutionContext) as IPlugin;
   finally
-    FLock.Leave;
+    FInstanceLock.Leave;
   end;
 end;
 

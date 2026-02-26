@@ -3,7 +3,7 @@ object EditFormTemplate: TEditFormTemplate
   Top = 0
   Width = 600
   Height = 500
-  Caption = '编辑表单'
+  Caption = #32534#36753#34920#21333
   ClientHeight = 500
   ClientWidth = 600
   OnCreate = FormCreate
@@ -24,11 +24,11 @@ object EditFormTemplate: TEditFormTemplate
       Top = 16
       Width = 200
       Height = 24
-      Caption = '编辑信息'
+      Caption = #32534#36753#20449#24687
       ParentFont = False
       Font.Color = clHighlight
       Font.Height = -19
-      Font.Name = 'Segoe UI'
+      Font.Name = Segoe UI
       Font.Style = [fsBold]
     end
   end
@@ -46,14 +46,14 @@ object EditFormTemplate: TEditFormTemplate
       Top = 16
       Width = 568
       Height = 348
-      Caption = '基本信息'
+      Caption = #22522#26412#20449#24687
       TabOrder = 0
       object lblField1: TUniLabel
         Left = 16
         Top = 32
         Width = 80
         Height = 13
-        Caption = '字段名称1:'
+        Caption = #23383#27573#21517#312161:'
         FocusControl = edtField1
       end
       object edtField1: TUniEdit
@@ -68,7 +68,7 @@ object EditFormTemplate: TEditFormTemplate
         Top = 72
         Width = 80
         Height = 13
-        Caption = '字段名称2:'
+        Caption = #23383#27573#21517#312162:
         FocusControl = edtField2
       end
       object edtField2: TUniEdit
@@ -83,7 +83,7 @@ object EditFormTemplate: TEditFormTemplate
         Top = 112
         Width = 80
         Height = 13
-        Caption = '字段名称3:'
+        Caption = #23383#27573#21517#312163:
         FocusControl = memField3
       end
       object memField3: TUniMemo
@@ -98,7 +98,7 @@ object EditFormTemplate: TEditFormTemplate
         Top = 216
         Width = 80
         Height = 13
-        Caption = '字段名称4:'
+        Caption = #23383#27573#21517#312164:
         FocusControl = chkField4
       end
       object chkField4: TUniCheckBox
@@ -106,7 +106,7 @@ object EditFormTemplate: TEditFormTemplate
         Top = 213
         Width = 97
         Height = 17
-        Caption = '启用'
+        Caption = #21551#29992
         TabOrder = 3
       end
       object lblField5: TUniLabel
@@ -114,7 +114,7 @@ object EditFormTemplate: TEditFormTemplate
         Top = 256
         Width = 80
         Height = 13
-        Caption = '字段名称5:'
+        Caption = #23383#27573#21517#312165:
         FocusControl = cboField5
       end
       object cboField5: TUniComboBox
@@ -124,9 +124,9 @@ object EditFormTemplate: TEditFormTemplate
         Height = 21
         TabOrder = 4
         Items.Strings = (
-          '选项1'
-          '选项2'
-          '选项3')
+          #36873#390331
+          #36873#390332
+          #36873#390333)
       end
     end
   end
@@ -153,7 +153,7 @@ object EditFormTemplate: TEditFormTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '保存(&S)'
+        Caption = #20445#23384(&S)
         TabOrder = 0
         OnClick = btnOKClick
       end
@@ -162,7 +162,7 @@ object EditFormTemplate: TEditFormTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '取消(&C)'
+        Caption = '#21462#28040(&C)
         ModalResult = 2
         TabOrder = 1
       end

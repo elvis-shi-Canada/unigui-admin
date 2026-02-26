@@ -1,4 +1,4 @@
-unit UniGUIMainModule;
+unit MainModule;
 
 interface
 
@@ -6,14 +6,14 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.SyncObjs,
   System.DateUtils,
   UniGUIMainModule, UniGUIApplication, UniGUIClasses,
-  UniSession, UniConfigService, UniModuleRegistry, UniPlugin.Intf;
+  UniSession, UniConfigService.Intf, UniModuleRegistry.Intf, UniPlugin.Intf, UniPlugin.Types;
 
 type
   /// <summary>
   /// UniGUI 主模块
   /// 继承自 TUniGUIMainModule，负责会话管理和插件生命周期管理
   /// </summary>
-  TUniGUIMainModule = class(TUniGUIMainModule)
+  TMainModule = class(TUniGUIMainModule)
   private
     FSessionLock: TCriticalSection;
     FSessions: TDictionary<string, TUniSession>;
@@ -66,26 +66,29 @@ type
     function LoadPluginForSession(const PluginID, SessionID: string): Boolean;
   end;
 
-function UniMainModule: TUniGUIMainModule;
+function GetMainModule: TMainModule;
 
 implementation
 
 {$R *.dfm}
 
-var
-  GUniMainModule: TUniGUIMainModule;
+uses
+  UniConfigService, UniModuleRegistry;
 
-function UniMainModule: TUniGUIMainModule;
+var
+  GMainModule: TMainModule;
+
+function GetMainModule: TMainModule;
 begin
-  Result := GUniMainModule;
+  Result := GMainModule;
 end;
 
-{ TUniGUIMainModule }
+{ TMainModule }
 
-procedure TUniGUIMainModule.OnCreate(Sender: TObject);
+procedure TMainModule.OnCreate(Sender: TObject);
 begin
   // 设置全局实例引用
-  GUniMainModule := Self;
+  GMainModule := Self;
 
   // 初始化线程安全锁
   FSessionLock := TCriticalSection.Create;
@@ -100,7 +103,7 @@ begin
   WriteLn('UniGUI Main Module initialized successfully.');
 end;
 
-procedure TUniGUIMainModule.OnDestroy(Sender: TObject);
+procedure TMainModule.OnDestroy(Sender: TObject);
 var
   LPair: TPair<string, TUniSession>;
   LSessionList: TList<TUniSession>;
@@ -145,12 +148,12 @@ begin
   FModuleRegistry := nil;
 
   // 清理全局实例引用
-  GUniMainModule := nil;
+  GMainModule := nil;
 
   WriteLn('UniGUI Main Module destroyed.');
 end;
 
-function TUniGUIMainModule.GetOrCreateSession(const SessionID: string): TUniSession;
+function TMainModule.GetOrCreateSession(const SessionID: string): TUniSession;
 var
   LSession: TUniSession;
 begin
@@ -188,7 +191,7 @@ begin
   end;
 end;
 
-function TUniGUIMainModule.RemoveSession(const SessionID: string): Boolean;
+function TMainModule.RemoveSession(const SessionID: string): Boolean;
 var
   LSession: TUniSession;
 begin
@@ -220,7 +223,7 @@ begin
   end;
 end;
 
-function TUniGUIMainModule.HasSession(const SessionID: string): Boolean;
+function TMainModule.HasSession(const SessionID: string): Boolean;
 var
   LSession: TUniSession;
 begin
@@ -240,7 +243,7 @@ begin
   end;
 end;
 
-function TUniGUIMainModule.GetAllSessionIDs: TArray<string>;
+function TMainModule.GetAllSessionIDs: TArray<string>;
 begin
   FSessionLock.Acquire;
   try
@@ -250,7 +253,7 @@ begin
   end;
 end;
 
-function TUniGUIMainModule.GetSessionCount: Integer;
+function TMainModule.GetSessionCount: Integer;
 begin
   FSessionLock.Acquire;
   try
@@ -260,17 +263,17 @@ begin
   end;
 end;
 
-function TUniGUIMainModule.GetConfigService: IUniConfigService;
+function TMainModule.GetConfigService: IUniConfigService;
 begin
   Result := FConfigService;
 end;
 
-function TUniGUIMainModule.GetModuleRegistry: IUniModuleRegistry;
+function TMainModule.GetModuleRegistry: IUniModuleRegistry;
 begin
   Result := FModuleRegistry;
 end;
 
-function TUniGUIMainModule.LoadPluginForSession(const PluginID,
+function TMainModule.LoadPluginForSession(const PluginID,
   SessionID: string): Boolean;
 var
   LSession: TUniSession;
@@ -300,10 +303,10 @@ begin
 
   // 获取插件信息
   LPluginInfo := FModuleRegistry.GetPluginClassInfo(PluginID);
-  LPluginClass := LPluginInfo.PluginClass;
 
   // 创建插件实例
-  if Supports(LPluginClass, IPlugin, LPlugin) then
+  LPlugin := FModuleRegistry.CreatePlugin(PluginID, LSession.GetExecutionContext.GetUserContext, LSession.GetExecutionContext);
+  if LPlugin <> nil then
   begin
     Result := LSession.LoadPlugin(LPlugin);
     if Result then
@@ -313,11 +316,11 @@ begin
   end
   else
   begin
-    WriteLn(Format('Plugin class does not support IPlugin: %s', [PluginID]));
+    WriteLn(Format('Failed to create plugin instance: %s', [PluginID]));
   end;
 end;
 
-procedure TUniGUIMainModule.CleanupInactiveSessions;
+procedure TMainModule.CleanupInactiveSessions;
 var
   LInactiveSessions: TList<string>;
   LPair: TPair<string, TUniSession>;
@@ -362,18 +365,12 @@ begin
   LInactiveSessions.Free;
 end;
 
-function TUniGUIMainModule.GetSessionTimeoutMinutes: Integer;
+function TMainModule.GetSessionTimeoutMinutes: Integer;
 begin
   // 从配置读取超时时间，默认30分钟
   Result := FConfigService.GetGlobalInteger('server.sessionTimeout', 1800) div 60;
   if Result < 1 then
     Result := 30;
 end;
-
-initialization
-  RegisterModule(TUniGUIMainModule);
-
-finalization
-  // 清理资源
 
 end.

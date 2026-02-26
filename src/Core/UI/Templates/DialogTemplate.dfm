@@ -2,14 +2,14 @@ object DialogTemplate: TDialogTemplate
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = '对话框'
+  Caption = #23545#35805#26694
   ClientHeight = 300
   ClientWidth = 500
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Name = 'Tahoma
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
@@ -30,7 +30,7 @@ object DialogTemplate: TDialogTemplate
       Width = 460
       Height = 180
       AutoSize = False
-      Caption = '对话框内容'
+      Caption = #23545#35805#26694#20869#23481
       WordWrap = True
     end
   end
@@ -48,7 +48,7 @@ object DialogTemplate: TDialogTemplate
       Top = 15
       Width = 75
       Height = 30
-      Caption = '是(&Y)'
+      Caption = #26159(&Y)'
       ModalResult = 6
       TabOrder = 0
     end
@@ -57,7 +57,7 @@ object DialogTemplate: TDialogTemplate
       Top = 15
       Width = 75
       Height = 30
-      Caption = '否(&N)'
+      Caption = #21542(&N)
       ModalResult = 7
       TabOrder = 1
     end
@@ -66,7 +66,7 @@ object DialogTemplate: TDialogTemplate
       Top = 15
       Width = 75
       Height = 30
-      Caption = '取消(&C)'
+      Caption = '#21462#28040(&C)
       ModalResult = 2
       TabOrder = 2
     end

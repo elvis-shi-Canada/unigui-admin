@@ -6,7 +6,7 @@ inherited IconSelector: TIconSelector
     Top = 0
     Width = 692
     Height = 500
-    Hint = ''
+    Hint = '
     Align = alClient
     TabOrder = 0
     object pnlSearch: TUniPanel
@@ -23,7 +23,7 @@ inherited IconSelector: TIconSelector
         Width = 60
         Height = 13
         Hint = ''
-        Caption = '搜索图标:'
+        Caption = #25628#32034#22270#26631:
         TabOrder = 1
       end
       object edtSearch: TUniEdit
@@ -31,8 +31,8 @@ inherited IconSelector: TIconSelector
         Top = 8
         Width = 150
         Height = 22
-        Hint = ''
-        TextHint = '输入图标名称或类名'
+        Hint = '
+        TextHint = #36755#20837#22270#26631#21517#31216#25110#31867#21517
         TabOrder = 2
         OnKeyPress = edtSearchKeyPress
       end
@@ -41,8 +41,8 @@ inherited IconSelector: TIconSelector
         Top = 8
         Width = 60
         Height = 25
-        Hint = ''
-        Caption = '搜索'
+        Hint = 
+        Caption = #25628#32034
         TabOrder = 3
         OnClick = btnSearchClick
       end
@@ -51,7 +51,7 @@ inherited IconSelector: TIconSelector
         Top = 1
         Width = 200
         Height = 38
-        Hint = ''
+        Hint = '
         TabOrder = 4
         object lblCategories: TUniLabel
           Left = 8
@@ -59,7 +59,7 @@ inherited IconSelector: TIconSelector
           Width = 60
           Height = 13
           Hint = ''
-          Caption = '类别:'
+          Caption = #31867#21035:
           TabOrder = 1
         end
         object cmbCategories: TUniComboBox
@@ -67,19 +67,19 @@ inherited IconSelector: TIconSelector
           Top = 8
           Width = 120
           Height = 21
-          Hint = ''
+          Hint = '
           Style = csDropDown
           ItemIndex = 0
           TabOrder = 2
           Items.Strings = (
-            '全部'
-            '导航'
-            '操作'
-            '文件'
-            '数据'
-            '图表'
-            '媒体'
-            '其他')
+            #20840#37096
+            #23548#33322
+            #25805#20316
+            #25991#20214
+            #25968#25454
+            #22270#34920
+            #23186#20307
+            #20854#20182)
           OnChange = cmbCategoriesChange
         end
       end
@@ -88,8 +88,8 @@ inherited IconSelector: TIconSelector
         Top = 12
         Width = 80
         Height = 17
-        Hint = ''
-        Caption = '大图标'
+        Hint = 
+        Caption = #22823#22270#26631
         TabOrder = 5
         OnClick = chkLargeClick
       end
@@ -99,7 +99,7 @@ inherited IconSelector: TIconSelector
       Top = 41
       Width = 690
       Height = 418
-      Hint = ''
+      Hint = '
       Align = alClient
       TabOrder = 2
       object scrollIcons: TUniScrollBox
@@ -135,7 +135,7 @@ inherited IconSelector: TIconSelector
         Width = 60
         Height = 13
         Hint = ''
-        Caption = '已选择:'
+        Caption = #24050#36873#25321:
         TabOrder = 1
       end
       object lblIconName: TUniLabel
@@ -143,8 +143,8 @@ inherited IconSelector: TIconSelector
         Top = 12
         Width = 400
         Height = 13
-        Hint = ''
-        Caption = '未选择'
+        Hint = '
+        Caption = #26410#36873#25321
         TabOrder = 2
       end
     end
@@ -153,7 +153,7 @@ inherited IconSelector: TIconSelector
       Top = 489
       Width = 690
       Height = 10
-      Hint = ''
+      Hint = '
       Align = alBottom
       TabOrder = 4
       Visible = False
@@ -162,8 +162,8 @@ inherited IconSelector: TIconSelector
         Top = 8
         Width = 75
         Height = 25
-        Hint = ''
-        Caption = '确定'
+        Hint = '
+        Caption = #30830#23450
         ModalResult = 1
         TabOrder = 0
         OnClick = btnOKClick
@@ -173,8 +173,8 @@ inherited IconSelector: TIconSelector
         Top = 8
         Width = 75
         Height = 25
-        Hint = ''
-        Caption = '取消'
+        Hint = '
+        Caption = '#21462#28040
         ModalResult = 2
         TabOrder = 1
         OnClick = btnCancelClick

@@ -1,4 +1,4 @@
-unit UniPlugin;
+﻿unit UniPlugin;
 
 interface
 
@@ -115,7 +115,8 @@ type
     function CreateDataModuleWithContext(const DataModuleName: string): TDataModule;
 
     property UserContext: IUserContext read FUserContext;
-    property CurrentUserID: Integer read FExecutionContext.GetCurrentUserID;
+    function GetCurrentUserID: Integer;
+    property CurrentUserID: Integer read GetCurrentUserID;
   end;
 
 implementation
@@ -250,6 +251,14 @@ begin
     Result := False;
 end;
 
+function TPlugin.GetCurrentUserID: Integer;
+begin
+  if Assigned(FExecutionContext) then
+    Result := FExecutionContext.GetCurrentUserID
+  else
+    Result := 0;
+end;
+
 function TPlugin.GetForm(const FormName: string): TFormInfo;
 begin
   FLock.Enter;
@@ -345,4 +354,4 @@ begin
   );
 end;
 
-end;
+end.

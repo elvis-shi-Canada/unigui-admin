@@ -1,0 +1,220 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+        <MainSource>UniAdmin.dpr</MainSource>
+        <Base>True</Base>
+        <Config Condition="'$(Config)'==''">Debug</Config>
+        <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Application</AppType>
+        <FrameworkType>VCL</FrameworkType>
+        <ProjectVersion>20.3</ProjectVersion>
+        <Platform Condition="'$(Platform)'==''">Win32</Platform>
+        <ProjectName Condition="'$(ProjectName)'==''">UniAdmin</ProjectName>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="('$(Platform)'=='Win32' and '$(Base)'=='true') or '$(Base_Win32)'!=''">
+        <Base_Win32>true</Base_Win32>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+        <Cfg_1>true</Cfg_1>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+        <Cfg_2>true</Cfg_2>
+        <CfgParent>Base</CfgParent>
+        <Base>true</Base>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base)'!=''">
+        <SanitizedProjectName>UniAdmin</SanitizedProjectName>
+        <DCC_E>false</DCC_E>
+        <DCC_F>false</DCC_F>
+        <DCC_K>false</DCC_K>
+        <DCC_N>false</DCC_N>
+        <DCC_S>false</DCC_S>
+        <DCC_ImageBase>00400000</DCC_ImageBase>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+        <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
+        <DCC_UnitSearchPath>$(UniGUIPath)\Lib;$(UniGUIPath)\Lib\Win32;$(UniGUIPath)\Lib\Core;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <VerInfo_Locale>2052</VerInfo_Locale>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Keys>CompanyName=UniAdmin Team;FileDescription=UniAdmin 管理系统;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright 2026;LegalTrademarks=;OriginalFilename=UniAdmin.exe;ProgramID=com.uniadmin;ProductName=UniAdmin;ProductVersion=1.0.0.0;Comments=UniGUI 后台管理系统</VerInfo_Keys>
+        <DCC_DcuOutput>..\dcu\$(Platform)\$(Config)</DCC_DcuOutput>
+        <DCC_ExeOutput>..\bin</DCC_ExeOutput>
+        <DCC_DcpOutput>..\dcu\$(Platform)\$(Config)</DCC_DcpOutput>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <BT_BuildType>Debug</BT_BuildType>
+        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+        <DCC_UsePackage> IndySystem;IndyCore;IndyProtocols;$(DCC_UsePackage)</DCC_UsePackage>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_1)'!=''">
+        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_DebugInformation>0</DCC_DebugInformation>
+        <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+        <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+        <DCC_Optimize>true</DCC_Optimize>
+        <DCC_AssertionsAtRuntime>false</DCC_AssertionsAtRuntime>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Cfg_2)'!=''">
+        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_Optimize>false</DCC_Optimize>
+        <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+        <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+        <DCC_RemoteDebug>true</DCC_RemoteDebug>
+    </PropertyGroup>
+    <ItemGroup>
+        <DelphiCompile Include="$(MainSource)">
+            <MainSource>MainSource</MainSource>
+        </DelphiCompile>
+        <!-- 核心模块 -->
+        <DCCReference Include="Core\Main\ServerModule.pas">
+            <Form>TServerModule</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="Core\Main\MainModule.pas">
+            <Form>TMainModule</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <!-- 配置服务 -->
+        <DCCReference Include="Core\Config\UniConfigService.Intf.pas"/>
+        <DCCReference Include="Core\Config\UniConfigService.pas"/>
+        <!-- 上下文 -->
+        <DCCReference Include="Core\Context\UniContext.pas"/>
+        <!-- 数据模块 -->
+        <DCCReference Include="Core\Data\UniDataModule.pas"/>
+        <DCCReference Include="Core\Data\UniConnectionManager.Intf.pas"/>
+        <DCCReference Include="Core\Data\UniConnectionManager.pas"/>
+        <!-- 认证服务 -->
+        <DCCReference Include="Core\Auth\UniAuthService.Intf.pas"/>
+        <DCCReference Include="Core\Auth\UniAuthService.pas"/>
+        <!-- 权限管理 -->
+        <DCCReference Include="Core\Permission\UniPermissionManager.Intf.pas"/>
+        <DCCReference Include="Core\Permission\UniPermissionManager.pas"/>
+        <!-- 菜单管理 -->
+        <DCCReference Include="Core\Menu\UniMenuManager.Intf.pas"/>
+        <DCCReference Include="Core\Menu\UniMenuManager.pas"/>
+        <DCCReference Include="Core\Menu\SystemMenuSetup.pas"/>
+        <!-- 插件系统 -->
+        <DCCReference Include="Core\Plugin\UniPlugin.Intf.pas"/>
+        <DCCReference Include="Core\Plugin\UniPlugin.Types.pas"/>
+        <DCCReference Include="Core\Plugin\UniPlugin.pas"/>
+        <DCCReference Include="Core\Plugin\UniModuleRegistry.Intf.pas"/>
+        <DCCReference Include="Core\Plugin\UniModuleRegistry.pas"/>
+        <DCCReference Include="Core\Plugin\UniModuleRegistration.pas"/>
+        <DCCReference Include="Core\Plugin\UniPluginLoader.pas"/>
+        <!-- 会话管理 -->
+        <DCCReference Include="Core\Session\UniSession.pas"/>
+        <!-- 元数据 -->
+        <DCCReference Include="Core\Metadata\UniMetadataCache.Intf.pas"/>
+        <DCCReference Include="Core\Metadata\UniMetadataCache.pas"/>
+        <DCCReference Include="Core\Metadata\UniFieldMetadata.pas"/>
+        <!-- 服务定位器 -->
+        <DCCReference Include="Core\Services\UniServices.pas"/>
+        <!-- 调度器 -->
+        <DCCReference Include="Core\Scheduler\UniScheduler.pas"/>
+        <DCCReference Include="Core\Scheduler\UniTaskProcessor.pas"/>
+        <!-- UI 组件 -->
+        <DCCReference Include="Core\UI\LoginForm.pas"/>
+        <DCCReference Include="Core\UI\MainFrame.pas"/>
+        <DCCReference Include="Core\UI\UniLayout.pas"/>
+        <DCCReference Include="Core\UI\UniModelAdmin.pas"/>
+        <DCCReference Include="Core\UI\UniPropertyEditor.pas"/>
+        <DCCReference Include="Core\UI\UniTheme.pas"/>
+        <DCCReference Include="Core\UI\BaseCrudFrame.pas"/>
+        <!-- UI 模板 -->
+        <DCCReference Include="Core\UI\Templates\BaseFormTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\DialogTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\EditFormTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\GridTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\QueryPanelTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\SplitterTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\StatusBarTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\TabSheetTemplate.pas"/>
+        <DCCReference Include="Core\UI\Templates\WizardTemplate.pas"/>
+        <!-- 业务模块 - 用户管理 -->
+        <DCCReference Include="Modules\User\UserListFrame.pas"/>
+        <DCCReference Include="Modules\User\UserEditForm.pas"/>
+        <DCCReference Include="Modules\User\UserDataModule.pas"/>
+        <DCCReference Include="Modules\User\UserPasswordDialog.pas"/>
+        <DCCReference Include="Modules\User\UserProfileFrame.pas"/>
+        <DCCReference Include="Modules\User\UserService.Intf.pas"/>
+        <DCCReference Include="Modules\User\UserService.pas"/>
+        <!-- 业务模块 - 角色管理 -->
+        <DCCReference Include="Modules\Role\RoleListFrame.pas"/>
+        <DCCReference Include="Modules\Role\RoleEditForm.pas"/>
+        <DCCReference Include="Modules\Role\RoleDataModule.pas"/>
+        <DCCReference Include="Modules\Role\RolePermissionDialog.pas"/>
+        <DCCReference Include="Modules\Role\RoleUserDialog.pas"/>
+        <!-- 业务模块 - 菜单管理 -->
+        <DCCReference Include="Modules\Menu\MenuTreeFrame.pas"/>
+        <DCCReference Include="Modules\Menu\MenuEditForm.pas"/>
+        <DCCReference Include="Modules\Menu\MenuDataModule.pas"/>
+        <!-- 业务模块 - 配置管理 -->
+        <DCCReference Include="Modules\Config\ConfigCategoryFrame.pas"/>
+        <DCCReference Include="Modules\Config\ConfigEditForm.pas"/>
+        <DCCReference Include="Modules\Config\ConfigDataModule.pas"/>
+        <DCCReference Include="Modules\Config\ConfigService.Intf.pas"/>
+        <DCCReference Include="Modules\Config\ConfigService.pas"/>
+        <!-- 业务模块 - 日志管理 -->
+        <DCCReference Include="Modules\Log\DataChangeLogFrame.pas"/>
+        <DCCReference Include="Modules\Log\LoginLogFrame.pas"/>
+        <DCCReference Include="Modules\Log\OperationLogFrame.pas"/>
+        <DCCReference Include="Modules\Log\LogDataModule.pas"/>
+        <DCCReference Include="Modules\Log\LogExport.pas"/>
+        <DCCReference Include="Modules\Log\LogService.pas"/>
+        <!-- 业务模块 - 字典管理 -->
+        <DCCReference Include="Plugins\Dictionary\DictionaryListFrame.pas"/>
+        <DCCReference Include="Plugins\Dictionary\DictionaryDataModule.pas"/>
+        <DCCReference Include="Plugins\Dictionary\DictionaryPlugin.pas"/>
+        <!-- 共享组件 -->
+        <DCCReference Include="Modules\Shared\IconSelector.pas"/>
+        <!-- 框架页面 -->
+        <DCCReference Include="Frames\ConfigManagerFrame.pas"/>
+        <DCCReference Include="Frames\PluginManagerFrame.pas"/>
+        <!-- 构建配置 -->
+        <BuildConfiguration Include="Base">
+            <Key>Base</Key>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Release">
+            <Key>Cfg_1</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+        <BuildConfiguration Include="Debug">
+            <Key>Cfg_2</Key>
+            <CfgParent>Base</CfgParent>
+        </BuildConfiguration>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Delphi.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Delphi.Personality>
+                <Source>
+                    <Source Name="MainSource">UniAdmin.dpr</Source>
+                </Source>
+            </Delphi.Personality>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">False</Platform>
+            </Platforms>
+            <Deployment Version="5">
+                <DeployFile LocalName="..\bin\UniAdmin.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>UniAdmin.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+            </Deployment>
+        </BorlandProject>
+        <ProjectFileVersion>12</ProjectFileVersion>
+    </ProjectExtensions>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+    <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
+    <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
+</Project>

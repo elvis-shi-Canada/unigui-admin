@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   FireDAC.Comp.Client,
-  UniConnectionManager.Intf, UniConfigService.Intf;
+  UniConnectionManager.Intf, UniConfigService.Intf, UniConfigService;
 
 type
   TUniConnectionManager = class(TInterfacedObject, IUniConnectionManager)
@@ -179,7 +179,7 @@ begin
 end;
 
 initialization
-  FLock := TObject.Create;
+  TUniConnectionManager.FLock := TObject.Create;
   TUniConnectionManager.GetInstance;
 
 finalization

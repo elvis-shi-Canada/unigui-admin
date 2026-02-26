@@ -3,7 +3,7 @@ unit UniMenuManager;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections,
+  System.SysUtils, System.Classes, System.Generics.Collections, System.StrUtils,
   Data.DB, FireDAC.Comp.Client,
   UniMenuManager.Intf;
 
@@ -140,12 +140,16 @@ end;
 
 procedure TUniMenuManager.ClearCache;
 var
-  LPair: TPair<Integer, TMenuItem>;
+  LMenuItem: TMenuItem;
+  LKeys: TArray<Integer>;
+  I: Integer;
 begin
-  for LPair in FMenuCache do
+  // 获取所有键并释放动态数组
+  LKeys := FMenuCache.Keys.ToArray;
+  for I := 0 to High(LKeys) do
   begin
-    // 释放动态数组
-    SetLength(LPair.Value.Children, 0);
+    if FMenuCache.TryGetValue(LKeys[I], LMenuItem) then
+      SetLength(LMenuItem.Children, 0);
   end;
   FMenuCache.Clear;
   FMenuTreeCache.Clear;
@@ -340,7 +344,7 @@ begin
       // 注意：修复了原逻辑错误 - 当用户权限为空时不应该显示所有菜单
       LHasPermission := (LMenu.PermissionCode = '') or
                        ((Length(UserPermissions) > 0) and
-                        (System.SysUtils.MatchText(LMenu.PermissionCode, UserPermissions)));
+                        (MatchText(LMenu.PermissionCode, UserPermissions)));
 
       if LHasPermission then
       begin

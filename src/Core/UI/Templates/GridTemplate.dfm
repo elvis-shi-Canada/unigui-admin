@@ -3,7 +3,7 @@ object GridTemplate: TGridTemplate
   Top = 0
   Width = 800
   Height = 600
-  Caption = '数据网格模板'
+  Caption = #25968#25454#32593#26684#27169#26495
   ClientHeight = 600
   ClientWidth = 800
   PixelsPerInch = 96
@@ -15,16 +15,16 @@ object GridTemplate: TGridTemplate
     Height = 40
     ButtonHeight = 36
     ButtonWidth = 36
-    Caption = 'UniToolBar1'
+    Caption = 'UniToolBar1
     TabOrder = 0
     object btnAdd: TUniToolButton
       Left = 0
       Top = 2
       Width = 36
       Height = 36
-      Hint = '新增'
+      Hint = #26032#22686
       ShowHint = True
-      Caption = 'btnAdd'
+      Caption = btnAdd
       ImageIndex = 0
       OnClick = DoAdd
     end
@@ -33,9 +33,9 @@ object GridTemplate: TGridTemplate
       Top = 2
       Width = 36
       Height = 36
-      Hint = '编辑'
+      Hint = #32534#36753
       ShowHint = True
-      Caption = 'btnEdit'
+      Caption = btnEdit
       ImageIndex = 1
       OnClick = DoEdit
     end
@@ -44,9 +44,9 @@ object GridTemplate: TGridTemplate
       Top = 2
       Width = 36
       Height = 36
-      Hint = '删除'
+      Hint = #21024#38500
       ShowHint = True
-      Caption = 'btnDelete'
+      Caption = btnDelete
       ImageIndex = 2
       OnClick = DoDelete
     end
@@ -55,9 +55,9 @@ object GridTemplate: TGridTemplate
       Top = 2
       Width = 36
       Height = 36
-      Hint = '刷新'
+      Hint = #21047#26032
       ShowHint = True
-      Caption = 'btnRefresh'
+      Caption = btnRefresh'
       ImageIndex = 3
       OnClick = DoRefresh
     end
@@ -66,8 +66,8 @@ object GridTemplate: TGridTemplate
       Top = 8
       Width = 200
       Height = 24
-      Hint = '搜索...'
-      TextHint = '搜索...'
+      Hint = #25628#32034...
+      TextHint = '#25628#32034...
       ParentFont = False
       TabOrder = 0
       OnChange = DoSearch

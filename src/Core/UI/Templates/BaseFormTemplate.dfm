@@ -3,7 +3,7 @@ object BaseFormTemplate: TBaseFormTemplate
   Top = 0
   Width = 600
   Height = 400
-  Caption = '基础窗体模板'
+  Caption = #22522#30784#31383#20307#27169#26495
   ClientHeight = 400
   ClientWidth = 600
   OnCreate = FormCreate
@@ -25,11 +25,11 @@ object BaseFormTemplate: TBaseFormTemplate
       Top = 16
       Width = 200
       Height = 24
-      Caption = '窗体标题'
+      Caption = #31383#20307#26631#39064
       ParentFont = False
       Font.Color = clHighlight
       Font.Height = -19
-      Font.Name = 'Segoe UI'
+      Font.Name = Segoe UI
       Font.Style = [fsBold]
     end
   end
@@ -69,7 +69,7 @@ object BaseFormTemplate: TBaseFormTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '确定'
+        Caption = #30830#23450
         ModalResult = 1
         TabOrder = 0
       end
@@ -78,7 +78,7 @@ object BaseFormTemplate: TBaseFormTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '取消'
+        Caption = #21462#28040
         ModalResult = 2
         TabOrder = 1
       end

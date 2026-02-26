@@ -6,7 +6,7 @@ inherited MenuEditForm: TMenuEditForm
     Top = 0
     Width = 550
     Height = 480
-    Hint = ''
+    Hint = '
     Align = alClient
     TabOrder = 0
     object lblMenuCode: TUniLabel
@@ -15,7 +15,7 @@ inherited MenuEditForm: TMenuEditForm
       Width = 60
       Height = 13
       Hint = ''
-      Caption = '菜单编码*'
+      Caption = #33756#21333#32534#30721*
       TabOrder = 1
     end
     object edtMenuCode: TUniEdit
@@ -24,7 +24,7 @@ inherited MenuEditForm: TMenuEditForm
       Width = 200
       Height = 22
       Hint = ''
-      TextHint = '唯一标识，如 system:user'
+      TextHint = #21807#19968#26631#35782，#22914 system:user
       TabOrder = 2
     end
     object lblMenuName: TUniLabel
@@ -33,7 +33,7 @@ inherited MenuEditForm: TMenuEditForm
       Width = 60
       Height = 13
       Hint = ''
-      Caption = '菜单名称*'
+      Caption = #33756#21333#21517#31216*
       TabOrder = 3
     end
     object edtMenuName: TUniEdit
@@ -41,8 +41,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 45
       Width = 200
       Height = 22
-      Hint = ''
-      TextHint = '显示名称'
+      Hint = '
+      TextHint = #26174#31034#21517#31216
       TabOrder = 4
     end
     object lblParent: TUniLabel
@@ -50,8 +50,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 80
       Width = 60
       Height = 13
-      Hint = ''
-      Caption = '父菜单'
+      Hint = 
+      Caption = #29238#33756#21333
       TabOrder = 5
     end
     object cmbParent: TUniComboBox
@@ -59,7 +59,7 @@ inherited MenuEditForm: TMenuEditForm
       Top = 77
       Width = 200
       Height = 21
-      Hint = ''
+      Hint = '
       Style = csDropDown
       ItemIndex = -1
       TabOrder = 6
@@ -70,7 +70,7 @@ inherited MenuEditForm: TMenuEditForm
       Width = 60
       Height = 13
       Hint = ''
-      Caption = '菜单类型*'
+      Caption = #33756#21333#31867#22411*
       TabOrder = 7
     end
     object cmbMenuType: TUniComboBox
@@ -93,8 +93,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 16
       Width = 60
       Height = 13
-      Hint = ''
-      Caption = '图标'
+      Hint = '
+      Caption = #22270#26631
       TabOrder = 9
     end
     object edtIcon: TUniEdit
@@ -102,7 +102,7 @@ inherited MenuEditForm: TMenuEditForm
       Top = 13
       Width = 150
       Height = 22
-      Hint = ''
+      Hint = '
       TextHint = 'fa fa-home'
       TabOrder = 10
     end
@@ -121,8 +121,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 48
       Width = 60
       Height = 13
-      Hint = ''
-      Caption = '路径'
+      Hint = '
+      Caption = #36335#24452
       TabOrder = 12
     end
     object edtPath: TUniEdit
@@ -130,7 +130,7 @@ inherited MenuEditForm: TMenuEditForm
       Top = 45
       Width = 150
       Height = 22
-      Hint = ''
+      Hint = '
       TextHint = '/system/user'
       TabOrder = 13
     end
@@ -139,8 +139,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 80
       Width = 60
       Height = 13
-      Hint = ''
-      Caption = '组件'
+      Hint = '
+      Caption = #32452#20214
       TabOrder = 14
     end
     object edtComponent: TUniEdit
@@ -148,7 +148,7 @@ inherited MenuEditForm: TMenuEditForm
       Top = 77
       Width = 150
       Height = 22
-      Hint = ''
+      Hint = '
       TextHint = 'UserList'
       TabOrder = 15
     end
@@ -157,8 +157,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 112
       Width = 60
       Height = 13
-      Hint = ''
-      Caption = '权限标识'
+      Hint = '
+      Caption = #26435#38480#26631#35782
       TabOrder = 16
     end
     object edtPermission: TUniEdit
@@ -166,7 +166,7 @@ inherited MenuEditForm: TMenuEditForm
       Top = 109
       Width = 150
       Height = 22
-      Hint = ''
+      Hint = '
       TextHint = 'user:view'
       TabOrder = 17
     end
@@ -175,8 +175,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 144
       Width = 60
       Height = 13
-      Hint = ''
-      Caption = '排序'
+      Hint = '
+      Caption = #25490#24207
       TabOrder = 18
     end
     object spnSortOrder: TUniSpinEdit
@@ -184,7 +184,7 @@ inherited MenuEditForm: TMenuEditForm
       Top = 141
       Width = 100
       Height = 22
-      Hint = ''
+      Hint = '
       TabOrder = 19
       MinValue = 0.000000000000000000
       MaxValue = 9999.000000000000000000
@@ -194,8 +194,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 144
       Width = 60
       Height = 17
-      Hint = ''
-      Caption = '可见'
+      Hint = '
+      Caption = #21487#35265
       TabOrder = 20
     end
     object chkStatus: TUniCheckBox
@@ -203,8 +203,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 144
       Width = 60
       Height = 17
-      Hint = ''
-      Caption = '启用'
+      Hint = 
+      Caption = #21551#29992
       Checked = True
       TabOrder = 21
     end
@@ -213,8 +213,8 @@ inherited MenuEditForm: TMenuEditForm
       Top = 176
       Width = 60
       Height = 13
-      Hint = ''
-      Caption = '描述'
+      Hint = 
+      Caption = #25551#36848
       TabOrder = 22
     end
     object memDescription: TUniMemo
@@ -222,7 +222,7 @@ inherited MenuEditForm: TMenuEditForm
       Top = 176
       Width = 440
       Height = 80
-      Hint = ''
+      Hint = '
       Lines.Strings = (
         '')
       TabOrder = 23
@@ -240,8 +240,8 @@ inherited MenuEditForm: TMenuEditForm
         Top = 8
         Width = 75
         Height = 25
-        Hint = ''
-        Caption = '保存'
+        Hint = '
+        Caption = #20445#23384
         ModalResult = 1
         TabOrder = 0
         OnClick = btnSaveClick
@@ -251,8 +251,8 @@ inherited MenuEditForm: TMenuEditForm
         Top = 8
         Width = 75
         Height = 25
-        Hint = ''
-        Caption = '取消'
+        Hint = '
+        Caption = '#21462#28040
         ModalResult = 2
         TabOrder = 1
         OnClick = btnCancelClick

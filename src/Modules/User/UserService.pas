@@ -3,7 +3,7 @@ unit UserService;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Types,
+  System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB,
   UniContext, UniPlugin.Types,
   UserService.Intf, UserDataModule;
@@ -172,8 +172,8 @@ function TUniUserService.GetUserByID(UserID: Integer): TUserInfo;
 var
   LDataSet: TDataSet;
 begin
-  Result := TUserInfo.Create;
-  
+  Result := Default(TUserInfo);
+
   LDataSet := FDataModule.GetUserByID(UserID);
   try
     if not LDataSet.Eof then
@@ -189,8 +189,8 @@ function TUniUserService.GetUserByName(const UserName: string): TUserInfo;
 var
   LDataSet: TDataSet;
 begin
-  Result := TUserInfo.Create;
-  
+  Result := Default(TUserInfo);
+
   LDataSet := FDataModule.GetUserByName(UserName);
   try
     if not LDataSet.Eof then

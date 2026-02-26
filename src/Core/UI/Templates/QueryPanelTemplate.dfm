@@ -12,14 +12,14 @@ object QueryPanelTemplate: TQueryPanelTemplate
     Top = 8
     Width = 784
     Height = 104
-    Caption = '查询条件'
+    Caption = #26597#35810#26465#20214
     TabOrder = 0
     object lblKeyword: TUniLabel
       Left = 16
       Top = 24
       Width = 60
       Height = 13
-      Caption = '关键词:'
+      Caption = #20851#38190#35789:
       FocusControl = edtKeyword
     end
     object edtKeyword: TUniEdit
@@ -28,14 +28,14 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Width = 200
       Height = 21
       TabOrder = 0
-      TextHint = '请输入查询关键词'
+      TextHint = #35831#36755#20837#26597#35810#20851#38190#35789
     end
     object lblDateFrom: TUniLabel
       Left = 300
       Top = 24
       Width = 60
       Height = 13
-      Caption = '起始日期:'
+      Caption = #36215#22987#26085#26399:
       FocusControl = dtpDateFrom
     end
     object dtpDateFrom: TUniDateTimePicker
@@ -50,7 +50,7 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Top = 24
       Width = 60
       Height = 13
-      Caption = '结束日期:'
+      Caption = #32467#26463#26085#26399:
       FocusControl = dtpDateTo
     end
     object dtpDateTo: TUniDateTimePicker
@@ -65,7 +65,7 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Top = 64
       Width = 60
       Height = 13
-      Caption = '状态:'
+      Caption = #29366#24577:
       FocusControl = cboStatus
     end
     object cboStatus: TUniComboBox
@@ -75,17 +75,17 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Height = 21
       TabOrder = 3
       Items.Strings = (
-        '全部'
-        '启用'
-        '禁用'
-        '待审核')
+        #20840#37096
+        #21551#29992
+        #31105#29992
+        #24453#23457#26680)
     end
     object btnQuery: TUniButton
       Left = 300
       Top = 59
       Width = 75
       Height = 25
-      Caption = '查询(&Q)'
+      Caption = #26597#35810(&Q)
       TabOrder = 4
       OnClick = btnQueryClick
     end
@@ -94,7 +94,7 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Top = 59
       Width = 75
       Height = 25
-      Caption = '重置(&R)'
+      Caption = #37325#32622(&R)
       TabOrder = 5
       OnClick = btnResetClick
     end
@@ -103,7 +103,7 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Top = 59
       Width = 75
       Height = 25
-      Caption = '高级(&A)...'
+      Caption = '#39640#32423(&A)...
       TabOrder = 6
       OnClick = btnAdvancedClick
     end

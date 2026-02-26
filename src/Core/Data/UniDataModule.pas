@@ -15,10 +15,10 @@ type
   private
     FContext: IExecutionContext;
     FConnection: TFDConnection;
+  protected
     function GetCurrentUserID: Integer;
     function GetCurrentUserName: string;
     function GetCurrentTime: TDateTime;
-  protected
     /// <summary>
     /// 设置数据库连接
     /// </summary>

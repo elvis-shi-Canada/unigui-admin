@@ -1,4 +1,4 @@
-unit UniPlugin.Intf;
+﻿unit UniPlugin.Intf;
 
 interface
 
@@ -7,7 +7,7 @@ uses
   UniContext, UniPlugin.Types;
 
 type
-  // 2??t���䨬????��
+  // 插件状态枚举
   TPluginState = (psUninitialized, psInitializing, psInitialized, psActivated, psDeactivated, psError);
 
   // ��㨬?D??��
@@ -40,11 +40,9 @@ type
     ConfigFile: string;
   end;
 
-  // 前向声明
-  TPlugin = class;
 
-  // 插件类引用类型
-  TPluginClass = class of TPlugin;
+
+
 
   // 插件接口
   IPlugin = interface(IInterface)

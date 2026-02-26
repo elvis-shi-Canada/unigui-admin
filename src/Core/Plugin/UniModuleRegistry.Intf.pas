@@ -3,7 +3,9 @@ unit UniModuleRegistry.Intf;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections;
+  System.SysUtils, System.Classes, System.Generics.Collections,
+  UniContext,
+  UniPlugin.Intf;
 
 type
   /// <summary>

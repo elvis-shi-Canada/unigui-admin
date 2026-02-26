@@ -103,7 +103,7 @@ object PluginManagerFrame: TPluginManagerFrame
           Width = 508
           Height = 13
           AutoSize = False
-          Caption = '-'
+          Caption = -
         end
         object lblDisplayName: TLabel
           Left = 8
@@ -118,7 +118,7 @@ object PluginManagerFrame: TPluginManagerFrame
           Width = 508
           Height = 13
           AutoSize = False
-          Caption = '-'
+          Caption = -
         end
         object lblVersion: TLabel
           Left = 8
@@ -133,7 +133,7 @@ object PluginManagerFrame: TPluginManagerFrame
           Width = 508
           Height = 13
           AutoSize = False
-          Caption = '-'
+          Caption = -
         end
         object lblAuthor: TLabel
           Left = 8
@@ -148,7 +148,7 @@ object PluginManagerFrame: TPluginManagerFrame
           Width = 508
           Height = 13
           AutoSize = False
-          Caption = '-'
+          Caption = -
         end
         object lblCategory: TLabel
           Left = 8
@@ -163,7 +163,7 @@ object PluginManagerFrame: TPluginManagerFrame
           Width = 508
           Height = 13
           AutoSize = False
-          Caption = '-'
+          Caption = -
         end
         object lblDescription: TLabel
           Left = 8

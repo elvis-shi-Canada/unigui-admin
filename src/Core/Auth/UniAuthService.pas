@@ -137,7 +137,7 @@ begin
     Result.UserName := LQuery.FieldByName('UserName').AsString;
     Result.RealName := LQuery.FieldByName('RealName').AsString;
     Result.Message := '登录成功';
-    Result.Token := Guid.NewGuid.ToString;
+    Result.Token := TGUID.NewGuid.ToString;
 
     // 记录登录信息
     FActiveSessions.Add(Result.Token, Result);
@@ -280,7 +280,7 @@ begin
 end;
 
 initialization
-  FLock := TObject.Create;
+  TUniAuthService.FLock := TObject.Create;
 
 finalization
   TUniAuthService.FInstance := nil;
