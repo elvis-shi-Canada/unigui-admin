@@ -1,6 +1,14 @@
 # UniAdmin
 
-基于 Delphi 12 Athens + UniGUI 的零代码后台管理框架，借鉴 Django Admin 设计理念。
+> A zero-code admin framework built on Delphi 12 Athens + UniGUI, inspired by Django Admin.
+
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Delphi](https://img.shields.io/badge/Delphi-12%20Athens-E62020.svg)
+![Platform](https://img.shields.io/badge/Platform-Windows-0078D6.svg)
+![UniGUI](https://img.shields.io/badge/UniGUI-1.6%2B-00A4EF.svg)
+![Database](https://img.shields.io/badge/Database-SQL%20Server-CC2927.svg)
+
+基于 Delphi 12 Athens + UniGUI 的零代码后台管理框架，借鉴 Django Admin 设计理念。插件化核心、设计时配置、运行时驱动——通过配置声明即可生成完整 CRUD，无需编写重复代码。
 
 ## 特性
 
@@ -101,7 +109,7 @@ src/
 
 数据库 Schema 位于 `Database/` 目录：
 
-```bash
+```
 Database/
 ├── Schema/
 │   ├── 01_CreatePluginTables.sql   插件管理表
@@ -123,13 +131,23 @@ cd tests && UniAdminTests.exe
 
 ## 文档
 
-- [开发指南](docs/DevelopmentGuide.md)
-- [架构设计](docs/uniadmin-framework-design.md)
-- [CRUD 框架](docs/TBaseCrudFrame-Architecture-Guide.md)
-- [API 文档](docs/API.md)
-- [部署指南](docs/DEPLOYMENT.md)
-- [安全指南](docs/Security.md)
+- [开发指南](docs/DevelopmentGuide.md) ｜ [中文版](docs/01-开发指南.md)
+- [架构设计](docs/uniadmin-framework-design.md) ｜ [中文版](docs/02-架构设计.md)
+- [CRUD 框架](docs/TBaseCrudFrame-Architecture-Guide.md) ｜ [中文版](docs/03-CRUD框架.md)
+- [API 文档](docs/API.md) ｜ [中文版](docs/04-API文档.md)
+- [部署指南](docs/DEPLOYMENT.md) ｜ [中文版](docs/05-部署指南.md)
+- [安全指南](docs/Security.md) ｜ [中文版](docs/06-安全指南.md)
+
+扩展资料：[UniGUI 组件参考手册](component-reference-manual.md)、[开发者手册](developer-manual.md)
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request！提 PR 前请先阅读 [贡献指南](docs/CONTRIBUTING.md)。
+
+如果这个项目对你有帮助，欢迎 ⭐ Star 支持一下！
 
 ## 许可证
 
-Copyright 2026 UniAdmin Team
+本项目基于 [MIT License](LICENSE) 开源。
+
+Copyright © 2026 jianfeihua
