@@ -1,15 +1,19 @@
-inherited LoginForm: TLoginForm
-  Caption = #29992#25143#30331#24405
+object LoginForm: TLoginForm
+  Left = 0
+  Top = 0
   ClientHeight = 300
   ClientWidth = 400
-  PixelsPerInch = 96
-  TextHeight = 13
+  Caption = #29992#25143#30331#24405
+  OldCreateOrder = False
+  MonitoredKeys.Keys = <>
+  TextHeight = 15
   object UniContainerPanel: TUniContainerPanel
     Left = 0
     Top = 0
     Width = 400
     Height = 300
     Hint = ''
+    ParentColor = False
     Align = alClient
     TabOrder = 0
     object UniPanel: TUniPanel
@@ -19,22 +23,23 @@ inherited LoginForm: TLoginForm
       Height = 240
       Hint = ''
       TabOrder = 0
+      Caption = ''
       object LblTitle: TUniLabel
         Left = 80
         Top = 16
-        Width = 140
-        Height = 24
+        Width = 359
+        Height = 25
         Hint = ''
-        Caption = UniAdmin #31649#29702#31995#32479
+        Caption = 'UniAdmin #31649#29702#31995#32479'
+        ParentFont = False
         Font.Height = -19
         Font.Style = [fsBold]
-        ParentFont = False
         TabOrder = 1
       end
       object LblUserName: TUniLabel
         Left = 16
         Top = 64
-        Width = 60
+        Width = 39
         Height = 13
         Hint = ''
         Caption = #29992#25143#21517
@@ -44,15 +49,14 @@ inherited LoginForm: TLoginForm
         Left = 16
         Top = 83
         Width = 268
-        Height = 22
         Hint = ''
-        TextHint = #35831#36755#20837#29992#25143#21517
+        Text = ''
         TabOrder = 3
       end
       object LblPassword: TUniLabel
         Left = 16
         Top = 112
-        Width = 60
+        Width = 26
         Height = 13
         Hint = ''
         Caption = #23494#30721
@@ -62,10 +66,9 @@ inherited LoginForm: TLoginForm
         Left = 16
         Top = 131
         Width = 268
-        Height = 22
         Hint = ''
         PasswordChar = '*'
-        TextHint = #35831#36755#20837#23494#30721
+        Text = ''
         TabOrder = 5
       end
       object ChkRememberMe: TUniCheckBox

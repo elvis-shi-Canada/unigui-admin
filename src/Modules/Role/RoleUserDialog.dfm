@@ -156,7 +156,7 @@ inherited RoleUserDialog: TRoleUserDialog
         Width = 36
         Height = 13
         Hint = ''
-        Caption = #35282#33394: 
+        Caption = #35282#33394':'
         TabOrder = 2
       end
       object edtSearch: TUniEdit

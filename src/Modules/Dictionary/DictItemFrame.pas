@@ -1,13 +1,13 @@
-unit DictItemFrame;
+﻿unit DictItemFrame;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants,
   Data.DB, FireDAC.Comp.Client,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
-  uniGrid, uniToolBar, uniLabel, uniComboBox, uniPanel, uniPageControl, uniTabSheet,
-  UniContext, UniPlugin.Types, BaseCrudFrame, DictionaryDataModule;
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
+  uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel, uniPageControl,
+  UniContext, UniPlugin.Types, BaseCrudFrame, DictionaryDataModule, uniTabControl;
 
 type
   /// <summary>
@@ -29,12 +29,17 @@ type
     UniDBGridTypes: TUniDBGrid;
     UniDataSourceTypes: TDataSource;
     qryDictTypes: TFDQuery;
-    FSelectedTypeID: Integer;
 
     procedure UniButtonSearchClick(Sender: TObject);
     procedure UniComboBoxStatusChange(Sender: TObject);
     procedure UniDBGridTypesDblClick(Sender: TObject);
     procedure UniDBGridItemsDblClick(Sender: TObject);
+  private
+    FSelectedTypeID: Integer;
+    FLastTypesDataSet: TDataSet;
+    FLastItemsDataSet: TDataSet;
+    procedure FreeLastTypesDataSet;
+    procedure FreeLastItemsDataSet;
   protected
     procedure DoInitialize; override;
     procedure DoBindControls; override;
@@ -44,6 +49,7 @@ type
     procedure Initialize; override;
     procedure RefreshTypes;
     procedure RefreshItems;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -51,6 +57,31 @@ implementation
 {$R *.dfm}
 
 { TDictItemFrame }
+
+destructor TDictItemFrame.Destroy;
+begin
+  FreeLastTypesDataSet;
+  FreeLastItemsDataSet;
+  inherited;
+end;
+
+procedure TDictItemFrame.FreeLastTypesDataSet;
+begin
+  if Assigned(FLastTypesDataSet) then
+  begin
+    UniDataSourceTypes.DataSet := nil;
+    FreeAndNil(FLastTypesDataSet);
+  end;
+end;
+
+procedure TDictItemFrame.FreeLastItemsDataSet;
+begin
+  if Assigned(FLastItemsDataSet) then
+  begin
+    UniDataSourceItems.DataSet := nil;
+    FreeAndNil(FLastItemsDataSet);
+  end;
+end;
 
 procedure TDictItemFrame.DoInitialize;
 begin
@@ -64,8 +95,6 @@ begin
   UniComboBoxStatus.Items.Add('启用');
   UniComboBoxStatus.Items.Add('禁用');
   UniComboBoxStatus.ItemIndex := 0;
-
-  // TODO: 初始化查询连接
 end;
 
 procedure TDictItemFrame.DoBindControls;
@@ -99,16 +128,12 @@ begin
   LDataModule := TDictionaryDataModule.Create(nil);
   try
     if Supports(LDataModule, IContextAware) then
-      (LDataModule as IContextAware).SetContext(FContext);
+      (LDataModule as IContextAware).SetContext(Context);
 
     LDataSet := LDataModule.GetDictTypes('', 1);
-    try
-      qryDictTypes.Close;
-      // TODO: 复制数据到 qryDictTypes
-      qryDictTypes.Open;
-    finally
-      LDataSet.Free;
-    end;
+    FreeLastTypesDataSet;
+    UniDataSourceTypes.DataSet := LDataSet;
+    FLastTypesDataSet := LDataSet;
   finally
     LDataModule.Free;
   end;
@@ -132,20 +157,16 @@ begin
   LDataModule := TDictionaryDataModule.Create(nil);
   try
     if Supports(LDataModule, IContextAware) then
-      (LDataModule as IContextAware).SetContext(FContext);
+      (LDataModule as IContextAware).SetContext(Context);
 
     if FSelectedTypeID > 0 then
       LDataSet := LDataModule.GetDictItemsByType(FSelectedTypeID, LStatus)
     else
       LDataSet := LDataModule.GetAllDictItems(LFilter, LStatus);
 
-    try
-      qryDictItems.Close;
-      // TODO: 复制数据到 qryDictItems
-      qryDictItems.Open;
-    finally
-      LDataSet.Free;
-    end;
+    FreeLastItemsDataSet;
+    UniDataSourceItems.DataSet := LDataSet;
+    FLastItemsDataSet := LDataSet;
   finally
     LDataModule.Free;
   end;
@@ -164,11 +185,11 @@ end;
 procedure TDictItemFrame.UniDBGridTypesDblClick(Sender: TObject);
 begin
   // 选择字典类型
-  if not qryDictTypes.Eof then
+  if Assigned(FLastTypesDataSet) and not FLastTypesDataSet.Eof then
   begin
-    FSelectedTypeID := qryDictTypes.FieldByName('TypeID').AsInteger;
+    FSelectedTypeID := FLastTypesDataSet.FieldByName('TypeID').AsInteger;
     RefreshItems;
-    UniPageControl.ActivePage := UniTabSheetItems;
+    UniPageControl.ActivePage := UniTabItemList;
   end;
 end;
 

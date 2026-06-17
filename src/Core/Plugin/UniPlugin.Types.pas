@@ -1,10 +1,10 @@
-﻿unit UniPlugin.Types;
+unit UniPlugin.Types;
 
 interface
 
 uses
   System.SysUtils, System.Classes,
-  UniContext;
+  UniContext, Vcl.Forms, uniGUIForm;
 
 type
   /// <summary>
@@ -16,16 +16,8 @@ type
   end;
 
   /// <summary>
-  /// UniGUI 窗体基类前向声明
-  /// 实际类型由 UniGUI 框架提供
-  /// </summary>
-  TUniForm = class(TComponent)
-  private
-    // UniGUI 特定的实现将在运行时由框架提供
-  end;
-
-  /// <summary>
   /// 窗体类类型别名
+  /// TUniForm 由 uniGUIForm 单元定义
   /// </summary>
   TFormClass = class of TUniForm;
 

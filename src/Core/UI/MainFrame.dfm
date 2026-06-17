@@ -1,19 +1,19 @@
-inherited MainFrame: TMainFrame
-  Caption = UniAdmin #31649#29702#31995#32479
+object MainFrame: TMainFrame
+  Left = 0
+  Top = 0
   ClientHeight = 600
   ClientWidth = 900
-  PixelsPerInch = 96
-  TextHeight = 13
-  object UniMainMenu: TUniMainMenu
-    Left = 8
-    Top = 8
-  end
+  Caption = 'UniAdmin #31649#29702#31995#32479'
+  OldCreateOrder = False
+  MonitoredKeys.Keys = <>
+  TextHeight = 15
   object UniContainerPanel: TUniContainerPanel
     Left = 0
     Top = 0
     Width = 900
     Height = 580
     Hint = ''
+    ParentColor = False
     Align = alClient
     TabOrder = 0
   end
@@ -24,9 +24,13 @@ inherited MainFrame: TMainFrame
     Height = 20
     Hint = ''
     Panels = <>
-    SimplePanel = True
-    SimpleText = #23601#32490
+    SizeGrip = False
     Align = alBottom
-    TabOrder = 1
+    ParentColor = False
+    SimpleText = #23601#32490
+  end
+  object UniMainMenu: TUniMainMenu
+    Left = 8
+    Top = 8
   end
 end

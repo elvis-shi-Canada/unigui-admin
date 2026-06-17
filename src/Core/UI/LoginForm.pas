@@ -1,12 +1,12 @@
-unit LoginForm;
+﻿unit LoginForm;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
-  uniGUISettings, uniGUIApplication, uniGUIForm, uniLabel, uniEdit,
-  uniButton, uniCheckBox, uniPanel, uniGUIBaseClasses,
-  UniAuthService.Intf;
+  System.SysUtils, System.Classes, System.Variants, System.UITypes,
+  uniGUIApplication, uniGUIForm, uniLabel, uniEdit,
+  uniButton, uniCheckBox, uniPanel, uniGUIBaseClasses, uniGUIClasses,
+  UniAuthService.Intf, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -71,8 +71,8 @@ begin
   Caption := '用户登录';
   Width := 400;
   Height := 300;
-  BorderStyle := bsDialog;
-  Position := poScreenCenter;
+  // BorderStyle := bsDialog;    // UniGUI 不支持 VCL 属性
+  // Position := poScreenCenter;  // UniGUI 使用 CSS 布局
 
   // 设置默认值
   EdtUserName.Text := '';
@@ -116,7 +116,7 @@ begin
     Exit;
 
   try
-    Screen.Cursor := crHourGlass;
+    // Screen.Cursor := crHourGlass;  // UniGUI 不支持 VCL Screen 对象
     try
       // 调用认证服务进行登录
       FLoginResult := FAuthService.Login(
@@ -137,7 +137,7 @@ begin
         EdtPassword.SetFocus;
       end;
     finally
-      Screen.Cursor := crDefault;
+      // Screen.Cursor := crDefault;  // UniGUI 不支持 VCL Screen 对象
     end;
   except
     on E: Exception do
@@ -178,7 +178,7 @@ class function TLoginForm.Execute(var LoginResult: TLoginResult): Boolean;
 var
   LForm: TLoginForm;
 begin
-  LForm := TLoginForm.Create(UniApplication);
+  LForm := TLoginForm.Create(nil);
   try
     Result := LForm.ShowModal = mrOk;
     if Result then

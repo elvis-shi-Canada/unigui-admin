@@ -20,11 +20,6 @@ type
     function GetCurrentUserName: string;
     function GetCurrentTime: TDateTime;
     /// <summary>
-    /// 设置数据库连接
-    /// </summary>
-    /// <param name="Value">要设置的连接对象。如果为 nil，将创建新的空连接对象</param>
-    procedure SetConnection(const Value: TFDConnection); virtual;
-    /// <summary>
     /// 设置审计字段（创建时间、创建人、修改时间、修改人）
     /// </summary>
     procedure SetAuditFields(const Query: TFDQuery; const IsInsert: Boolean); virtual;
@@ -40,6 +35,11 @@ type
     /// 设置执行上下文
     /// </summary>
     procedure SetContext(const Context: IExecutionContext); virtual;
+    /// <summary>
+    /// 设置数据库连接
+    /// </summary>
+    /// <param name="Value">要设置的连接对象。如果为 nil，将创建新的空连接对象</param>
+    procedure SetConnection(const Value: TFDConnection); virtual;
     /// <summary>
     /// 打开数据库连接
     /// </summary>

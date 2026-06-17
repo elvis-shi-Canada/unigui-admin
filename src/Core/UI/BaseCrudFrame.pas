@@ -1,13 +1,13 @@
-unit BaseCrudFrame;
+﻿unit BaseCrudFrame;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants,
   Data.DB, FireDAC.Comp.Client,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniGrid,
-  uniToolBar,
-  UniContext, UniPlugin.Types, UniModelAdmin;
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniBasicGrid, uniDBGrid,
+  uniToolBar, uniGUIForm, uniGUIFrame, uniSession,
+  UniContext, UniPlugin.Types, UniModelAdmin, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -18,21 +18,20 @@ type
   private
     FModelAdmin: TUniModelAdmin;
     FContext: IExecutionContext;
-    FPermissionPrefix: string;
 
     procedure UpdateButtonStates;
     procedure CheckPermissions;
 
     // 工具栏按钮事件
     procedure BtnAddClick(Sender: TObject);
-    procedure BtnEditClick(Sender: TObject);
-    procedure BtnDeleteClick(Sender: TObject);
     procedure BtnSaveClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure BtnRefreshClick(Sender: TObject);
 
     procedure DoStateChange(Sender: TObject);
   protected
+    FPermissionPrefix: string;
+
     // 工具栏组件
     UniToolBar: TUniToolBar;
     BtnAdd: TUniButton;
@@ -71,6 +70,10 @@ type
     /// 刷新数据
     /// </summary>
     procedure DoRefresh; virtual;
+
+    // 工具栏按钮事件（protected，子类可调用）
+    procedure BtnEditClick(Sender: TObject);
+    procedure BtnDeleteClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -101,6 +104,8 @@ type
   end;
 
 implementation
+
+{$R *.dfm}
 
 { TBaseCrudFrame }
 
@@ -276,17 +281,14 @@ end;
 
 procedure TBaseCrudFrame.BtnDeleteClick(Sender: TObject);
 begin
-  if Confirm('确定要删除这条记录吗？') then
-  begin
-    try
-      FModelAdmin.Delete;
+  try
+    FModelAdmin.Delete;
+    UpdateButtonStates;
+  except
+    on E: Exception do
+    begin
       UpdateButtonStates;
-    except
-      on E: Exception do
-      begin
-        UpdateButtonStates;
-        raise;
-      end;
+      raise;
     end;
   end;
 end;

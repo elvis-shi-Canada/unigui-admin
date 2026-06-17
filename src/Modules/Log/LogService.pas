@@ -1,10 +1,10 @@
-unit LogService;
+﻿unit LogService;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
-  Data.DB,
+  Data.DB, FireDAC.Comp.Client,
   UniContext, UniPlugin.Types, LogDataModule;
 
 type
@@ -152,8 +152,8 @@ procedure TLogService.LogDataChange(UserID: Integer; const UserName, TableName: 
 var
   LIP: string;
 begin
-  // TODO: 从上下文获取 IP
   LIP := '';
+  // IP 地址需要从 HTTP 请求上下文中获取，在 UniGUI 中通过 UniApplication.RemoteAddr 访问
   FDataModule.AddDataChangeLog(UserID, UserName, TableName, RecordID, Operation, OldValue, NewValue, LIP);
 end;
 

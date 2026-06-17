@@ -1,12 +1,13 @@
-unit RoleEditForm;
+﻿unit RoleEditForm;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
-  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniLabel, uniComboBox, uniPanel, uniSpinEdit,
-  UniContext, UniPlugin.Types,
-  RoleDataModule;
+  System.SysUtils, System.Classes, System.Variants, System.UITypes, System.Types,
+  Data.DB, Vcl.Forms,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniLabel, uniMultiItem, uniComboBox, uniPanel, uniSpinEdit,
+  UniContext, UniPlugin.Types, uniGUIForm, Vcl.Dialogs,
+  RoleDataModule, uniCheckBox, uniMemo, Vcl.Controls;
 
 type
   /// <summary>
@@ -24,13 +25,13 @@ type
     lblRoleName: TUniLabel;
     edtRoleName: TUniEdit;
     lblDescription: TUniLabel;
-    edtDescription: TUniEdit;
+    memDescription: TUniMemo;
     lblDataScope: TUniLabel;
     cmbDataScope: TUniComboBox;
     lblSortOrder: TUniLabel;
-    edtSortOrder: TUniSpinEdit;
+    spnSortOrder: TUniSpinEdit;
     lblStatus: TUniLabel;
-    cmbStatus: TUniComboBox;
+    chkStatus: TUniCheckBox;
     pnlBottom: TUniPanel;
     btnSave: TUniButton;
     btnCancel: TUniButton;
@@ -43,7 +44,7 @@ type
     FRoleID: Integer;
     FMode: TEditMode;
     FContext: IExecutionContext;
-    FRoleDM: IRoleDataModule;
+    FRoleDM: TRoleDataModule;
     FRequiredPermission: string;
 
     procedure ValidateInputs;
@@ -82,7 +83,8 @@ end;
 procedure TRoleEditForm.SetContext(const Context: IExecutionContext);
 begin
   FContext := Context;
-  FRoleDM := TRoleDataModule.Create(Context);
+  FRoleDM := TRoleDataModule.Create(Self);
+  FRoleDM.SetContext(Context);
 end;
 
 procedure TRoleEditForm.SetRequiredPermission(const Permission: string);
@@ -116,16 +118,13 @@ begin
   cmbDataScope.Items.Add('自定义');   // custom
   cmbDataScope.ItemIndex := 0;
 
-  // 初始化状态下拉框
-  cmbStatus.Items.Clear;
-  cmbStatus.Items.Add('启用');
-  cmbStatus.Items.Add('禁用');
-  cmbStatus.ItemIndex := 0;
+  // 初始化状态复选框
+  chkStatus.Checked := True;
 
   // 设置默认排序
-  edtSortOrder.Value := 0;
-  edtSortOrder.MinValue := 0;
-  edtSortOrder.MaxValue := 9999;
+  spnSortOrder.Value := 0;
+  spnSortOrder.MinValue := 0;
+  spnSortOrder.MaxValue := 9999;
 
   // 设置默认模式
   SetAsAddMode;
@@ -135,10 +134,10 @@ procedure TRoleEditForm.ClearForm;
 begin
   edtRoleCode.Text := '';
   edtRoleName.Text := '';
-  edtDescription.Text := '';
+  memDescription.Text := '';
   cmbDataScope.ItemIndex := 0;
-  edtSortOrder.Value := 0;
-  cmbStatus.ItemIndex := 0;
+  spnSortOrder.Value := 0;
+  chkStatus.Checked := True;
 
   edtRoleCode.Enabled := True;
 end;
@@ -179,20 +178,17 @@ begin
       begin
         edtRoleCode.Text := LDataSet.FieldByName('RoleCode').AsString;
         edtRoleName.Text := LDataSet.FieldByName('RoleName').AsString;
-        edtDescription.Text := LDataSet.FieldByName('Description').AsString;
+        memDescription.Text := LDataSet.FieldByName('Description').AsString;
 
         // 设置数据范围
         cmbDataScope.ItemIndex := cmbDataScope.Items.IndexOf(GetDataScopeText(LDataSet.FieldByName('DataScope').AsString));
         if cmbDataScope.ItemIndex < 0 then
           cmbDataScope.ItemIndex := 0;
 
-        edtSortOrder.Value := LDataSet.FieldByName('SortOrder').AsInteger;
+        spnSortOrder.Value := LDataSet.FieldByName('SortOrder').AsInteger;
 
         // 设置状态
-        if LDataSet.FieldByName('Status').AsInteger = 1 then
-          cmbStatus.ItemIndex := 0
-        else
-          cmbStatus.ItemIndex := 1;
+        chkStatus.Checked := LDataSet.FieldByName('Status').AsInteger = 1;
       end
       else
       begin
@@ -248,9 +244,9 @@ var
 begin
   LRoleCode := Trim(edtRoleCode.Text);
   LRoleName := Trim(edtRoleName.Text);
-  LDescription := Trim(edtDescription.Text);
+  LDescription := Trim(memDescription.Text);
   LDataScope := GetDataScopeValue(cmbDataScope.Text);
-  LSortOrder := Trunc(edtSortOrder.Value);
+  LSortOrder := Trunc(spnSortOrder.Value);
 
   // 角色编码验证
   if LRoleCode = '' then
@@ -263,7 +259,7 @@ begin
     raise Exception.Create('角色编码长度不能超过 50 位');
 
   // 角色编码格式验证（只允许字母、数字、下划线）
-  if not LRoleCode.IsValidIdentifier then
+  if not System.SysUtils.IsValidIdent(LRoleCode) then
     raise Exception.Create('角色编码只能包含字母、数字和下划线，且必须以字母开头');
 
   // 角色名称验证
@@ -309,11 +305,11 @@ begin
     // 获取输入值
     LRoleCode := Trim(edtRoleCode.Text);
     LRoleName := Trim(edtRoleName.Text);
-    LDescription := Trim(edtDescription.Text);
+    LDescription := Trim(memDescription.Text);
     LDataScope := GetDataScopeValue(cmbDataScope.Text);
-    LSortOrder := Trunc(edtSortOrder.Value);
+    LSortOrder := Trunc(spnSortOrder.Value);
 
-    if cmbStatus.ItemIndex = 0 then
+    if chkStatus.Checked then
       LStatus := 1
     else
       LStatus := 0;

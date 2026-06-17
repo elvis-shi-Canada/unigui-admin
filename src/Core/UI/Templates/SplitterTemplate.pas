@@ -4,11 +4,11 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.ExtCtrls,
-  UniGUIBaseClasses, UniGUIClasses, UniPanel, UniLabel, UniTreeView, UniMemo, UniSplitter;
+  Vcl.Controls,
+  UniGUIBaseClasses, UniGUIClasses, uniGUIFrame, uniPanel, UniLabel, UniTreeView, UniMemo, UniSplitter;
 
 type
-  TSplitterTemplate = class(TUniPanel)
+  TSplitterTemplate = class(TUniFrame)
     pnlLeft: TUniPanel;
     lblLeftTitle: TUniLabel;
     treeLeft: TUniTreeView;

@@ -413,6 +413,8 @@ procedure TConfigManagerFrame.btnAddClick(Sender: TObject);
 var
   LKey, LValue, LTypeStr: string;
   LValueType: TConfigValueType;
+  LTempDateTime: TDateTime;
+  LTempFloat: Double;
 begin
   if not Assigned(FCurrentModuleConfig) then
   begin
@@ -447,12 +449,17 @@ begin
     cvtBoolean:
       FCurrentModuleConfig.SetValue(LKey, StrToBoolDef(LValue, False));
     cvtFloat:
-      FCurrentModuleConfig.SetValue(LKey, StrToFloatDef(LValue, 0.0));
+      begin
+        LTempFloat := StrToFloatDef(LValue, 0.0);
+        FCurrentModuleConfig.SetValue(LKey, LTempFloat);
+      end;
     cvtDateTime:
-      if TryStrToDateTime(LValue, TDateTime(LValue)) then
-        FCurrentModuleConfig.SetValue(LKey, TDateTime(LValue))
-      else
-        FCurrentModuleConfig.SetValue(LKey, LValue);
+      begin
+        if TryStrToDateTime(LValue, LTempDateTime) then
+          FCurrentModuleConfig.SetValue(LKey, LTempDateTime)
+        else
+          FCurrentModuleConfig.SetValue(LKey, LValue);
+      end;
     else
       FCurrentModuleConfig.SetValue(LKey, LValue);
   end;
@@ -465,6 +472,8 @@ procedure TConfigManagerFrame.btnUpdateClick(Sender: TObject);
 var
   LKey, LValue, LTypeStr: string;
   LValueType: TConfigValueType;
+  LTempDateTime: TDateTime;
+  LTempFloat: Double;
 begin
   if not Assigned(FCurrentModuleConfig) then
   begin
@@ -498,12 +507,17 @@ begin
     cvtBoolean:
       FCurrentModuleConfig.SetValue(LKey, StrToBoolDef(LValue, False));
     cvtFloat:
-      FCurrentModuleConfig.SetValue(LKey, StrToFloatDef(LValue, 0.0));
+      begin
+        LTempFloat := StrToFloatDef(LValue, 0.0);
+        FCurrentModuleConfig.SetValue(LKey, LTempFloat);
+      end;
     cvtDateTime:
-      if TryStrToDateTime(LValue, TDateTime(LValue)) then
-        FCurrentModuleConfig.SetValue(LKey, TDateTime(LValue))
-      else
-        FCurrentModuleConfig.SetValue(LKey, LValue);
+      begin
+        if TryStrToDateTime(LValue, LTempDateTime) then
+          FCurrentModuleConfig.SetValue(LKey, LTempDateTime)
+        else
+          FCurrentModuleConfig.SetValue(LKey, LValue);
+      end;
     else
       FCurrentModuleConfig.SetValue(LKey, LValue);
   end;

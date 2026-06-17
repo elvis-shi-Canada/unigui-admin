@@ -111,7 +111,7 @@ begin
     if Assigned(FConnection) and FConnection.Connected then
     begin
       // 初始化所有核心服务
-      FConnectionManager := TUniConnectionManager.GetInstance(FConnection);
+      FConnectionManager := TUniConnectionManager.GetInstance;
       FAuthService := TUniAuthService.GetInstance(FConnection);
       FMetadataCache := TUniMetadataCache.GetInstance(FConnection);
       FMenuManager := TUniMenuManager.GetInstance(FConnection);
@@ -193,17 +193,17 @@ begin
 end;
 
 initialization
-  FLock := TObject.Create;
-  FInitialized := False;
-  FConnection := nil;
-  FConnectionManager := nil;
-  FAuthService := nil;
-  FMetadataCache := nil;
-  FMenuManager := nil;
-  FPermissionManager := nil;
+  TUniServices.FLock := TObject.Create;
+  TUniServices.FInitialized := False;
+  TUniServices.FConnection := nil;
+  TUniServices.FConnectionManager := nil;
+  TUniServices.FAuthService := nil;
+  TUniServices.FMetadataCache := nil;
+  TUniServices.FMenuManager := nil;
+  TUniServices.FPermissionManager := nil;
 
 finalization
   TUniServices.Shutdown;
-  FLock.Free;
+  FreeAndNil(TUniServices.FLock);
 
 end.

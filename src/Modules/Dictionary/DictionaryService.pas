@@ -1,4 +1,4 @@
-unit DictionaryService;
+﻿unit DictionaryService;
 
 interface
 
@@ -158,6 +158,10 @@ begin
 end;
 
 procedure TDictionaryService.RefreshDictCache(const TypeCode: string);
+var
+  LItemDict: TDictionary<string, string>;
+  LItemsDataSet: TDataSet;
+  LPair: TPair<string, string>;
 begin
   if TypeCode.IsEmpty then
     LoadDictCache
@@ -282,8 +286,6 @@ function TDictionaryService.GetDictTypeByID(TypeID: Integer): TDictTypeInfo;
 var
   LDataSet: TDataSet;
 begin
-  Result := TDictTypeInfo.Create;
-
   LDataSet := FDataModule.GetDictTypeByID(TypeID);
   try
     if not LDataSet.Eof then
@@ -299,8 +301,6 @@ function TDictionaryService.GetDictTypeByCode(const TypeCode: string): TDictType
 var
   LDataSet: TDataSet;
 begin
-  Result := TDictTypeInfo.Create;
-
   LDataSet := FDataModule.GetDictTypeByCode(TypeCode);
   try
     if not LDataSet.Eof then
@@ -411,8 +411,6 @@ function TDictionaryService.GetDictItemByID(ItemID: Integer): TDictItemInfo;
 var
   LDataSet: TDataSet;
 begin
-  Result := TDictItemInfo.Create;
-
   LDataSet := FDataModule.GetDictItemByID(ItemID);
   try
     if not LDataSet.Eof then
@@ -470,6 +468,7 @@ function TDictionaryService.GetDictItemText(const TypeCode, ItemValue: string): 
 var
   LItems: TArray<TDictItemInfo>;
   LItem: TDictItemInfo;
+  LPair: TPair<string, string>;
 begin
   Result := '';
 

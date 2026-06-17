@@ -3,9 +3,9 @@ unit UserPasswordDialog;
 interface
 
 uses
-  System.SysUtils, System.Classes,
+  System.SysUtils, System.Classes, System.Math,
   uniGUIBaseClasses, uniGUIClasses, uniEdit, uniButton, uniLabel, uniPanel, uniProgressBar,
-  UniContext;
+  UniContext, Vcl.Forms, Vcl.Graphics, Vcl.Dialogs, Vcl.Controls, uniGUIForm, UserService.Intf;
 
 type
   /// <summary>

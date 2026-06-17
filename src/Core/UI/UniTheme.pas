@@ -85,10 +85,10 @@ type
 
     property Name: string read FName;
     property Mode: TThemeMode read FMode;
-    property ColorScheme: TColorScheme read FColorScheme;
-    property FontScheme: TFontScheme read FFontScheme;
-    property SpacingScheme: TSpacingScheme read FSpacingScheme;
-    property RadiusScheme: TRadiusScheme read FRadiusScheme;
+    property ColorScheme: TColorScheme read FColorScheme write FColorScheme;
+    property FontScheme: TFontScheme read FFontScheme write FFontScheme;
+    property SpacingScheme: TSpacingScheme read FSpacingScheme write FSpacingScheme;
+    property RadiusScheme: TRadiusScheme read FRadiusScheme write FRadiusScheme;
   end;
 
   /// <summary>
@@ -102,9 +102,6 @@ type
   /// </summary>
   TUniTheme = class(TComponent)
   private
-    class var FCurrentTheme: TUniTheme;
-    class var FThemes: TDictionary<string, TThemeDefinition>;
-
     FThemeName: string;
     FMode: TThemeMode;
     FColorScheme: TColorScheme;
@@ -113,6 +110,9 @@ type
     FRadiusScheme: TRadiusScheme;
 
     FOnThemeChange: TThemeChangeEvent;
+
+    class var FCurrentTheme: TUniTheme;
+    class var FThemes: TDictionary<string, TThemeDefinition>;
 
     procedure SetThemeName(const Value: string);
     procedure SetMode(const Value: TThemeMode);
@@ -129,56 +129,16 @@ type
     function GetHeaderColor: TColor;
     function GetFontColor: TColor;
     function GetBorderColor: TColor;
-
-    class constructor Create;
-    class destructor Destroy;
   public
+    // 实例构造函数和析构函数
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    /// <summary>
-    /// 初始化默认主题
-    /// </summary>
-    class procedure Initialize; static;
-
-    /// <summary>
-    /// 注册主题
-    /// </summary>
-    class procedure RegisterTheme(ATheme: TThemeDefinition); static;
-
-    /// <summary>
-    /// 注销主题
-    /// </summary>
-    class procedure UnregisterTheme(const AThemeName: string); static;
-
-    /// <summary>
-    /// 获取所有已注册的主题名称
-    /// </summary>
-    class function GetThemeNames: TArray<string>; static;
-
-    /// <summary>
-    /// 应用指定主题
-    /// </summary>
+    // 实例方法
     procedure ApplyTheme(const AThemeName: string);
-
-    /// <summary>
-    /// 切换深色/浅色模式
-    /// </summary>
     procedure ToggleTheme;
-
-    /// <summary>
-    /// 重置为默认主题
-    /// </summary>
     procedure ResetToDefault;
-
-    /// <summary>
-    /// 保存当前主题配置
-    /// </summary>
     procedure SaveThemeConfig(const AFileName: string);
-
-    /// <summary>
-    /// 加载主题配置
-    /// </summary>
     procedure LoadThemeConfig(const AFileName: string);
 
     // 颜色属性
@@ -194,8 +154,13 @@ type
     // 主题属性
     property ThemeName: string read FThemeName write SetThemeName;
     property Mode: TThemeMode read FMode write SetMode;
-
     property OnThemeChange: TThemeChangeEvent read FOnThemeChange write FOnThemeChange;
+
+    // 静态类方法
+    class procedure Initialize; static;
+    class procedure RegisterTheme(ATheme: TThemeDefinition); static;
+    class procedure UnregisterTheme(const AThemeName: string); static;
+    class function GetThemeNames: TArray<string>; static;
   end;
 
 implementation
@@ -232,7 +197,7 @@ begin
   else // tmLight
   begin
     FColorScheme.BackgroundColor := clWhite;
-    FColorScheme.SurfaceColor = $00F5F5F5;
+    FColorScheme.SurfaceColor := $00F5F5F5;
     FColorScheme.PanelColor := clWhite;
     FColorScheme.HeaderColor := $00F0F0F0;
     FColorScheme.BorderColor := $00E0E0E0;
@@ -264,24 +229,9 @@ end;
 
 { TUniTheme }
 
-class constructor TUniTheme.Create;
-begin
-  FThemes := TDictionary<string, TThemeDefinition>.Create;
-  Initialize;
-end;
-
-class destructor TUniTheme.Destroy;
-begin
-  if Assigned(FThemes) then
-  begin
-    for var LTheme in FThemes.Values do
-      LTheme.Free;
-    FThemes.Clear;
-    FThemes.Free;
-  end;
-end;
-
 constructor TUniTheme.Create(AOwner: TComponent);
+var
+  LTheme: TThemeDefinition;
 begin
   inherited;
   FThemeName := 'Default Light';
@@ -290,7 +240,7 @@ begin
   // 从全局主题复制设置
   if FThemes.ContainsKey(FThemeName) then
   begin
-    var LTheme := FThemes[FThemeName];
+    LTheme := FThemes[FThemeName];
     ApplyColorScheme(LTheme.ColorScheme);
     ApplyFontScheme(LTheme.FontScheme);
     ApplySpacingScheme(LTheme.SpacingScheme);
@@ -304,6 +254,8 @@ begin
 end;
 
 class procedure TUniTheme.Initialize;
+var
+  LScheme: TColorScheme;
 begin
   // 注册默认主题
   RegisterTheme(TThemeDefinition.Create('Default Light', tmLight));
@@ -317,14 +269,18 @@ begin
   // 自定义蓝色主题
   if FThemes.ContainsKey('Blue Light') then
   begin
-    FThemes['Blue Light'].ColorScheme.PrimaryColor := clBlue;
-    FThemes['Blue Light'].ColorScheme.AccentColor := $00DD7700;
+    LScheme := FThemes['Blue Light'].ColorScheme;
+    LScheme.PrimaryColor := clBlue;
+    LScheme.AccentColor := $00DD7700;
+    FThemes['Blue Light'].ColorScheme := LScheme;
   end;
 
   if FThemes.ContainsKey('Blue Dark') then
   begin
-    FThemes['Blue Dark'].ColorScheme.PrimaryColor := $007777DD;
-    FThemes['Blue Dark'].ColorScheme.AccentColor := $00FFAA00;
+    LScheme := FThemes['Blue Dark'].ColorScheme;
+    LScheme.PrimaryColor := $007777DD;
+    LScheme.AccentColor := $00FFAA00;
+    FThemes['Blue Dark'].ColorScheme := LScheme;
   end;
 end;
 
@@ -363,12 +319,14 @@ begin
 end;
 
 procedure TUniTheme.ApplyTheme(const AThemeName: string);
+var
+  LTheme: TThemeDefinition;
 begin
   if not FThemes.ContainsKey(AThemeName) then
     raise Exception.CreateFmt('Theme "%s" not found', [AThemeName]);
 
   FThemeName := AThemeName;
-  var LTheme := FThemes[AThemeName];
+  LTheme := FThemes[AThemeName];
 
   ApplyColorScheme(LTheme.ColorScheme);
   ApplyFontScheme(LTheme.FontScheme);
@@ -537,5 +495,18 @@ begin
     LIni.Free;
   end;
 end;
+
+initialization
+  TUniTheme.FThemes := TDictionary<string, TThemeDefinition>.Create;
+  TUniTheme.Initialize;
+
+finalization
+  if Assigned(TUniTheme.FThemes) then
+  begin
+    for var LTheme in TUniTheme.FThemes.Values do
+      LTheme.Free;
+    TUniTheme.FThemes.Clear;
+    TUniTheme.FThemes.Free;
+  end;
 
 end.

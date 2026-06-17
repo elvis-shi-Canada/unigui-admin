@@ -1,12 +1,12 @@
-unit OperationLogFrame;
+﻿unit OperationLogFrame;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants,
   Data.DB, FireDAC.Comp.Client,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
-  uniGrid, uniToolBar, uniLabel, uniComboBox, uniPanel, uniDateTimePicker,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
+  uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel, uniDateTimePicker,
   UniContext, UniPlugin.Types, BaseCrudFrame, LogDataModule;
 
 type
@@ -33,11 +33,15 @@ type
 
     procedure UniButtonSearchClick(Sender: TObject);
     procedure UniButtonExportClick(Sender: TObject);
+  private
+    FLastDataSet: TDataSet;
+    procedure FreeLastDataSet;
   protected
     procedure DoInitialize; override;
     procedure DoRefresh; override;
   public
     procedure Initialize; override;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -45,6 +49,21 @@ implementation
 {$R *.dfm}
 
 { TOperationLogFrame }
+
+destructor TOperationLogFrame.Destroy;
+begin
+  FreeLastDataSet;
+  inherited;
+end;
+
+procedure TOperationLogFrame.FreeLastDataSet;
+begin
+  if Assigned(FLastDataSet) then
+  begin
+    UniDataSource.DataSet := nil;
+    FreeAndNil(FLastDataSet);
+  end;
+end;
 
 procedure TOperationLogFrame.DoInitialize;
 begin
@@ -81,16 +100,12 @@ begin
   LDataModule := TLogDataModule.Create(nil);
   try
     if Supports(LDataModule, IContextAware) then
-      (LDataModule as IContextAware).SetContext(FContext);
+      (LDataModule as IContextAware).SetContext(Context);
 
     LDataSet := LDataModule.GetOperationLogs(LUserName, LModule, LStartTime, LEndTime, LStatus, 1, 100);
-    try
-      qryOperationLogs.Close;
-      // TODO: 复制数据到 qryOperationLogs
-      qryOperationLogs.Open;
-    finally
-      LDataSet.Free;
-    end;
+    FreeLastDataSet;
+    UniDataSource.DataSet := LDataSet;
+    FLastDataSet := LDataSet;
   finally
     LDataModule.Free;
   end;

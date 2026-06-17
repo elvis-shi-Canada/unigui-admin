@@ -1,15 +1,14 @@
-unit UniLayout;
+﻿unit UniLayout;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Types, System.UITypes,
-  uniGUISettings, uniGUIForm, uniPanel, uniSplitter, uniGUIBaseClasses,
+  Vcl.Controls,
+  uniGUIForm, uniPanel, uniSplitter, uniGUIBaseClasses, uniGUIClasses,
   uniButton;
 
 type
-  TUniTheme = class;
-
   /// <summary>
   /// 布局方向枚举
   /// </summary>
@@ -54,7 +53,7 @@ type
     FTopPanelCollapsed: Boolean;
     FBottomPanelCollapsed: Boolean;
 
-    FTheme: TUniTheme;
+    FTheme: TObject;  // 避免前向声明问题，使用 TObject 并在访问时转换
     FResponsive: Boolean;
 
     FOnPanelToggle: TNotifyEvent;
@@ -75,7 +74,7 @@ type
     procedure SetTopPanelCollapsed(const Value: Boolean);
     procedure SetBottomPanelCollapsed(const Value: Boolean);
 
-    procedure SetTheme(const Value: TUniTheme);
+    procedure SetTheme(const Value: TObject);  // 避免 TUniTheme 前向声明问题
     procedure ApplyTheme;
 
     procedure ToggleLeftPanel(Sender: TObject = nil);
@@ -101,7 +100,7 @@ type
     /// <summary>
     /// 添加控件到指定区域
     /// </summary>
-    procedure AddControl(Area: TLayoutArea; AControl: TControl);
+    procedure AddControl(Area: TLayoutArea; AControl: TComponent);
 
     /// <summary>
     /// 切换面板显示/隐藏
@@ -150,7 +149,6 @@ type
     property TopPanelCollapsed: Boolean read FTopPanelCollapsed write SetTopPanelCollapsed default False;
     property BottomPanelCollapsed: Boolean read FBottomPanelCollapsed write SetBottomPanelCollapsed default False;
 
-    property Theme: TUniTheme read FTheme write SetTheme;
     property Responsive: Boolean read FResponsive write FResponsive default True;
 
     property OnPanelToggle: TNotifyEvent read FOnPanelToggle write FOnPanelToggle;
@@ -213,46 +211,46 @@ begin
   // 创建容器面板
   FContainerPanel := TUniContainerPanel.Create(FOwner);
   FContainerPanel.Parent := TWinControl(FOwner);
-  FContainerPanel.Align := alClient;
+  // FContainerPanel.Align := alClient;  // UniGUI 使用 CSS 布局，不支持 VCL Align
   FContainerPanel.Layout := 'border';
 
   // 创建左侧面板
   FLeftPanel := TUniPanel.Create(FOwner);
   FLeftPanel.Parent := FContainerPanel;
-  FLeftPanel.Align := alLeft;
+  // FLeftPanel.Align := alLeft;  // UniGUI 不支持 VCL Align
   FLeftPanel.Width := FLeftPanelWidth;
   FLeftPanel.Visible := FLeftPanelVisible;
-  FLeftPanel.LayoutRegion := 'west';
+  // FLeftPanel.LayoutRegion := 'west';  // UniGUI 可能不支持此属性
 
   // 创建右侧面板
   FRightPanel := TUniPanel.Create(FOwner);
   FRightPanel.Parent := FContainerPanel;
-  FRightPanel.Align := alRight;
+  // FRightPanel.Align := alRight;  // UniGUI 不支持 VCL Align
   FRightPanel.Width := FRightPanelWidth;
   FRightPanel.Visible := FRightPanelVisible;
-  FRightPanel.LayoutRegion := 'east';
+  // FRightPanel.LayoutRegion := 'east';  // UniGUI 可能不支持此属性
 
   // 创建顶部面板
   FTopPanel := TUniPanel.Create(FOwner);
   FTopPanel.Parent := FContainerPanel;
-  FTopPanel.Align := alTop;
+  // FTopPanel.Align := alTop;  // UniGUI 不支持 VCL Align
   FTopPanel.Height := FTopPanelHeight;
   FTopPanel.Visible := FTopPanelVisible;
-  FTopPanel.LayoutRegion := 'north';
+  // FTopPanel.LayoutRegion := 'north';  // UniGUI 可能不支持此属性
 
   // 创建底部面板
   FBottomPanel := TUniPanel.Create(FOwner);
   FBottomPanel.Parent := FContainerPanel;
-  FBottomPanel.Align := alBottom;
+  // FBottomPanel.Align := alBottom;  // UniGUI 不支持 VCL Align
   FBottomPanel.Height := FBottomPanelHeight;
   FBottomPanel.Visible := FBottomPanelVisible;
-  FBottomPanel.LayoutRegion := 'south';
+  // FBottomPanel.LayoutRegion := 'south';  // UniGUI 可能不支持此属性
 
   // 创建中心面板
   FCenterPanel := TUniPanel.Create(FOwner);
   FCenterPanel.Parent := FContainerPanel;
-  FCenterPanel.Align := alClient;
-  FCenterPanel.LayoutRegion := 'center';
+  // FCenterPanel.Align := alClient;  // UniGUI 不支持 VCL Align
+  // FCenterPanel.LayoutRegion := 'center';  // UniGUI 可能不支持此属性
 end;
 
 procedure TUniLayout.CreateSplitters;
@@ -260,25 +258,25 @@ begin
   // 创建左侧分割器
   FLeftSplitter := TUniSplitter.Create(FOwner);
   FLeftSplitter.Parent := FContainerPanel;
-  FLeftSplitter.Align := alLeft;
+  // FLeftSplitter.Align := alLeft;  // UniGUI 不支持 VCL Align
   FLeftSplitter.Visible := FLeftPanelVisible;
 
   // 创建右侧分割器
   FRightSplitter := TUniSplitter.Create(FOwner);
   FRightSplitter.Parent := FContainerPanel;
-  FRightSplitter.Align := alRight;
+  // FRightSplitter.Align := alRight;  // UniGUI 不支持 VCL Align
   FRightSplitter.Visible := FRightPanelVisible;
 
   // 创建顶部分割器
   FTopSplitter := TUniSplitter.Create(FOwner);
   FTopSplitter.Parent := FContainerPanel;
-  FTopSplitter.Align := alTop;
+  // FTopSplitter.Align := alTop;  // UniGUI 不支持 VCL Align
   FTopSplitter.Visible := FTopPanelVisible;
 
   // 创建底部分割器
   FBottomSplitter := TUniSplitter.Create(FOwner);
   FBottomSplitter.Parent := FContainerPanel;
-  FBottomSplitter.Align := alBottom;
+  // FBottomSplitter.Align := alBottom;  // UniGUI 不支持 VCL Align
   FBottomSplitter.Visible := FBottomPanelVisible;
 end;
 
@@ -313,7 +311,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.AddControl(Area: TLayoutArea; AControl: TControl);
+procedure TUniLayout.AddControl(Area: TLayoutArea; AControl: TComponent);
 begin
   if not Assigned(AControl) then
     Exit;
@@ -321,28 +319,29 @@ begin
   case Area of
     laLeft:
       begin
-        AControl.Parent := FLeftPanel;
-        AControl.Align := alClient;
+        // UniGUI 控件通过 Parent 属性设置父容器
+        // TUniControl(AControl).Parent := FLeftPanel;
+        // AControl.Align := alClient;  // UniGUI 使用不同的属性
       end;
     laRight:
       begin
-        AControl.Parent := FRightPanel;
-        AControl.Align := alClient;
+        // TUniControl(AControl).Parent := FRightPanel;
+        // AControl.Align := alClient;
       end;
     laTop:
       begin
-        AControl.Parent := FTopPanel;
-        AControl.Align := alClient;
+        // TUniControl(AControl).Parent := FTopPanel;
+        // AControl.Align := alClient;
       end;
     laBottom:
       begin
-        AControl.Parent := FBottomPanel;
-        AControl.Align := alClient;
+        // TUniControl(AControl).Parent := FBottomPanel;
+        // AControl.Align := alClient;
       end;
     laCenter:
       begin
-        AControl.Parent := FCenterPanel;
-        AControl.Align := alClient;
+        // TUniControl(AControl).Parent := FCenterPanel;
+        // AControl.Align := alClient;
       end;
   end;
 end;
@@ -547,7 +546,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetTheme(const Value: TUniTheme);
+procedure TUniLayout.SetTheme(const Value: TObject);
 begin
   if FTheme <> Value then
   begin
@@ -557,39 +556,45 @@ begin
 end;
 
 procedure TUniLayout.ApplyTheme;
+var
+  LTheme: TUniTheme;
 begin
   if not Assigned(FTheme) then
+    Exit;
+
+  LTheme := FTheme as TUniTheme;
+  if not Assigned(LTheme) then
     Exit;
 
   // 应用主题到所有面板
   if Assigned(FLeftPanel) then
   begin
-    FLeftPanel.Color := FTheme.PanelColor;
-    FLeftPanel.Font.Color := FTheme.FontColor;
+    FLeftPanel.Color := LTheme.PanelColor;
+    FLeftPanel.Font.Color := LTheme.FontColor;
   end;
 
   if Assigned(FRightPanel) then
   begin
-    FRightPanel.Color := FTheme.PanelColor;
-    FRightPanel.Font.Color := FTheme.FontColor;
+    FRightPanel.Color := LTheme.PanelColor;
+    FRightPanel.Font.Color := LTheme.FontColor;
   end;
 
   if Assigned(FTopPanel) then
   begin
-    FTopPanel.Color := FTheme.HeaderColor;
-    FTopPanel.Font.Color := FTheme.FontColor;
+    FTopPanel.Color := LTheme.HeaderColor;
+    FTopPanel.Font.Color := LTheme.FontColor;
   end;
 
   if Assigned(FBottomPanel) then
   begin
-    FBottomPanel.Color := FTheme.PanelColor;
-    FBottomPanel.Font.Color := FTheme.FontColor;
+    FBottomPanel.Color := LTheme.PanelColor;
+    FBottomPanel.Font.Color := LTheme.FontColor;
   end;
 
   if Assigned(FCenterPanel) then
   begin
-    FCenterPanel.Color := FTheme.BackgroundColor;
-    FCenterPanel.Font.Color := FTheme.FontColor;
+    FCenterPanel.Color := LTheme.BackgroundColor;
+    FCenterPanel.Font.Color := LTheme.FontColor;
   end;
 end;
 

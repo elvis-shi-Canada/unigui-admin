@@ -6,7 +6,7 @@ inherited TaskManageFrame: TTaskManageFrame
     Top = 40
     Width = 800
     Height = 40
-    Hint = '
+    Hint = ''
     Align = alTop
     TabOrder = 0
     object UniLabelFilter: TUniLabel
@@ -14,7 +14,7 @@ inherited TaskManageFrame: TTaskManageFrame
       Top = 12
       Width = 60
       Height = 13
-      Hint = '
+      Hint = ''
       Caption = #20219#21153#21517#31216
       TabOrder = 1
     end
@@ -23,7 +23,7 @@ inherited TaskManageFrame: TTaskManageFrame
       Top = 8
       Width = 150
       Height = 22
-      Hint = 
+      Hint = ''
       TextHint = #36755#20837#20219#21153#21517#31216
       TabOrder = 2
     end
@@ -32,7 +32,7 @@ inherited TaskManageFrame: TTaskManageFrame
       Top = 12
       Width = 60
       Height = 13
-      Hint = 
+      Hint = ''
       Caption = #29366#24577
       TabOrder = 3
     end
@@ -41,7 +41,7 @@ inherited TaskManageFrame: TTaskManageFrame
       Top = 8
       Width = 100
       Height = 21
-      Hint = 
+      Hint = ''
       Style = csDropDown
       ItemIndex = 0
       TabOrder = 4
@@ -57,7 +57,7 @@ inherited TaskManageFrame: TTaskManageFrame
       Top = 8
       Width = 75
       Height = 25
-      Hint = 
+      Hint = ''
       Caption = #26597#35810
       TabOrder = 5
       OnClick = UniButtonSearchClick
@@ -67,7 +67,7 @@ inherited TaskManageFrame: TTaskManageFrame
       Top = 8
       Width = 75
       Height = 25
-      Hint = 
+      Hint = ''
       Caption = #21047#26032
       TabOrder = 6
       OnClick = UniButtonRefreshClick
@@ -78,7 +78,7 @@ inherited TaskManageFrame: TTaskManageFrame
     Top = 80
     Width = 800
     Height = 520
-    Hint = 
+    Hint = ''
     Align = alClient
     TabOrder = 1
     DataSource = UniDataSource

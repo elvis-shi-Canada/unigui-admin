@@ -3,12 +3,13 @@ unit RoleListFrame;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
+  System.SysUtils, System.Classes, System.Variants, System.UITypes,
   Data.DB, FireDAC.Comp.Client,
-  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniGrid, uniToolBar, uniPanel,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniBasicGrid, uniDBGrid, uniToolBar, uniPanel,
+  uniMultiItem, uniComboBox, uniLabel, uniGUIApplication,
   UniContext, UniPlugin.Types, UniModelAdmin,
   BaseCrudFrame, RoleDataModule,
-  RolePermissionDialog, RoleUserDialog;
+  RolePermissionDialog, RoleUserDialog, Vcl.Dialogs;
 
 type
   /// <summary>
@@ -34,7 +35,8 @@ type
     procedure UniDBGridDblClick(Sender: TObject);
   private
     FQuery: TFDQuery;
-    FRoleDM: IRoleDataModule;
+    FRoleDM: TRoleDataModule;
+    FSelectedRoleID: Integer;
     FAdditionalButtons: array[0..1] of TUniButton; // 权限、用户按钮
 
     procedure LoadRoles;
@@ -80,7 +82,8 @@ begin
   inherited;
 
   // 创建角色数据模块
-  FRoleDM := TRoleDataModule.Create(Context);
+  FRoleDM := TRoleDataModule.Create(Self);
+  FRoleDM.SetContext(Context);
 
   // 设置数据源
   UniDataSource.DataSet := FQuery;
@@ -352,10 +355,10 @@ var
   LRoleName: string;
 begin
   try
-    LDialog := TRolePermissionDialog.Create(UniGUIApplication.UniApplication);
+    LDialog := TRolePermissionDialog.Create(UniApplication);
     try
       LDialog.SetContext(Context);
-      LDialog.SetConnection(ModelAdmin.Connection);
+      LDialog.SetConnection(TFDConnection(ModelAdmin.Connection));
 
       // 获取角色名称
       LRoleInfo := FRoleDM.GetRoleByID(FSelectedRoleID);
@@ -370,7 +373,7 @@ begin
 
       LDialog.SetRole(FSelectedRoleID, LRoleName);
 
-      if LDialog.Execute = mrOK then
+      if LDialog.Execute then
       begin
         // 刷新列表
         LoadRoles;
@@ -393,10 +396,10 @@ var
   LRoleName: string;
 begin
   try
-    LDialog := TRoleUserDialog.Create(UniGUIApplication.UniApplication);
+    LDialog := TRoleUserDialog.Create(UniApplication);
     try
       LDialog.SetContext(Context);
-      LDialog.SetConnection(ModelAdmin.Connection);
+      LDialog.SetConnection(TFDConnection(ModelAdmin.Connection));
 
       // 获取角色名称
       LRoleInfo := FRoleDM.GetRoleByID(FSelectedRoleID);
@@ -411,7 +414,7 @@ begin
 
       LDialog.SetRole(FSelectedRoleID, LRoleName);
 
-      if LDialog.Execute = mrOK then
+      if LDialog.Execute then
       begin
         // 刷新列表
         LoadRoles;

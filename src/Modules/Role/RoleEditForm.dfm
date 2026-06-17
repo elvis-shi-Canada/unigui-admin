@@ -1,9 +1,12 @@
-inherited RoleEditForm: TRoleEditForm
-  Caption = #35282#33394#32534#36753
+object RoleEditForm: TRoleEditForm
+  Left = 0
+  Top = 0
   ClientHeight = 400
   ClientWidth = 500
-  PixelsPerInch = 96
-  TextHeight = 13
+  Caption = #35282#33394#32534#36753
+  OldCreateOrder = False
+  MonitoredKeys.Keys = <>
+  TextHeight = 15
   object pnlMain: TUniPanel
     Left = 0
     Top = 0
@@ -12,107 +15,104 @@ inherited RoleEditForm: TRoleEditForm
     Hint = ''
     Align = alClient
     TabOrder = 0
+    Caption = ''
     object lblRoleCode: TUniLabel
       Left = 16
       Top = 16
-      Width = 60
+      Width = 57
       Height = 13
       Hint = ''
-      Caption = #35282#33394#32534#30721*
-      TabOrder = 1
+      Caption = #35282#33394#32534#30721'*'
+      TabOrder = 2
     end
     object edtRoleCode: TUniEdit
       Left = 90
       Top = 13
       Width = 200
-      Height = 22
       Hint = ''
-      TextHint = #22914: admin
-      TabOrder = 2
+      Text = ''
+      TabOrder = 1
     end
     object lblRoleName: TUniLabel
       Left = 16
       Top = 48
-      Width = 60
+      Width = 57
       Height = 13
       Hint = ''
-      Caption = #35282#33394#21517#31216*
-      TabOrder = 3
+      Caption = #35282#33394#21517#31216'*'
+      TabOrder = 4
     end
     object edtRoleName: TUniEdit
       Left = 90
       Top = 45
       Width = 200
-      Height = 22
       Hint = ''
-      TextHint = #22914: #31995#32479#31649#29702#21592
-      TabOrder = 4
+      Text = ''
+      TabOrder = 3
     end
     object lblDescription: TUniLabel
       Left = 16
       Top = 80
-      Width = 60
+      Width = 26
       Height = 13
-      Hint = '
+      Hint = ''
       Caption = #25551#36848
-      TabOrder = 5
+      TabOrder = 6
     end
     object memDescription: TUniMemo
       Left = 90
       Top = 77
       Width = 380
       Height = 80
-      Hint = '
+      Hint = ''
       Lines.Strings = (
         '')
-      TabOrder = 6
+      TabOrder = 5
     end
     object lblDataScope: TUniLabel
       Left = 16
       Top = 168
-      Width = 60
+      Width = 52
       Height = 13
-      Hint = '
+      Hint = ''
       Caption = #25968#25454#33539#22260
-      TabOrder = 7
+      TabOrder = 8
     end
     object cmbDataScope: TUniComboBox
       Left = 90
       Top = 165
       Width = 150
       Height = 21
-      Hint = 
-      Style = csDropDown
-      ItemIndex = 0
-      TabOrder = 8
+      Hint = ''
+      Text = ''
       Items.Strings = (
-        #20840#37096
-        #26412#37096#38376
-        #26412#37096#38376#21450#19979#32423
-        #20165#26412#20154)
+        #37711#12585#20788
+        #37832#57604#20788#38338'?'
+        #37832#57604#20788#38338#12581#24375#28051#23340#39559
+        #28000#21614#28272#27996'?')
+      TabOrder = 7
+      IconItems = <>
     end
     object lblSortOrder: TUniLabel
       Left = 16
       Top = 200
-      Width = 60
+      Width = 26
       Height = 13
-      Hint = 
+      Hint = ''
       Caption = #25490#24207
-      TabOrder = 9
+      TabOrder = 10
     end
-    object edtSortOrder: TUniEdit
+    object spnSortOrder: TUniSpinEdit
       Left = 90
       Top = 197
       Width = 100
-      Height = 22
       Hint = ''
-      TextHint = '0'
-      TabOrder = 10
+      TabOrder = 9
     end
     object lblStatus: TUniLabel
       Left = 16
       Top = 232
-      Width = 60
+      Width = 26
       Height = 13
       Hint = ''
       Caption = #29366#24577
@@ -123,9 +123,9 @@ inherited RoleEditForm: TRoleEditForm
       Top = 232
       Width = 60
       Height = 17
-      Hint = '' 
-      Caption = #21551#29992
+      Hint = ''
       Checked = True
+      Caption = #21551#29992
       TabOrder = 12
     end
   end
@@ -137,6 +137,7 @@ inherited RoleEditForm: TRoleEditForm
     Hint = ''
     Align = alBottom
     TabOrder = 1
+    Caption = ''
     object btnSave: TUniButton
       Left = 340
       Top = 8
@@ -145,7 +146,7 @@ inherited RoleEditForm: TRoleEditForm
       Hint = ''
       Caption = #20445#23384
       ModalResult = 1
-      TabOrder = 0
+      TabOrder = 1
     end
     object btnCancel: TUniButton
       Left = 420
@@ -155,7 +156,7 @@ inherited RoleEditForm: TRoleEditForm
       Hint = ''
       Caption = #21462#28040
       ModalResult = 2
-      TabOrder = 1
+      TabOrder = 2
     end
   end
 end

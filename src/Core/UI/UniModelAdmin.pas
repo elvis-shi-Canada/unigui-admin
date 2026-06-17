@@ -1,11 +1,11 @@
-unit UniModelAdmin;
+﻿unit UniModelAdmin;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants, System.Types,
   System.Generics.Collections,
-  Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet,
+  Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Intf,
   UniContext, UniPlugin.Types;
 
 type
@@ -81,9 +81,15 @@ type
     /// </summary>
     procedure FillAuditFields(const IsInsert: Boolean);
 
+    /// <summary>
+    /// 获取数据库连接
+    /// </summary>
+    function GetConnection: TFDCustomConnection;
+
     property DataSet: TDataSet read FDataSet write SetDataSet;
     property State: TCrudState read FState;
     property Context: IExecutionContext read FContext;
+    property Connection: TFDCustomConnection read GetConnection;
 
     // 事件
     property OnBeforePost: TNotifyEvent read FOnBeforePost write FOnBeforePost;
@@ -291,6 +297,14 @@ begin
 
   if FDataSet.FindField('ModifiedBy') <> nil then
     FDataSet.FieldByName('ModifiedBy').AsInteger := LCurrentUserID;
+end;
+
+function TUniModelAdmin.GetConnection: TFDCustomConnection;
+begin
+  Result := nil;
+    
+  if (FDataSet <> nil) and (FDataSet is TFDQuery) then
+    Result := TFDQuery(FDataSet).Connection;
 end;
 
 end.

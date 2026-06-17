@@ -1,14 +1,18 @@
-inherited BaseCrudFrame: TBaseCrudFrame
-  PixelsPerInch = 96
-  TextHeight = 13
+object BaseCrudFrame: TBaseCrudFrame
+  Left = 0
+  Top = 0
+  Width = 640
+  Height = 480
+  TabOrder = 0
   object UniToolBar: TUniToolBar
     Left = 0
     Top = 0
-    Width = 800
+    Width = 640
     Height = 40
     Hint = ''
-    Align = alTop
     TabOrder = 0
+    ParentColor = False
+    Color = clBtnFace
     object BtnAdd: TUniButton
       Left = 8
       Top = 8
@@ -16,7 +20,7 @@ inherited BaseCrudFrame: TBaseCrudFrame
       Height = 25
       Hint = ''
       Caption = #26032#22686
-      TabOrder = 0
+      TabOrder = 1
     end
     object BtnEdit: TUniButton
       Left = 88
@@ -25,7 +29,7 @@ inherited BaseCrudFrame: TBaseCrudFrame
       Height = 25
       Hint = ''
       Caption = #32534#36753
-      TabOrder = 1
+      TabOrder = 2
     end
     object BtnDelete: TUniButton
       Left = 168
@@ -34,7 +38,7 @@ inherited BaseCrudFrame: TBaseCrudFrame
       Height = 25
       Hint = ''
       Caption = #21024#38500
-      TabOrder = 2
+      TabOrder = 3
     end
     object BtnRefresh: TUniButton
       Left = 248
@@ -43,7 +47,7 @@ inherited BaseCrudFrame: TBaseCrudFrame
       Height = 25
       Hint = ''
       Caption = #21047#26032
-      TabOrder = 3
+      TabOrder = 4
     end
   end
 end

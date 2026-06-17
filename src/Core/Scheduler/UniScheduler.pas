@@ -1,12 +1,12 @@
-unit UniScheduler;
+﻿unit UniScheduler;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
-  System.SyncObjs,
+  System.SyncObjs, System.DateUtils, System.Math, System.StrUtils,
   Data.DB, FireDAC.Comp.Client,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniDataModule, uniTimer;
 
 type
   /// <summary>
@@ -68,14 +68,14 @@ type
     FConnection: TFDConnection;
     FTasks: TList<TScheduledTaskInfo>;
     FRunningTasks: TDictionary<Integer, TThread>;
-    FTimer: TTimer;
+    FTimer: TUniTimer;
     FIsRunning: Boolean;
     FCriticalSection: TCriticalSection;
 
     procedure LoadTasks;
     procedure CalculateNextRunTime(var TaskInfo: TScheduledTaskInfo);
     function ParseCronExpression(const Expression: string; DateTime: TDateTime): TDateTime;
-    procedure CheckAndExecuteTasks;
+    procedure CheckAndExecuteTasks(Sender: TObject);
     procedure ExecuteTask(TaskID: Integer);
     procedure LogTaskExecution(TaskID: Integer; StartTime: TDateTime; Status: Integer;
       const ErrorMessage, Result: string);
@@ -101,6 +101,9 @@ type
   end;
 
 implementation
+
+uses
+  UniTaskProcessor;
 
 { TUniScheduler }
 
@@ -222,7 +225,7 @@ begin
     FIsRunning := True;
 
     // 创建定时器，每分钟检查一次
-    FTimer := TTimer.Create(nil);
+    FTimer := TUniTimer.Create(nil);
     FTimer.Interval := 60000; // 60秒
     FTimer.OnTimer := CheckAndExecuteTasks;
     FTimer.Enabled := True;
@@ -283,10 +286,10 @@ begin
   end;
 end;
 
-procedure TUniScheduler.CheckAndExecuteTasks;
+procedure TUniScheduler.CheckAndExecuteTasks(Sender: TObject);
 var
   LCurrentTime: TDateTime;
-  LTaskInfo: TScheduledTaskInfo;
+  I: Integer;
 begin
   if not FIsRunning then
     Exit;
@@ -295,13 +298,13 @@ begin
 
   FCriticalSection.Acquire;
   try
-    for LTaskInfo in FTasks do
+    for I := 0 to FTasks.Count - 1 do
     begin
-      if (LTaskInfo.Status = tsStopped) and
-         (LTaskInfo.NextRunTime > 0) and
-         (LTaskInfo.NextRunTime <= LCurrentTime) then
+      if (FTasks[I].Status = tsStopped) and
+         (FTasks[I].NextRunTime > 0) and
+         (FTasks[I].NextRunTime <= LCurrentTime) then
       begin
-        ExecuteTask(LTaskInfo.TaskID);
+        ExecuteTask(FTasks[I].TaskID);
       end;
     end;
   finally
@@ -311,27 +314,36 @@ end;
 
 procedure TUniScheduler.ExecuteTask(TaskID: Integer);
 var
+  LTaskIndex: Integer;
   LTaskInfo: TScheduledTaskInfo;
   LProcessor: ITaskProcessor;
   LStartTime: TDateTime;
   LStatus: Integer;
   LErrorMsg, LResult: string;
   LQuery: TFDQuery;
+  LNextRunTime: TDateTime;
 begin
+  // 查找任务并获取信息
+  LTaskIndex := -1;
   FCriticalSection.Acquire;
   try
-    // 查找任务
-    for LTaskInfo in FTasks do
+    for LTaskIndex := 0 to FTasks.Count - 1 do
     begin
-      if LTaskInfo.TaskID = TaskID then
+      if FTasks[LTaskIndex].TaskID = TaskID then
       begin
+        LTaskInfo := FTasks[LTaskIndex];
+        // 修改状态并更新到列表
         LTaskInfo.Status := tsRunning;
+        FTasks[LTaskIndex] := LTaskInfo;
         Break;
       end;
     end;
   finally
     FCriticalSection.Release;
   end;
+
+  if LTaskIndex < 0 then
+    Exit; // 任务未找到
 
   LStartTime := Now;
   LStatus := 1; // 成功
@@ -362,21 +374,19 @@ begin
   // 记录执行日志
   LogTaskExecution(TaskID, LStartTime, LStatus, LErrorMsg, LResult);
 
-  // 更新任务状态
+  // 更新任务信息
+  LTaskInfo.Status := tsStopped;
+  LTaskInfo.LastRunTime := LStartTime;
+  LTaskInfo.LastRunStatus := LStatus;
+  LTaskInfo.LastRunMessage := IfThen(LStatus = 1, LResult, LErrorMsg);
+  CalculateNextRunTime(LTaskInfo);
+  LNextRunTime := LTaskInfo.NextRunTime;
+
+  // 更新内存中的任务状态
   FCriticalSection.Acquire;
   try
-    for LTaskInfo in FTasks do
-    begin
-      if LTaskInfo.TaskID = TaskID then
-      begin
-        LTaskInfo.Status := tsStopped;
-        LTaskInfo.LastRunTime := LStartTime;
-        LTaskInfo.LastRunStatus := LStatus;
-        LTaskInfo.LastRunMessage := Ifthen(LStatus = 1, LResult, LErrorMsg);
-        CalculateNextRunTime(LTaskInfo);
-        Break;
-      end;
-    end;
+    if (LTaskIndex >= 0) and (LTaskIndex < FTasks.Count) then
+      FTasks[LTaskIndex] := LTaskInfo;
   finally
     FCriticalSection.Release;
   end;
@@ -393,9 +403,9 @@ begin
 
     LQuery.Params.ParamByName('TaskID').AsInteger := TaskID;
     LQuery.Params.ParamByName('LastRunTime').AsDateTime := LStartTime;
-    LQuery.Params.ParamByName('NextRunTime').AsDateTime := LTaskInfo.NextRunTime;
+    LQuery.Params.ParamByName('NextRunTime').AsDateTime := LNextRunTime;
     LQuery.Params.ParamByName('LastRunStatus').AsInteger := LStatus;
-    LQuery.Params.ParamByName('LastRunMessage').AsString := Ifthen(LStatus = 1, LResult, LErrorMsg);
+    LQuery.Params.ParamByName('LastRunMessage').AsString := IfThen(LStatus = 1, LResult, LErrorMsg);
 
     LQuery.ExecSQL;
   finally
@@ -437,9 +447,7 @@ end;
 
 function TUniScheduler.GetTaskProcessor(const HandlerClass: string): ITaskProcessor;
 begin
-  // TODO: 实现任务处理器的动态加载
-  // 这里需要通过类名动态创建处理器实例
-  Result := nil;
+  Result := TTaskProcessorFactory.CreateProcessor(HandlerClass);
 end;
 
 procedure TUniScheduler.ReloadTasks;

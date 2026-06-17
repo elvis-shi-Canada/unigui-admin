@@ -1,4 +1,4 @@
-unit MenuTreeFrame;
+﻿unit MenuTreeFrame;
 
 interface
 
@@ -6,9 +6,10 @@ uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniToolBar,
-  uniPanel, uniTreeMenu, uniLabel, uniComboBox, uniSplitter,
+  uniPanel, uniTreeMenu, uniLabel, uniComboBox, uniSplitter, uniGUIAbstractClasses,
   UniContext, UniPlugin.Types, UniModelAdmin,
-  BaseCrudFrame, MenuDataModule;
+  BaseCrudFrame, MenuDataModule, uniDBGrid, uniBasicGrid,
+  Vcl.Controls;
 
 type
   /// <summary>
@@ -51,7 +52,7 @@ type
     procedure UniDBGridDblClick(Sender: TObject);
   private
     FQuery: TFDQuery;
-    FMenuDM: IMenuDataModule;
+    FMenuDM: TMenuDataModule;
     FSelectedMenuID: Integer;
     FNodeMap: TDictionary<Integer, TUniTreeNode>;
 
@@ -101,8 +102,10 @@ procedure TMenuTreeFrame.DoInitialize;
 begin
   inherited;
 
-  // 创建菜单数据模块
-  FMenuDM := TMenuDataModule.Create(Context);
+  // 创建菜单数据模块 (使用 Self 作为 Owner，然后设置 Context)
+  FMenuDM := TMenuDataModule.Create(Self);
+  FMenuDM.SetContext(Context);
+  FMenuDM.SetConnection(TFDConnection(ModelAdmin.Connection));
 
   // 设置数据源
   UniDataSource.DataSet := FQuery;
@@ -211,15 +214,12 @@ end;
 procedure TMenuTreeFrame.SetupDragDrop;
 begin
   // 启用树形菜单的拖拽功能
-  if Assigned(treeMenus) then
-  begin
-    treeMenus.DragMode := dmAutomatic;
-  end;
+  // 注意：TUniTreeMenu 可能通过其他属性配置拖拽，而不是 DragMode
+  // 或者通过 AllowDragDrop, DragDropMode 等属性设置
+  // 如果 UniGUI 版本支持，请使用适当的属性
 end;
 
 procedure TMenuTreeFrame.LoadMenus;
-var
-  LStatus: Integer;
 begin
   FNodeMap.Clear;
   treeMenus.Items.Clear;
@@ -232,6 +232,7 @@ procedure TMenuTreeFrame.BuildTree(ParentID: Integer; ParentNode: TUniTreeNode =
 var
   LQuery: TFDQuery;
   LNode: TUniTreeNode;
+  LStatus: Integer;
   LStatusFilter: string;
   LSearchFilter: string;
   LWhereParts: TStringList;
@@ -292,7 +293,7 @@ begin
           LQuery.FieldByName('MenuName').AsString,
           TObject(LQuery.FieldByName('MenuID').AsInteger))
       else
-        LNode := treeMenus.Items.AddChildObjectFirst(nil,
+        LNode := treeMenus.Items.AddChildObject(nil,
           LQuery.FieldByName('MenuName').AsString,
           TObject(LQuery.FieldByName('MenuID').AsInteger));
 
@@ -435,7 +436,9 @@ begin
 
   // 执行移动
   try
-    LMenuDM := TMenuDataModule.Create(Context);
+    LMenuDM := TMenuDataModule.Create(Self);
+    LMenuDM.SetContext(Context);
+    LMenuDM.SetConnection(TFDConnection(ModelAdmin.Connection));
     try
       LMenuDM.MoveMenu(LMenuID, LTargetParentID, -1);
 

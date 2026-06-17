@@ -1,4 +1,4 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
         <MainSource>UniAdmin.dpr</MainSource>
@@ -72,7 +72,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <!-- 核心模块 -->
         <DCCReference Include="Core\Main\ServerModule.pas">
             <Form>TServerModule</Form>
             <FormType>dfm</FormType>
@@ -81,26 +80,19 @@
             <Form>TMainModule</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <!-- 配置服务 -->
         <DCCReference Include="Core\Config\UniConfigService.Intf.pas"/>
         <DCCReference Include="Core\Config\UniConfigService.pas"/>
-        <!-- 上下文 -->
         <DCCReference Include="Core\Context\UniContext.pas"/>
-        <!-- 数据模块 -->
         <DCCReference Include="Core\Data\UniDataModule.pas"/>
         <DCCReference Include="Core\Data\UniConnectionManager.Intf.pas"/>
         <DCCReference Include="Core\Data\UniConnectionManager.pas"/>
-        <!-- 认证服务 -->
         <DCCReference Include="Core\Auth\UniAuthService.Intf.pas"/>
         <DCCReference Include="Core\Auth\UniAuthService.pas"/>
-        <!-- 权限管理 -->
         <DCCReference Include="Core\Permission\UniPermissionManager.Intf.pas"/>
         <DCCReference Include="Core\Permission\UniPermissionManager.pas"/>
-        <!-- 菜单管理 -->
         <DCCReference Include="Core\Menu\UniMenuManager.Intf.pas"/>
         <DCCReference Include="Core\Menu\UniMenuManager.pas"/>
         <DCCReference Include="Core\Menu\SystemMenuSetup.pas"/>
-        <!-- 插件系统 -->
         <DCCReference Include="Core\Plugin\UniPlugin.Intf.pas"/>
         <DCCReference Include="Core\Plugin\UniPlugin.Types.pas"/>
         <DCCReference Include="Core\Plugin\UniPlugin.pas"/>
@@ -108,36 +100,18 @@
         <DCCReference Include="Core\Plugin\UniModuleRegistry.pas"/>
         <DCCReference Include="Core\Plugin\UniModuleRegistration.pas"/>
         <DCCReference Include="Core\Plugin\UniPluginLoader.pas"/>
-        <!-- 会话管理 -->
         <DCCReference Include="Core\Session\UniSession.pas"/>
-        <!-- 元数据 -->
         <DCCReference Include="Core\Metadata\UniMetadataCache.Intf.pas"/>
         <DCCReference Include="Core\Metadata\UniMetadataCache.pas"/>
         <DCCReference Include="Core\Metadata\UniFieldMetadata.pas"/>
-        <!-- 服务定位器 -->
         <DCCReference Include="Core\Services\UniServices.pas"/>
-        <!-- 调度器 -->
         <DCCReference Include="Core\Scheduler\UniScheduler.pas"/>
         <DCCReference Include="Core\Scheduler\UniTaskProcessor.pas"/>
-        <!-- UI 组件 -->
         <DCCReference Include="Core\UI\LoginForm.pas"/>
-        <DCCReference Include="Core\UI\MainFrame.pas"/>
         <DCCReference Include="Core\UI\UniLayout.pas"/>
         <DCCReference Include="Core\UI\UniModelAdmin.pas"/>
         <DCCReference Include="Core\UI\UniPropertyEditor.pas"/>
         <DCCReference Include="Core\UI\UniTheme.pas"/>
-        <DCCReference Include="Core\UI\BaseCrudFrame.pas"/>
-        <!-- UI 模板 -->
-        <DCCReference Include="Core\UI\Templates\BaseFormTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\DialogTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\EditFormTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\GridTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\QueryPanelTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\SplitterTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\StatusBarTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\TabSheetTemplate.pas"/>
-        <DCCReference Include="Core\UI\Templates\WizardTemplate.pas"/>
-        <!-- 业务模块 - 用户管理 -->
         <DCCReference Include="Modules\User\UserListFrame.pas"/>
         <DCCReference Include="Modules\User\UserEditForm.pas"/>
         <DCCReference Include="Modules\User\UserDataModule.pas"/>
@@ -145,39 +119,67 @@
         <DCCReference Include="Modules\User\UserProfileFrame.pas"/>
         <DCCReference Include="Modules\User\UserService.Intf.pas"/>
         <DCCReference Include="Modules\User\UserService.pas"/>
-        <!-- 业务模块 - 角色管理 -->
         <DCCReference Include="Modules\Role\RoleListFrame.pas"/>
         <DCCReference Include="Modules\Role\RoleEditForm.pas"/>
         <DCCReference Include="Modules\Role\RoleDataModule.pas"/>
         <DCCReference Include="Modules\Role\RolePermissionDialog.pas"/>
         <DCCReference Include="Modules\Role\RoleUserDialog.pas"/>
-        <!-- 业务模块 - 菜单管理 -->
         <DCCReference Include="Modules\Menu\MenuTreeFrame.pas"/>
         <DCCReference Include="Modules\Menu\MenuEditForm.pas"/>
         <DCCReference Include="Modules\Menu\MenuDataModule.pas"/>
-        <!-- 业务模块 - 配置管理 -->
         <DCCReference Include="Modules\Config\ConfigCategoryFrame.pas"/>
         <DCCReference Include="Modules\Config\ConfigEditForm.pas"/>
         <DCCReference Include="Modules\Config\ConfigDataModule.pas"/>
         <DCCReference Include="Modules\Config\ConfigService.Intf.pas"/>
         <DCCReference Include="Modules\Config\ConfigService.pas"/>
-        <!-- 业务模块 - 日志管理 -->
         <DCCReference Include="Modules\Log\DataChangeLogFrame.pas"/>
         <DCCReference Include="Modules\Log\LoginLogFrame.pas"/>
         <DCCReference Include="Modules\Log\OperationLogFrame.pas"/>
         <DCCReference Include="Modules\Log\LogDataModule.pas"/>
         <DCCReference Include="Modules\Log\LogExport.pas"/>
         <DCCReference Include="Modules\Log\LogService.pas"/>
-        <!-- 业务模块 - 字典管理 -->
-        <DCCReference Include="Plugins\Dictionary\DictionaryListFrame.pas"/>
-        <DCCReference Include="Plugins\Dictionary\DictionaryDataModule.pas"/>
-        <DCCReference Include="Plugins\Dictionary\DictionaryPlugin.pas"/>
-        <!-- 共享组件 -->
+        <DCCReference Include="Modules\Dictionary\DictTypeFrame.pas"/>
+        <DCCReference Include="Modules\Dictionary\DictItemFrame.pas"/>
+        <DCCReference Include="Modules\Dictionary\DictionaryDataModule.pas"/>
+        <DCCReference Include="Modules\Dictionary\DictionaryService.Intf.pas"/>
+        <DCCReference Include="Modules\Dictionary\DictionaryService.pas"/>
         <DCCReference Include="Modules\Shared\IconSelector.pas"/>
-        <!-- 框架页面 -->
         <DCCReference Include="Frames\ConfigManagerFrame.pas"/>
         <DCCReference Include="Frames\PluginManagerFrame.pas"/>
-        <!-- 构建配置 -->
+        <DCCReference Include="Core\UI\Templates\BaseFormTemplate.pas">
+            <Form>BaseFormTemplate</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TUniForm</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Core\UI\Templates\DialogTemplate.pas">
+            <Form>DialogTemplate</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TUniForm</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Core\UI\Templates\EditFormTemplate.pas">
+            <Form>EditFormTemplate</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TUniForm</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Core\UI\Templates\WizardTemplate.pas">
+            <Form>WizardTemplate</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TUniForm</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Core\UI\Templates\GridTemplate.pas">
+            <Form>GridTemplate</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TUniForm</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Core\UI\MainFrame.pas">
+            <Form>MainFrame</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TUniForm</DesignClass>
+        </DCCReference>
+        <DCCReference Include="Modules\Scheduler\SampleTasks.pas"/>
+        <DCCReference Include="Modules\Scheduler\TaskLogFrame.pas"/>
+        <DCCReference Include="Modules\Scheduler\TaskManageFrame.pas"/>
+        <DCCReference Include="Core\UI\BaseCrudFrame.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -207,6 +209,12 @@
                 <DeployFile LocalName="..\bin\UniAdmin.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>UniAdmin.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\bin\UniAdmin.rsm" Configuration="Debug" Class="DebugSymbols">
+                    <Platform Name="Win32">
+                        <RemoteName>UniAdmin.rsm</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

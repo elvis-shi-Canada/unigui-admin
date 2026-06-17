@@ -1,10 +1,10 @@
-﻿unit UniPlugin;
+unit UniPlugin;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.SyncObjs,
-  UniContext, UniPlugin.Intf, UniPlugin.Types;
+  UniContext, UniPlugin.Intf, UniPlugin.Types, uniGUIForm;
 
 type
   /// <summary>

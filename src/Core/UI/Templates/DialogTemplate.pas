@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes,
   Vcl.Controls, Vcl.Forms,
-  UniGUIBaseClasses, UniGUIClasses, UniThemeManager, UniGUIForm, UniLabel, UniPanel, UniButton;
+  UniGUIBaseClasses, UniGUIClasses, UniGUIForm, UniLabel, uniPanel, UniButton;
 
 type
   TDialogTemplate = class(TUniForm)
@@ -15,7 +15,6 @@ type
     btnYes: TUniButton;
     btnNo: TUniButton;
     btnCancel: TUniButton;
-    UniThemeManager1: TUniThemeManager;
   private
     { Private declarations }
   public

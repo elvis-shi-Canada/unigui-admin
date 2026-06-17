@@ -1,47 +1,14 @@
-unit ConfigDataModule;
+﻿unit ConfigDataModule;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniDataModule,
+  ConfigService.Intf;
 
 type
-  /// <summary>
-  /// 配置值类型枚举
-  /// </summary>
-  TConfigValueType = (cvtString, cvtInteger, cvtBoolean, cvtFloat, cvtJson, cvtXml);
-
-  /// <summary>
-  /// 系统配置记录
-  /// </summary>
-  TConfigInfo = record
-    ConfigID: Integer;
-    ConfigKey: string;
-    ConfigValue: string;
-    Category: string;
-    Description: string;
-    ValueType: TConfigValueType;
-    ValueTypeText: string;
-    SortOrder: Integer;
-    Status: Integer;
-    StatusText: string;
-    CreatedDate: TDateTime;
-    CreatedBy: Integer;
-    ModifiedDate: TDateTime;
-    ModifiedBy: Integer;
-  end;
-
-  /// <summary>
-  /// 配置分类记录
-  /// </summary>
-  TConfigCategoryInfo = record
-    Category: string;
-    CategoryName: string;
-    Description: string;
-    ConfigCount: Integer;
-  end;
 
   /// <summary>
   /// 系统配置数据模块 - 提供系统配置的 CRUD 操作
@@ -72,6 +39,7 @@ type
     function GetValueTypeText(ValueType: TConfigValueType): string;
     function ParseValueType(const ValueTypeText: string): TConfigValueType;
     function ValidateValue(const Value: string; ValueType: TConfigValueType): Boolean;
+    function GetCategoryName(const Category: string): string;
   end;
 
 implementation

@@ -3,10 +3,10 @@ unit TaskManageFrame;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
+  System.SysUtils, System.Classes, System.Variants, System.StrUtils,
   Data.DB, FireDAC.Comp.Client,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
-  uniGrid, uniToolBar, uniLabel, uniComboBox, uniPanel,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
+  uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel,
   UniContext, UniPlugin.Types, BaseCrudFrame, UniScheduler;
 
 type
@@ -29,6 +29,9 @@ type
     procedure UniButtonSearchClick(Sender: TObject);
     procedure UniButtonRefreshClick(Sender: TObject);
     procedure UniDBGridDblClick(Sender: TObject);
+  private
+    FLastDataSet: TDataSet;
+    procedure FreeLastDataSet;
   protected
     procedure DoInitialize; override;
     procedure DoRefresh; override;
@@ -47,15 +50,25 @@ implementation
 constructor TTaskManageFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  // TODO: 初始化调度器
   FScheduler := nil;
+  FLastDataSet := nil;
 end;
 
 destructor TTaskManageFrame.Destroy;
 begin
+  FreeLastDataSet;
   if Assigned(FScheduler) then
     FScheduler.Free;
   inherited;
+end;
+
+procedure TTaskManageFrame.FreeLastDataSet;
+begin
+  if Assigned(FLastDataSet) then
+  begin
+    UniDataSource.DataSet := nil;
+    FreeAndNil(FLastDataSet);
+  end;
 end;
 
 procedure TTaskManageFrame.DoInitialize;
@@ -71,22 +84,95 @@ begin
   UniComboBoxStatus.Items.Add('已暂停');
   UniComboBoxStatus.Items.Add('错误');
   UniComboBoxStatus.ItemIndex := 0;
+
+  // 创建调度器实例
+  if Assigned(Context) then
+  begin
+    try
+      FScheduler := TUniScheduler.Create(Context, nil);
+    except
+      on E: Exception do
+        FScheduler := nil;
+    end;
+  end;
 end;
 
 procedure TTaskManageFrame.DoRefresh;
 var
   LFilter: string;
+  LStatusIdx: Integer;
   LTasks: TArray<TScheduledTaskInfo>;
   LTask: TScheduledTaskInfo;
+  LMemTable: TFDMemTable;
 begin
+  FreeLastDataSet;
+
   LFilter := Trim(UniEditFilter.Text);
+  LStatusIdx := UniComboBoxStatus.ItemIndex;
 
-  // TODO: 根据筛选条件加载任务
-  // LTasks := FScheduler.GetTasks;
+  if Assigned(FScheduler) then
+    LTasks := FScheduler.GetTasks
+  else
+    LTasks := nil;
 
-  qryTasks.Close;
-  // TODO: 填充 qryTasks
-  qryTasks.Open;
+  // 使用内存表展示数据
+  LMemTable := TFDMemTable.Create(nil);
+  try
+    LMemTable.FieldDefs.Add('TaskID', ftInteger);
+    LMemTable.FieldDefs.Add('TaskName', ftString, 100);
+    LMemTable.FieldDefs.Add('TaskCode', ftString, 50);
+    LMemTable.FieldDefs.Add('CronExpression', ftString, 50);
+    LMemTable.FieldDefs.Add('HandlerClass', ftString, 100);
+    LMemTable.FieldDefs.Add('StatusText', ftString, 20);
+    LMemTable.FieldDefs.Add('LastRunTime', ftDateTime);
+    LMemTable.FieldDefs.Add('NextRunTime', ftDateTime);
+    LMemTable.FieldDefs.Add('LastRunMessage', ftString, 200);
+    LMemTable.CreateDataSet;
+
+    for LTask in LTasks do
+    begin
+      // 按筛选条件过滤
+      if (LFilter <> '') and
+         (not LFilter.Contains(LTask.TaskName)) and
+         (not LFilter.Contains(LTask.TaskCode)) then
+        Continue;
+
+      // 按状态过滤
+      case LStatusIdx of
+        1: if LTask.Status <> tsRunning then Continue;
+        2: if LTask.Status <> tsStopped then Continue;
+        3: if LTask.Status <> tsPaused then Continue;
+        4: if LTask.Status <> tsError then Continue;
+      end;
+
+      LMemTable.Append;
+      LMemTable.FieldByName('TaskID').AsInteger := LTask.TaskID;
+      LMemTable.FieldByName('TaskName').AsString := LTask.TaskName;
+      LMemTable.FieldByName('TaskCode').AsString := LTask.TaskCode;
+      LMemTable.FieldByName('CronExpression').AsString := LTask.CronExpression;
+      LMemTable.FieldByName('HandlerClass').AsString := LTask.HandlerClass;
+
+      case LTask.Status of
+        tsStopped: LMemTable.FieldByName('StatusText').AsString := '已停止';
+        tsRunning: LMemTable.FieldByName('StatusText').AsString := '运行中';
+        tsPaused:  LMemTable.FieldByName('StatusText').AsString := '已暂停';
+        tsError:   LMemTable.FieldByName('StatusText').AsString := '错误';
+      end;
+
+      if LTask.LastRunTime > 0 then
+        LMemTable.FieldByName('LastRunTime').AsDateTime := LTask.LastRunTime;
+      if LTask.NextRunTime > 0 then
+        LMemTable.FieldByName('NextRunTime').AsDateTime := LTask.NextRunTime;
+      LMemTable.FieldByName('LastRunMessage').AsString := LTask.LastRunMessage;
+      LMemTable.Post;
+    end;
+
+    FLastDataSet := LMemTable;
+    UniDataSource.DataSet := FLastDataSet;
+  except
+    LMemTable.Free;
+    raise;
+  end;
 end;
 
 procedure TTaskManageFrame.Initialize;

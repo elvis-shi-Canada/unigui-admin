@@ -1,9 +1,9 @@
-unit UniTaskProcessor;
+﻿unit UniTaskProcessor;
 
 interface
 
 uses
-  System.SysUtils, System.Classes,
+  System.SysUtils, System.Classes, System.Generics.Collections,
   UniContext, UniPlugin.Types, UniScheduler;
 
 type
@@ -41,12 +41,12 @@ type
   private
     class var FProcessors: TDictionary<string, TClass>;
 
-    class procedure RegisterProcessor(const HandlerClass: string; ProcessorClass: TClass);
     class function GetProcessorClass(const HandlerClass: string): TClass;
   public
     class constructor Create;
     class destructor Destroy;
 
+    class procedure RegisterProcessor(const HandlerClass: string; ProcessorClass: TClass);
     class function CreateProcessor(const HandlerClass: string): ITaskProcessor;
     class procedure RegisterDefaultProcessors;
   end;

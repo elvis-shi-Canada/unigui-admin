@@ -3,10 +3,10 @@ unit RoleUserDialog;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
+  System.SysUtils, System.Classes, System.Variants, System.Generics.Collections, System.UITypes,
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniButton, uniLabel, uniListBox,
-  uniPanel, uniGUIForm,
+  uniPanel, uniEdit, uniGUIForm, Vcl.Dialogs,
   UniContext, UniPlugin.Types, UniDataModule;
 
 type

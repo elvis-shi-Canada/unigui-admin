@@ -1,11 +1,12 @@
-unit UserEditForm;
+﻿unit UserEditForm;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants,
-  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniLabel, uniComboBox, uniPanel,
-  UniContext, UniPlugin.Types;
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniLabel, uniMultiItem, uniComboBox, uniPanel, uniGUIForm,
+  UniContext, UniPlugin.Types, UserService.Intf, Vcl.Dialogs, Vcl.Controls, Vcl.Forms,
+  uniMemo, uniCheckBox;
 
 type
   /// <summary>
@@ -25,8 +26,12 @@ type
     edtPassword: TUniEdit;
     lblConfirmPassword: TUniLabel;
     edtConfirmPassword: TUniEdit;
+    lblRole: TUniLabel;
+    cmbRole: TUniComboBox;
     lblStatus: TUniLabel;
-    cmbStatus: TUniComboBox;
+    chkStatus: TUniCheckBox;
+    lblRemark: TUniLabel;
+    memRemark: TUniMemo;
     pnlBottom: TUniPanel;
     btnSave: TUniButton;
     btnCancel: TUniButton;
@@ -86,11 +91,9 @@ end;
 
 procedure TUserEditForm.InitForm;
 begin
-  // 初始化状态下拉框
-  cmbStatus.Items.Add('启用');
-  cmbStatus.Items.Add('禁用');
-  cmbStatus.ItemIndex := 0;
-  
+  // 初始化状态复选框
+  chkStatus.Checked := True;
+
   // 设置默认模式
   SetAsAddMode;
 end;
@@ -111,7 +114,7 @@ begin
   edtConfirmPassword.Visible := True;
   lblPassword.Visible := True;
   lblConfirmPassword.Visible := True;
-  cmbStatus.ItemIndex := 0;
+  chkStatus.Checked := True;
 end;
 
 procedure TUserEditForm.SetAsEditMode(UserID: Integer);
@@ -144,10 +147,7 @@ begin
     edtEmail.Text := LInfo.Email;
     edtPhone.Text := LInfo.Phone;
     
-    if LInfo.Status = 1 then
-      cmbStatus.ItemIndex := 0
-    else
-      cmbStatus.ItemIndex := 1;
+    chkStatus.Checked := LInfo.Status = 1;
   except
     on E: Exception do
     begin
@@ -243,7 +243,7 @@ begin
     LPhone := Trim(edtPhone.Text);
     LPassword := Trim(edtPassword.Text);
     
-    if cmbStatus.ItemIndex = 0 then
+    if chkStatus.Checked then
       LStatus := 1
     else
       LStatus := 0;

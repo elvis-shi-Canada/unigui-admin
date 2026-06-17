@@ -1,15 +1,16 @@
-unit QueryPanelTemplate;
+﻿unit QueryPanelTemplate;
 
 interface
 
 uses
   System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.ExtCtrls,
-  UniGUIBaseClasses, UniGUIClasses, UniPanel, UniLabel, UniEdit,
-  UniDateTimePicker, UniComboBox, UniButton, UniGroupBox;
+  Vcl.Controls,
+  UniGUIBaseClasses, UniGUIClasses, uniGUIFrame, uniPanel, UniLabel, UniEdit,
+  UniDateTimePicker, UniComboBox, UniButton, UniGroupBox, uniMultiItem,
+  Vcl.Forms;
 
 type
-  TQueryPanelTemplate = class(TUniPanel)
+  TQueryPanelTemplate = class(TUniFrame)
     grpQuery: TUniGroupBox;
     lblKeyword: TUniLabel;
     edtKeyword: TUniEdit;

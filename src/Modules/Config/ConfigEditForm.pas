@@ -1,13 +1,14 @@
-unit ConfigEditForm;
+﻿unit ConfigEditForm;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants,
-  Data.DB,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
-  uniLabel, uniComboBox, uniPanel, uniForm, uniMemo, uniCheckBox,
-  UniContext, UniPlugin.Types, ConfigDataModule;
+  Data.DB, System.UITypes, System.Math,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
+  uniLabel, uniMultiItem, uniComboBox, uniPanel, uniGUIForm, uniMemo, uniCheckBox,
+  UniContext, UniPlugin.Types, ConfigDataModule, ConfigService.Intf,
+  Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -31,16 +32,16 @@ type
     UniCheckBoxStatus: TUniCheckBox;
     UniButtonOK: TUniButton;
     UniButtonCancel: TUniButton;
-    FConfigID: Integer;
-    FIsEditMode: Boolean;
-    FDataModule: TConfigDataModule;
 
     procedure UniButtonOKClick(Sender: TObject);
     procedure UniButtonCancelClick(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
+    FDataModule: TConfigDataModule;
+    FConfigID: Integer;
+    FIsEditMode: Boolean;
     procedure ValidateInput;
     procedure SaveConfig;
+    procedure LoadConfigData;
   public
     constructor Create(AOwner: TComponent; const Context: IExecutionContext;
       ConfigID: Integer = -1); reintroduce;
@@ -136,16 +137,16 @@ end;
 
 procedure TConfigEditForm.ValidateInput;
 begin
-  if UniEditKey.Text.Trim.IsEmpty then
+  if Trim(UniEditKey.Text) = '' then
     raise Exception.Create('配置键不能为空');
 
-  if UniMemoValue.Text.Trim.IsEmpty then
+  if Trim(UniMemoValue.Text) = '' then
     raise Exception.Create('配置值不能为空');
 
-  if UniComboBoxCategory.Text.Trim.IsEmpty then
+  if Trim(UniComboBoxCategory.Text) = '' then
     raise Exception.Create('请选择配置分类');
 
-  if UniComboBoxValueType.Text.Trim.IsEmpty then
+  if Trim(UniComboBoxValueType.Text) = '' then
     raise Exception.Create('请选择值类型');
 end;
 
@@ -158,10 +159,10 @@ var
 begin
   ValidateInput;
 
-  LConfigKey := UniEditKey.Text.Trim;
-  LConfigValue := UniMemoValue.Text.Trim;
-  LCategory := UniComboBoxCategory.Text.Trim;
-  LDescription := UniMemoDescription.Text.Trim;
+  LConfigKey := Trim(UniEditKey.Text);
+  LConfigValue := Trim(UniMemoValue.Text);
+  LCategory := Trim(UniComboBoxCategory.Text);
+  LDescription := Trim(UniMemoDescription.Text);
 
   if UniComboBoxValueType.Text = 'integer' then
     LValueType := cvtInteger
@@ -207,11 +208,6 @@ end;
 procedure TConfigEditForm.UniButtonCancelClick(Sender: TObject);
 begin
   ModalResult := mrCancel;
-end;
-
-procedure TConfigEditForm.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  Action := caFree;
 end;
 
 end.

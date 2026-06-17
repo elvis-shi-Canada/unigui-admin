@@ -30,8 +30,16 @@ bin/
 .DS_Store
 Thumbs.db
 
+
 # custom
+node_modules/
 *.log
-AGENTS.md
+# AGENTS.md
 app.json
 ProjectConfig.json
+.*
+
+# Local tooling & temp files (do not commit to public repo)
+dcc_check.txt
+openmemory.md
+opencode.json

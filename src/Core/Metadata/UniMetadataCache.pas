@@ -1,9 +1,9 @@
-unit UniMetadataCache;
+﻿unit UniMetadataCache;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections,
+  System.SysUtils, System.Classes, System.Generics.Collections, System.Character,
   FireDAC.Comp.Client,
   UniMetadataCache.Intf, UniFieldMetadata;
 
@@ -88,30 +88,32 @@ begin
   for I := 1 to TableName.Length do
   begin
     C := TableName[I];
-    if not (Char.IsLetterOrDigit(C) or (C = '_')) then
+    if not (TCharacter.IsLetterOrDigit(C) or (C = '_')) then
       Exit(False);
   end;
 end;
 
 function TUniMetadataCache.GetFieldTypeFromDB(const TypeName: string;
   Size, Precision: Integer): TFieldType;
+var
+  LTypeName: string;
 begin
-  TypeName := UpperCase(TypeName);
+  LTypeName := UpperCase(TypeName);
 
-  if TypeName.Contains('INT') then
+  if LTypeName.Contains('INT') then
     Result := ftInteger
-  else if TypeName.Contains('CHAR') or TypeName.Contains('TEXT') then
+  else if LTypeName.Contains('CHAR') or LTypeName.Contains('TEXT') then
     Result := ftString
-  else if TypeName.Contains('DECIMAL') or TypeName.Contains('NUMERIC')
-    or TypeName.Contains('FLOAT') or TypeName.Contains('DOUBLE') then
+  else if LTypeName.Contains('DECIMAL') or LTypeName.Contains('NUMERIC')
+    or LTypeName.Contains('FLOAT') or LTypeName.Contains('DOUBLE') then
     Result := ftFloat
-  else if TypeName.Contains('DATE') or TypeName.Contains('TIME') then
+  else if LTypeName.Contains('DATE') or LTypeName.Contains('TIME') then
     Result := ftDateTime
-  else if TypeName.Contains('BIT') or TypeName.Contains('BOOL') then
+  else if LTypeName.Contains('BIT') or LTypeName.Contains('BOOL') then
     Result := ftBoolean
-  else if TypeName.Contains('BLOB') or TypeName.Contains('BINARY') then
+  else if LTypeName.Contains('BLOB') or LTypeName.Contains('BINARY') then
     Result := ftBlob
-  else if TypeName.Contains('GUID') or TypeName.Contains('UUID') then
+  else if LTypeName.Contains('GUID') or LTypeName.Contains('UUID') then
     Result := ftGuid
   else
     Result := ftUnknown;
@@ -121,6 +123,7 @@ function TUniMetadataCache.LoadTableMetadata(const TableName: string): TTableMet
 var
   LQuery: TFDQuery;
   LField: TFieldMetadata;
+  I: Integer;
 begin
   // 初始化结果
   Result.TableName := TableName;
@@ -187,10 +190,14 @@ begin
       begin
         Result.PrimaryKey := LQuery.FieldByName('COLUMN_NAME').AsString;
         // 更新字段的主键标记
-        for LField in Result.Fields do
+        for I := 0 to Result.Fields.Count - 1 do
         begin
+          LField := Result.Fields[I];
           if LField.FieldName = Result.PrimaryKey then
+          begin
             LField.IsPrimaryKey := True;
+            Result.Fields[I] := LField;
+          end;
         end;
       end;
 

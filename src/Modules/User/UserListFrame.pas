@@ -1,13 +1,13 @@
-unit UserListFrame;
+﻿unit UserListFrame;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants,
-  Data.DB, FireDAC.Comp.Client,
-  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniGrid, uniToolBar,
+  Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,  uniBasicGrid, uniDBGrid, uniToolBar,
   UniContext, UniPlugin.Types,
-  BaseCrudFrame;
+  BaseCrudFrame, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>

@@ -1,9 +1,12 @@
-inherited UserEditForm: TUserEditForm
-  Caption = #29992#25143#32534#36753
-  ClientHeight = 400
+object UserEditForm: TUserEditForm
+  Left = 0
+  Top = 0
+  ClientHeight = 480
   ClientWidth = 500
-  PixelsPerInch = 96
-  TextHeight = 13
+  Caption = #29992#25143#32534#36753
+  OldCreateOrder = False
+  MonitoredKeys.Keys = <>
+  TextHeight = 15
   object pnlMain: TUniPanel
     Left = 0
     Top = 0
@@ -12,134 +15,167 @@ inherited UserEditForm: TUserEditForm
     Hint = ''
     Align = alClient
     TabOrder = 0
+    Caption = ''
     object lblUserName: TUniLabel
       Left = 16
       Top = 16
-      Width = 60
+      Width = 44
       Height = 13
       Hint = ''
-      Caption = #29992#25143#21517*
-      TabOrder = 1
+      Caption = #29992#25143#21517'*'
+      TabOrder = 2
     end
     object edtUserName: TUniEdit
       Left = 90
       Top = 13
       Width = 200
-      Height = 22
       Hint = ''
-      TextHint = #22914: admin
-      TabOrder = 2
+      Text = ''
+      TabOrder = 1
     end
     object lblRealName: TUniLabel
       Left = 16
       Top = 48
-      Width = 60
+      Width = 57
       Height = 13
       Hint = ''
-      Caption = #30495#23454#22995#21517*
-      TabOrder = 3
+      Caption = #30495#23454#22995#21517'*'
+      TabOrder = 4
     end
     object edtRealName: TUniEdit
       Left = 90
       Top = 45
       Width = 200
-      Height = 22
       Hint = ''
-      TextHint = #22914: #24352#19977
-      TabOrder = 4
+      Text = ''
+      TabOrder = 3
     end
     object lblEmail: TUniLabel
       Left = 16
       Top = 80
-      Width = 60
+      Width = 31
       Height = 13
       Hint = ''
-      Caption = #37038#31665*
-      TabOrder = 5
+      Caption = #37038#31665'*'
+      TabOrder = 6
     end
     object edtEmail: TUniEdit
       Left = 90
       Top = 77
       Width = 200
-      Height = 22
       Hint = ''
-      TextHint = #22914: admin@example.com
-      TabOrder = 6
+      Text = ''
+      TabOrder = 5
     end
     object lblPhone: TUniLabel
       Left = 16
       Top = 112
-      Width = 60
+      Width = 26
       Height = 13
-      Hint = '
+      Hint = ''
       Caption = #25163#26426
-      TabOrder = 7
+      TabOrder = 8
     end
     object edtPhone: TUniEdit
       Left = 90
       Top = 109
       Width = 200
-      Height = 22
-      Hint = '
-      TextHint = #22914: 13800138000
-      TabOrder = 8
+      Hint = ''
+      Text = ''
+      TabOrder = 7
     end
-    object lblRole: TUniLabel
+    object lblPassword: TUniLabel
       Left = 16
       Top = 144
-      Width = 60
+      Width = 26
       Height = 13
-      Hint = '
-      Caption = #35282#33394
-      TabOrder = 9
+      Hint = ''
+      Caption = #23494#30721
+      TabOrder = 14
     end
-    object cmbRole: TUniComboBox
+    object edtPassword: TUniEdit
       Left = 90
       Top = 141
       Width = 200
-      Height = 21
-      Hint = '
-      Style = csDropDown
-      ItemIndex = -1
+      Hint = ''
+      Text = ''
+      PasswordChar = '*'
+      TabOrder = 8
+    end
+    object lblConfirmPassword: TUniLabel
+      Left = 16
+      Top = 176
+      Width = 52
+      Height = 13
+      Hint = ''
+      Caption = #30830#35748#23494#30721
+      TabOrder = 15
+    end
+    object edtConfirmPassword: TUniEdit
+      Left = 90
+      Top = 173
+      Width = 200
+      Hint = ''
+      Text = ''
+      PasswordChar = '*'
+      TabOrder = 9
+    end
+    object lblRole: TUniLabel
+      Left = 16
+      Top = 208
+      Width = 26
+      Height = 13
+      Hint = ''
+      Caption = #35282#33394
       TabOrder = 10
+    end
+    object cmbRole: TUniComboBox
+      Left = 90
+      Top = 205
+      Width = 200
+      Height = 21
+      Hint = ''
+      Text = ''
+      TabOrder = 10
+      IconItems = <>
     end
     object lblStatus: TUniLabel
       Left = 16
-      Top = 176
-      Width = 60
+      Top = 240
+      Width = 26
       Height = 13
-      Hint = '
+      Hint = ''
       Caption = #29366#24577
       TabOrder = 11
     end
     object chkStatus: TUniCheckBox
       Left = 90
-      Top = 176
+      Top = 240
       Width = 60
       Height = 17
-      Hint = 
-      Caption = #21551#29992
+      Hint = ''
       Checked = True
+      Caption = #21551#29992
       TabOrder = 12
     end
     object lblRemark: TUniLabel
       Left = 16
-      Top = 208
-      Width = 60
+      Top = 272
+      Width = 26
       Height = 13
-      Hint = 
+      Hint = ''
       Caption = #22791#27880
-      TabOrder = 13
+      TabOrder = 14
     end
     object memRemark: TUniMemo
       Left = 90
-      Top = 205
+      Top = 269
       Width = 380
       Height = 80
-      Hint = '
+      Hint = ''
       Lines.Strings = (
         '')
-      TabOrder = 14
+      TabOrder = 13
     end
   end
   object pnlBottom: TUniPanel
@@ -150,25 +186,26 @@ inherited UserEditForm: TUserEditForm
     Hint = ''
     Align = alBottom
     TabOrder = 1
+    Caption = ''
     object btnSave: TUniButton
       Left = 340
       Top = 8
       Width = 75
       Height = 25
-      Hint = '
+      Hint = ''
       Caption = #20445#23384
       ModalResult = 1
-      TabOrder = 0
+      TabOrder = 1
     end
     object btnCancel: TUniButton
       Left = 420
       Top = 8
       Width = 75
       Height = 25
-      Hint = '
-      Caption = '#21462#28040
+      Hint = ''
+      Caption = #21462#28040
       ModalResult = 2
-      TabOrder = 1
+      TabOrder = 2
     end
   end
 end

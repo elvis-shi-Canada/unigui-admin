@@ -33,7 +33,7 @@ inherited LoginLogFrame: TLoginLogFrame
       Width = 60
       Height = 13
       Hint = ''
-      Caption = IP#22320#22336
+      Caption = 'IP'#22320#22336
       TabOrder = 3
     end
     object UniEditIP: TUniEdit
@@ -42,7 +42,7 @@ inherited LoginLogFrame: TLoginLogFrame
       Width = 120
       Height = 22
       Hint = ''
-      TextHint = #36755#20837IP#22320#22336
+      TextHint = ''
       TabOrder = 4
     end
     object UniLabelStartTime: TUniLabel
@@ -98,9 +98,9 @@ inherited LoginLogFrame: TLoginLogFrame
       ItemIndex = 0
       TabOrder = 10
       Items.Strings = (
-        #20840#37096
-        #25104#21151
-        #22833#36133)
+        '全部'
+        '成功'
+        '失败')
     end
     object UniButtonSearch: TUniButton
       Left = 570

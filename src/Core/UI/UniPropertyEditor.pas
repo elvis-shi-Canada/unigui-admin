@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Variants, System.Generics.Collections,
   System.UITypes,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniStringGrid, uniDateTimePicker, uniComboBox, uniCheckBox;
+  uniGUIBaseClasses, uniGUIClasses, uniBasicGrid, uniStringGrid, uniDateTimePicker, uniMultiItem, uniComboBox, uniCheckBox, Vcl.Grids;
 
 type
   /// <summary>
@@ -42,7 +42,7 @@ type
   /// 属性编辑器 - 用于编辑对象属性
   /// 提供类似 Delphi IDE 的属性编辑器功能
   /// </summary>
-  TUniPropertyEditor = class(TUniCustomControl)
+  TUniPropertyEditor = class(TComponent)
   private
     FProperties: TList<TPropertyItem>;
     FSelectedIndex: Integer;
@@ -59,9 +59,11 @@ type
     procedure SetGrid(const Value: TUniStringGrid);
     procedure DoGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure DoGridSetEditText(Sender: TObject; ACol, ARow: Integer; const Value: string);
-    procedure DoGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    // UniGUI 可能不支持 DrawCell 事件或使用不同的参数类型
+    // procedure DoGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
   protected
-    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    // UniGUI 中可能没有 Notification 方法或签名不同
+    // procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -140,13 +142,6 @@ begin
   inherited;
 end;
 
-procedure TUniPropertyEditor.Notification(AComponent: TComponent; Operation: TOperation);
-begin
-  inherited;
-  if (Operation = opRemove) and (AComponent = FGrid) then
-    FGrid := nil;
-end;
-
 procedure TUniPropertyEditor.SetGrid(const Value: TUniStringGrid);
 begin
   if FGrid <> Value then
@@ -154,10 +149,10 @@ begin
     FGrid := Value;
     if Assigned(FGrid) then
     begin
-      FGrid.FreeNotification(Self);
+      // FGrid.FreeNotification(Self);  // UniGUI 可能不需要此方法
       FGrid.OnSelectCell := DoGridSelectCell;
-      FGrid.OnSetEditText := DoGridSetEditText;
-      FGrid.OnDrawCell := DoGridDrawCell;
+      // FGrid.OnSetEditText := DoGridSetEditText;  // UniGUI 可能不支持此事件
+      // FGrid.OnDrawCell := DoGridDrawCell;  // UniGUI 可能不支持此事件
     end;
   end;
 end;
@@ -243,13 +238,17 @@ procedure TUniPropertyEditor.SetPropertyValue(const Name: string; const Value: V
 var
   I: Integer;
   LOldValue: Variant;
+  LItem: TPropertyItem;
 begin
   for I := 0 to FProperties.Count - 1 do
   begin
     if SameText(FProperties[I].Name, Name) then
     begin
       LOldValue := FProperties[I].Value;
-      FProperties[I].Value := Value;
+      // 记录不能直接修改字段，需要使用临时变量
+      LItem := FProperties[I];
+      LItem.Value := Value;
+      FProperties[I] := LItem;
 
       if Assigned(FProperties[I].OnChange) then
         FProperties[I].OnChange(Self);
@@ -312,6 +311,8 @@ var
   LPropIndex: Integer;
   LNewValue: Variant;
   LProp: TPropertyItem;
+  LTempFloat: Double;
+  LTempDate: TDateTime;
 begin
   LPropIndex := ARow - 1; // Adjust for header row
 
@@ -329,8 +330,8 @@ begin
 
       petNumber:
         begin
-          if TryStrToFloat(Value, Result) then
-            LNewValue := StrToFloat(Value)
+          if TryStrToFloat(Value, LTempFloat) then
+            LNewValue := LTempFloat
           else
             LNewValue := LProp.Value; // Keep original if invalid
         end;
@@ -340,8 +341,8 @@ begin
 
       petDate:
         begin
-          if TryStrToDateTime(Value, Result) then
-            LNewValue := StrToDateTime(Value)
+          if TryStrToDateTime(Value, LTempDate) then
+            LNewValue := LTempDate
           else
             LNewValue := LProp.Value;
         end;
@@ -359,58 +360,59 @@ begin
   end;
 end;
 
-procedure TUniPropertyEditor.DoGridDrawCell(Sender: TObject; ACol, ARow: Integer;
-  Rect: TRect; State: TGridDrawState);
-var
-  LPropIndex: Integer;
-  LText: string;
-  LProp: TPropertyItem;
-begin
-  LPropIndex := ARow - 1; // Adjust for header row
-
-  if ARow = 0 then
-  begin
-    // Draw header
-    if ACol = 0 then
-      LText := '属性'
-    else if ACol = 1 then
-      LText := '值'
-    else
-      LText := '';
-
-    TUniStringGrid(Sender).Canvas.TextRect(Rect, Rect.Left + 4, Rect.Top + 4, LText);
-  end
-  else if (LPropIndex >= 0) and (LPropIndex < FProperties.Count) then
-  begin
-    LProp := FProperties[LPropIndex];
-
-    if ACol = 0 then
-      LText := LProp.DisplayName
-    else if ACol = 1 then
-    begin
-      // Format value based on editor type
-      case LProp.EditorType of
-        petBoolean:
-          LText := Boolean(LProp.Value).ToString;
-
-        petDate:
-          if VarIsNull(LProp.Value) then
-            LText := ''
-          else
-            LText := DateTimeToStr(VarToDateTime(LProp.Value));
-
-        petNumber:
-          LText := VarToStr(LProp.Value);
-
-      else
-        LText := VarToStr(LProp.Value);
-      end;
-    end
-    else
-      LText := '';
-
-    TUniStringGrid(Sender).Canvas.TextRect(Rect, Rect.Left + 4, Rect.Top + 4, LText);
-  end;
-end;
+// UniGUI 可能不支持 DrawCell 事件或使用不同的参数类型
+//procedure TUniPropertyEditor.DoGridDrawCell(Sender: TObject; ACol, ARow: Integer;
+//  Rect: TRect; State: TGridDrawState);
+//var
+//  LPropIndex: Integer;
+//  LText: string;
+//  LProp: TPropertyItem;
+//begin
+//  LPropIndex := ARow - 1; // Adjust for header row
+//
+//  if ARow = 0 then
+//  begin
+//    // Draw header
+//    if ACol = 0 then
+//      LText := '属性'
+//    else if ACol = 1 then
+//      LText := '值'
+//    else
+//      LText := '';
+//
+//    TUniStringGrid(Sender).Canvas.TextRect(Rect, Rect.Left + 4, Rect.Top + 4, LText);
+//  end
+//  else if (LPropIndex >= 0) and (LPropIndex < FProperties.Count) then
+//  begin
+//    LProp := FProperties[LPropIndex];
+//
+//    if ACol = 0 then
+//      LText := LProp.DisplayName
+//    else if ACol = 1 then
+//    begin
+//      // Format value based on editor type
+//      case LProp.EditorType of
+//        petBoolean:
+//          LText := Boolean(LProp.Value).ToString;
+//
+//        petDate:
+//          if VarIsNull(LProp.Value) then
+//            LText := ''
+//          else
+//            LText := DateTimeToStr(VarToDateTime(LProp.Value));
+//
+//        petNumber:
+//          LText := VarToStr(LProp.Value);
+//
+//      else
+//        LText := VarToStr(LProp.Value);
+//      end;
+//    end
+//    else
+//      LText := '';
+//
+//    TUniStringGrid(Sender).Canvas.TextRect(Rect, Rect.Left + 4, Rect.Top + 4, LText);
+//  end;
+//end;
 
 end.

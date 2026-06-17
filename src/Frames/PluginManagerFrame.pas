@@ -3,7 +3,7 @@ unit PluginManagerFrame;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
+  System.SysUtils, System.Classes, System.Variants, System.Generics.Collections, System.StrUtils,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.Grids,
   UniModuleRegistry.Intf, UniConfigService.Intf;

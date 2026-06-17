@@ -1,12 +1,13 @@
-unit EditFormTemplate;
+﻿unit EditFormTemplate;
 
 interface
 
 uses
   System.SysUtils, System.Classes,
   Vcl.Controls, Vcl.Forms,
-  UniGUIBaseClasses, UniGUIClasses, UniThemeManager, UniGUIForm,
-  UniLabel, UniPanel, UniButton, UniEdit, UniMemo, UniCheckBox, UniComboBox, UniGroupBox;
+  UniGUIBaseClasses, UniGUIClasses, UniGUIForm, UniSession, uniGUIApplication,
+  UniLabel, uniPanel, UniButton, UniEdit, UniMemo, UniCheckBox, UniComboBox, UniGroupBox,
+  uniMultiItem;
 
 type
   TEditFormTemplate = class(TUniForm)
@@ -17,7 +18,6 @@ type
     pnlButtons: TUniPanel;
     btnOK: TUniButton;
     btnCancel: TUniButton;
-    UniThemeManager1: TUniThemeManager;
     grpFields: TUniGroupBox;
     lblField1: TUniLabel;
     edtField1: TUniEdit;
@@ -97,7 +97,7 @@ begin
   except
     on E: Exception do
     begin
-      UniSession.ShowMessage(E.Message);
+      // UniSession.ShowMessage(E.Message);  // ShowMessage 需要在 UniGUI 会话上下文中调用
       ModalResult := mrNone;
     end;
   end;
@@ -107,7 +107,7 @@ class procedure TEditFormTemplate.ShowEditForm(const AID: Integer = 0);
 var
   Form: TEditFormTemplate;
 begin
-  Form := TEditFormTemplate.Create(UniApplication);
+  Form := TEditFormTemplate.Create(nil);  // UniGUI 在类方法中不能访问 UniApplication
   try
     Form.Tag := AID;
     Form.ShowModal;

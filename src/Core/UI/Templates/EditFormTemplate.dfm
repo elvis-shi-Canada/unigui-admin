@@ -1,35 +1,35 @@
 object EditFormTemplate: TEditFormTemplate
   Left = 0
   Top = 0
-  Width = 600
-  Height = 500
-  Caption = #32534#36753#34920#21333
   ClientHeight = 500
   ClientWidth = 600
+  Caption = #32534#36753#34920#21333
+  OldCreateOrder = False
+  MonitoredKeys.Keys = <>
   OnCreate = FormCreate
-  UniThemeManager = UniThemeManager1
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object pnlHeader: TUniPanel
     Left = 0
     Top = 0
     Width = 600
     Height = 60
+    Hint = ''
     Align = alTop
-    Color = clWindow
-    ParentColor = False
     TabOrder = 0
+    Caption = ''
+    Color = clWindow
     object lblTitle: TUniLabel
       Left = 16
       Top = 16
-      Width = 200
-      Height = 24
+      Width = 84
+      Height = 25
+      Hint = ''
       Caption = #32534#36753#20449#24687
       ParentFont = False
       Font.Color = clHighlight
       Font.Height = -19
-      Font.Name = Segoe UI
       Font.Style = [fsBold]
+      TabOrder = 1
     end
   end
   object pnlBody: TUniPanel
@@ -37,96 +37,112 @@ object EditFormTemplate: TEditFormTemplate
     Top = 60
     Width = 600
     Height = 380
+    Hint = ''
     Align = alClient
-    Color = clWindow
-    ParentColor = False
     TabOrder = 1
+    Caption = ''
+    Color = clWindow
     object grpFields: TUniGroupBox
       Left = 16
       Top = 16
       Width = 568
       Height = 348
+      Hint = ''
       Caption = #22522#26412#20449#24687
-      TabOrder = 0
+      TabOrder = 1
       object lblField1: TUniLabel
         Left = 16
         Top = 32
-        Width = 80
+        Width = 157
         Height = 13
-        Caption = #23383#27573#21517#312161:'
-        FocusControl = edtField1
+        Hint = ''
+        Caption = #23383#27573#21517#312161':'
+        TabOrder = 2
       end
       object edtField1: TUniEdit
         Left = 102
         Top = 29
         Width = 450
         Height = 21
-        TabOrder = 0
+        Hint = ''
+        Text = ''
+        TabOrder = 1
       end
       object lblField2: TUniLabel
         Left = 16
         Top = 72
-        Width = 80
+        Width = 157
         Height = 13
-        Caption = #23383#27573#21517#312162:
-        FocusControl = edtField2
+        Hint = ''
+        Caption = #23383#27573#21517#312162':'
+        TabOrder = 4
       end
       object edtField2: TUniEdit
         Left = 102
         Top = 69
         Width = 450
         Height = 21
-        TabOrder = 1
+        Hint = ''
+        Text = ''
+        TabOrder = 3
       end
       object lblField3: TUniLabel
         Left = 16
         Top = 112
-        Width = 80
+        Width = 157
         Height = 13
-        Caption = #23383#27573#21517#312163:
-        FocusControl = memField3
+        Hint = ''
+        Caption = #23383#27573#21517#312163':'
+        TabOrder = 6
       end
       object memField3: TUniMemo
         Left = 102
         Top = 109
         Width = 450
         Height = 89
-        TabOrder = 2
+        Hint = ''
+        TabOrder = 5
       end
       object lblField4: TUniLabel
         Left = 16
         Top = 216
-        Width = 80
+        Width = 157
         Height = 13
-        Caption = #23383#27573#21517#312164:
-        FocusControl = chkField4
+        Hint = ''
+        Caption = #23383#27573#21517#312164':'
+        TabOrder = 8
       end
       object chkField4: TUniCheckBox
         Left = 102
         Top = 213
         Width = 97
         Height = 17
+        Hint = ''
         Caption = #21551#29992
-        TabOrder = 3
+        TabOrder = 7
       end
       object lblField5: TUniLabel
         Left = 16
         Top = 256
-        Width = 80
+        Width = 157
         Height = 13
-        Caption = #23383#27573#21517#312165:
-        FocusControl = cboField5
+        Hint = ''
+        Caption = #23383#27573#21517#312165':'
+        TabOrder = 10
       end
       object cboField5: TUniComboBox
         Left = 102
         Top = 253
         Width = 450
         Height = 21
-        TabOrder = 4
+        Hint = ''
+        Text = ''
         Items.Strings = (
-          #36873#390331
-          #36873#390332
-          #36873#390333)
+          #36873#62651
+          #36873#62652
+          #36873#62653)
+        TabOrder = 9
+        IconItems = <>
       end
     end
   end
@@ -135,26 +151,31 @@ object EditFormTemplate: TEditFormTemplate
     Top = 440
     Width = 600
     Height = 60
+    Hint = ''
     Align = alBottom
-    Color = 15856113
-    ParentColor = False
     TabOrder = 2
+    Caption = ''
+    Color = 15856113
+    DesignSize = (
+      600
+      60)
     object pnlButtons: TUniPanel
       Left = 420
       Top = 10
       Width = 170
       Height = 40
+      Hint = ''
       Anchors = [akTop, akRight]
-      ParentColor = False
-      Color = clBtnFace
-      TabOrder = 0
+      TabOrder = 1
+      Caption = ''
       object btnOK: TUniButton
         Left = 10
         Top = 5
         Width = 75
         Height = 30
-        Caption = #20445#23384(&S)
-        TabOrder = 0
+        Hint = ''
+        Caption = #20445#23384'(&S)'
+        TabOrder = 1
         OnClick = btnOKClick
       end
       object btnCancel: TUniButton
@@ -162,14 +183,11 @@ object EditFormTemplate: TEditFormTemplate
         Top = 5
         Width = 75
         Height = 30
-        Caption = '#21462#28040(&C)
+        Hint = ''
+        Caption = #21462#28040'(&C)'
         ModalResult = 2
-        TabOrder = 1
+        TabOrder = 2
       end
     end
-  end
-  object UniThemeManager1: TUniThemeManager
-    Left = 544
-    Top = 16
   end
 end

@@ -1,12 +1,12 @@
-unit BaseFormTemplate;
+﻿unit BaseFormTemplate;
 
 interface
 
 uses
   System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.StdCtrls, Vcl.ExtCtrls,
-  UniGUIBaseModule, UniGUIClasses, UniGUIForm, UniGUIButton,
-  UniTheme;
+  Vcl.Controls, Vcl.Forms,
+  UniGUIClasses, UniGUIForm, uniButton, uniPanel,
+  UniTheme, uniLabel, uniGUIBaseClasses;
 
 type
   /// <summary>
@@ -14,16 +14,13 @@ type
   /// 提供标准的窗体布局和常用按钮
   /// </summary>
   TBaseFormTemplate = class(TUniForm)
-    UniThemeManager1: TUniThemeManager;
     pnlHeader: TUniPanel;
     pnlBody: TUniPanel;
     pnlFooter: TUniPanel;
     pnlButtons: TUniPanel;
-    btnSave: TUniButton;
     btnCancel: TUniButton;
     btnOK: TUniButton;
     procedure FormCreate(Sender: TObject);
-    procedure UniThemeManager1ThemeChange(Sender: TObject);
   private
   protected
     procedure DoInitialize; virtual;
@@ -39,12 +36,6 @@ implementation
 procedure TBaseFormTemplate.FormCreate(Sender: TObject);
 begin
   DoInitialize;
-end;
-
-procedure TBaseFormTemplate.UniThemeManager1ThemeChange(Sender: TObject);
-begin
-  // 主题切换时更新界面样式
-  Self.Update;
 end;
 
 procedure TBaseFormTemplate.DoInitialize;

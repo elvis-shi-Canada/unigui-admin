@@ -1,4 +1,4 @@
-unit DictionaryDataModule;
+﻿unit DictionaryDataModule;
 
 interface
 
@@ -170,7 +170,7 @@ begin
   // 设置连接参数
   // 注意：实际连接参数应该从配置中读取
   // 这里仅作为示例
-  FDConnection.Params.DriverName := 'MySQL';
+  FDConnection.DriverName := 'MySQL';
   FDConnection.Params.Database := 'uniadmin';
   // 其他参数在运行时设置
 end;

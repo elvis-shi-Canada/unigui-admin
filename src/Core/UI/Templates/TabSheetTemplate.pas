@@ -4,12 +4,12 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.ComCtrls,
-  UniGUIBaseClasses, UniGUIClasses, UniPanel, UniLabel, UniMemo, UniStringGrid,
-  UniPageControl, UniTabSheet, UniGroupBox, UniCheckBox;
+  Vcl.Controls,
+  UniGUIBaseClasses, UniGUIClasses, uniGUIFrame, uniPanel, UniLabel, UniMemo, UniStringGrid,
+  UniPageControl, UniGroupBox, UniCheckBox;
 
 type
-  TTabSheetTemplate = class(TUniPanel)
+  TTabSheetTemplate = class(TUniFrame)
     UniPageControl1: TUniPageControl;
     tabSheet1: TUniTabSheet;
     lblTab1Title: TUniLabel;

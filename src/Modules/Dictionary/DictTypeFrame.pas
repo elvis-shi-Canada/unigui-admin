@@ -1,12 +1,12 @@
-unit DictTypeFrame;
+﻿unit DictTypeFrame;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants,
   Data.DB, FireDAC.Comp.Client,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
-  uniGrid, uniToolBar, uniLabel, uniComboBox, uniPanel,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
+  uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel,
   UniContext, UniPlugin.Types, BaseCrudFrame, DictionaryDataModule;
 
 type
@@ -73,7 +73,6 @@ var
   LFilter: string;
   LStatus: Integer;
   LDataModule: TDictionaryDataModule;
-  LDataSet: TDataSet;
 begin
   LFilter := Trim(UniEditFilter.Text);
   LStatus := -1;
@@ -86,17 +85,9 @@ begin
   LDataModule := TDictionaryDataModule.Create(nil);
   try
     if Supports(LDataModule, IContextAware) then
-      (LDataModule as IContextAware).SetContext(FContext);
+      (LDataModule as IContextAware).SetContext(Context);
 
-    LDataSet := LDataModule.GetDictTypes(LFilter, LStatus);
-    try
-      qryDictTypes.Close;
-      qryDictTypes.SQL := LDataSet.SQL;
-      // 复制参数（简化处理）
-      qryDictTypes.Open;
-    finally
-      LDataSet.Free;
-    end;
+    UniDataSource.DataSet := LDataModule.GetDictTypes(LFilter, LStatus);
   finally
     LDataModule.Free;
   end;

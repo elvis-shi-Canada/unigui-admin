@@ -1,4 +1,4 @@
-unit UniModuleRegistration;
+﻿unit UniModuleRegistration;
 
 interface
 
@@ -26,7 +26,7 @@ uses
   LogDataModule, LogService,
   LoginLogFrame, OperationLogFrame, DataChangeLogFrame,
   // Scheduler Module
-  UniScheduler, TaskManageFrame, TaskEditForm, TaskLogFrame;
+  UniScheduler, TaskManageFrame, TaskLogFrame;
 
 type
   /// <summary>
@@ -553,20 +553,6 @@ begin
   LInfo.Dependencies := nil;
   LInfo.Priority := 701;
   LRegistry.RegisterPluginClass(TTaskManageFrame, LInfo.PluginID, LInfo);
-
-  // 注册任务编辑窗体
-  LInfo.PluginID := 'task-edit-form';
-  LInfo.ClassName := 'TTaskEditForm';
-  LInfo.DisplayName := '任务编辑';
-  LInfo.Version := '1.0.0';
-  LInfo.Description := '定时任务新增/编辑表单';
-  LInfo.Author := 'UniAdmin Team';
-  LInfo.Category := 'System.UI';
-  LInfo.AutoStart := False;
-  LInfo.ConfigFile := '';
-  LInfo.Dependencies := nil;
-  LInfo.Priority := 702;
-  LRegistry.RegisterPluginClass(TTaskEditForm, LInfo.PluginID, LInfo);
 
   // 注册任务执行日志窗体
   LInfo.PluginID := 'task-log-frame';

@@ -1,13 +1,14 @@
-unit MenuEditForm;
+﻿unit MenuEditForm;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
+  System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
+  System.RegularExpressions, System.UITypes, System.Math,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniLabel,
-  uniComboBox, uniPanel, uniCheckBox, uniSpinBox,
+  uniComboBox, uniPanel, uniCheckBox, uniGUIForm, UniMemo, UniSpinEdit,
   UniContext, UniPlugin.Types,
-  IconSelector;
+  IconSelector, uniMultiItem, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -23,7 +24,7 @@ type
     cmbParent: TUniComboBox;
     lblMenuType: TUniLabel;
     cmbMenuType: TUniComboBox;
-    lblIcon: TUniIconLabel;
+    lblIcon: TUniLabel;
     edtIcon: TUniEdit;
     btnSelectIcon: TUniButton;
     lblPath: TUniLabel;
@@ -34,13 +35,12 @@ type
     edtPermission: TUniEdit;
     lblSortOrder: TUniLabel;
     spnSortOrder: TUniSpinEdit;
+    lblVisible: TUniLabel;
     chkVisible: TUniCheckBox;
-    chkStatus: TUniCheckBox;
     lblDescription: TUniLabel;
     memDescription: TUniMemo;
-    pnlBottom: TUniPanel;
-    btnSave: TUniButton;
-    btnCancel: TUniButton;
+    lblStatus: TUniLabel;
+    chkStatus: TUniCheckBox;
 
     procedure btnSaveClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
@@ -360,7 +360,7 @@ begin
     LPermission := Trim(edtPermission.Text);
     LParentID := GetSelectedParentID;
     LMenuType := GetMenuTypeID;
-    LSortOrder := spnSortOrder.AsInteger;
+    LSortOrder := Integer(spnSortOrder.Value);
     LVisible := IfThen(chkVisible.Checked, 1, 0);
     LStatus := IfThen(chkStatus.Checked, 1, 0);
 
@@ -403,7 +403,7 @@ var
   LSelectedIcon: string;
 begin
   try
-    LIconSelector := TIconSelector.Create(UniGUIApplication.UniApplication);
+    LIconSelector := TIconSelector.Create(UniApplication);
     try
       LIconSelector.SetContext(FContext);
       LSelectedIcon := LIconSelector.Execute(edtIcon.Text);

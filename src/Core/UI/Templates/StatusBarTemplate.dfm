@@ -1,4 +1,4 @@
-object StatusBarTemplate: TStatusBarTemplate
+inherited StatusBarTemplate: TStatusBarTemplate
   Left = 0
   Top = 0
   Width = 800

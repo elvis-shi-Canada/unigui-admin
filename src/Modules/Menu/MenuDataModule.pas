@@ -926,8 +926,46 @@ begin
 end;
 
 procedure TMenuDataModule.UpdatePath(MenuID: Integer);
+var
+  LQuery: TFDQuery;
+  LPath: string;
+  LCurrentID: Integer;
 begin
-  // TODO: 实现路径更新逻辑（如果使用缓存路径）
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := Connection;
+
+    // 通过向上遍历父节点链构建路径
+    LPath := '';
+    LCurrentID := MenuID;
+
+    while LCurrentID > 0 do
+    begin
+      LQuery.Close;
+      LQuery.SQL.Text :=
+        'SELECT MenuID, ParentID, MenuCode FROM UniAdmin_Menus WHERE MenuID = :MenuID';
+      LQuery.Params.ParamByName('MenuID').AsInteger := LCurrentID;
+      LQuery.Open;
+
+      if LQuery.Eof then Break;
+
+      if LPath = '' then
+        LPath := LQuery.FieldByName('MenuCode').AsString
+      else
+        LPath := LQuery.FieldByName('MenuCode').AsString + '/' + LPath;
+
+      LCurrentID := LQuery.FieldByName('ParentID').AsInteger;
+    end;
+
+    // 更新路径字段
+    LQuery.Close;
+    LQuery.SQL.Text := 'UPDATE UniAdmin_Menus SET Path = :Path WHERE MenuID = :MenuID';
+    LQuery.Params.ParamByName('Path').AsString := LPath;
+    LQuery.Params.ParamByName('MenuID').AsInteger := MenuID;
+    LQuery.ExecSQL;
+  finally
+    LQuery.Free;
+  end;
 end;
 
 procedure TMenuDataModule.ReorderSiblings(ParentID: Integer);

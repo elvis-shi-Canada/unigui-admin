@@ -3,10 +3,10 @@ unit TaskLogFrame;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
+  System.SysUtils, System.Classes, System.Variants, System.StrUtils,
   Data.DB, FireDAC.Comp.Client,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
-  uniGrid, uniToolBar, uniLabel, uniPanel, uniMemo,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
+  uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniPanel, uniMemo, uniComboBox,
   UniContext, UniPlugin.Types, BaseCrudFrame, UniScheduler;
 
 type
@@ -24,10 +24,14 @@ type
     UniPanelDetail: TUniPanel;
     UniLabelDetail: TUniLabel;
     UniMemoDetail: TUniMemo;
-    FTaskID: Integer;
 
     procedure UniButtonSearchClick(Sender: TObject);
     procedure UniDBGridAfterScroll(DataSet: TDataSet);
+  private
+    FTaskID: Integer;
+    FLastDataSet: TDataSet;
+    procedure FreeLastDataSet;
+    procedure LoadTaskList;
   protected
     procedure DoInitialize; override;
     procedure DoRefresh; override;
@@ -42,35 +46,136 @@ implementation
 
 { TTaskLogFrame }
 
+procedure TTaskLogFrame.FreeLastDataSet;
+begin
+  if Assigned(FLastDataSet) then
+  begin
+    UniDataSource.DataSet := nil;
+    FreeAndNil(FLastDataSet);
+  end;
+end;
+
+procedure TTaskLogFrame.LoadTaskList;
+var
+  LQuery: TFDQuery;
+begin
+  UniComboBoxTask.Items.Clear;
+  UniComboBoxTask.Items.Add('全部任务');
+
+  LQuery := TFDQuery.Create(nil);
+  try
+    if Assigned(Context) and Assigned(Context.GetDatabaseConfig) then
+    begin
+      // 使用上下文获取连接信息
+      LQuery.SQL.Text :=
+        'SELECT TaskID, TaskName FROM UniAdmin_ScheduledTasks ORDER BY TaskID';
+      try
+        LQuery.Open;
+        while not LQuery.Eof do
+        begin
+          UniComboBoxTask.Items.AddObject(
+            LQuery.FieldByName('TaskName').AsString,
+            TObject(LQuery.FieldByName('TaskID').AsInteger));
+          LQuery.Next;
+        end;
+      except
+        // 数据库不可用时忽略
+      end;
+    end;
+  finally
+    LQuery.Free;
+  end;
+
+  UniComboBoxTask.ItemIndex := 0;
+end;
+
 procedure TTaskLogFrame.DoInitialize;
 begin
   inherited;
   FPermissionPrefix := 'scheduler_log';
   FTaskID := 0;
+  FLastDataSet := nil;
 
-  // 加载任务列表到下拉框
-  // TODO: 从数据库加载任务列表
+  LoadTaskList;
 end;
 
 procedure TTaskLogFrame.DoRefresh;
 var
   LLogs: TArray<TTaskExecutionLogInfo>;
+  LLog: TTaskExecutionLogInfo;
+  LMemTable: TFDMemTable;
 begin
-  if FTaskID <= 0 then
-    Exit;
+  FreeLastDataSet;
 
-  // TODO: 获取任务执行日志
-  // LLogs := FScheduler.GetTaskExecutionLogs(FTaskID, 100);
+  LMemTable := TFDMemTable.Create(nil);
+  try
+    LMemTable.FieldDefs.Add('LogID', ftInteger);
+    LMemTable.FieldDefs.Add('TaskID', ftInteger);
+    LMemTable.FieldDefs.Add('StartTime', ftDateTime);
+    LMemTable.FieldDefs.Add('EndTime', ftDateTime);
+    LMemTable.FieldDefs.Add('Status', ftInteger);
+    LMemTable.FieldDefs.Add('StatusText', ftString, 20);
+    LMemTable.FieldDefs.Add('ErrorMessage', ftString, 500);
+    LMemTable.FieldDefs.Add('Result', ftString, 200);
+    LMemTable.FieldDefs.Add('Duration', ftInteger);
+    LMemTable.CreateDataSet;
 
-  qryLogs.Close;
-  // TODO: 填充 qryLogs
-  qryLogs.Open;
+    // 从调度器获取日志（如果可用）
+    // 否则尝试直接查询数据库
+    if FTaskID > 0 then
+    begin
+      LLogs := nil;
+      // 尝试通过数据库查询
+      if Assigned(Context) then
+      begin
+        var LQuery := TFDQuery.Create(nil);
+        try
+          LQuery.SQL.Text :=
+            'SELECT TOP 100 LogID, TaskID, StartTime, EndTime, Status, ' +
+            'ErrorMessage, Result, Duration ' +
+            'FROM UniAdmin_TaskExecutionLogs ' +
+            'WHERE TaskID = :TaskID ' +
+            'ORDER BY StartTime DESC';
+          LQuery.Params.ParamByName('TaskID').AsInteger := FTaskID;
+          try
+            LQuery.Open;
+            while not LQuery.Eof do
+            begin
+              LMemTable.Append;
+              LMemTable.FieldByName('LogID').AsInteger := LQuery.FieldByName('LogID').AsInteger;
+              LMemTable.FieldByName('TaskID').AsInteger := LQuery.FieldByName('TaskID').AsInteger;
+              LMemTable.FieldByName('StartTime').AsDateTime := LQuery.FieldByName('StartTime').AsDateTime;
+              LMemTable.FieldByName('EndTime').AsDateTime := LQuery.FieldByName('EndTime').AsDateTime;
+              LMemTable.FieldByName('Status').AsInteger := LQuery.FieldByName('Status').AsInteger;
+              LMemTable.FieldByName('StatusText').AsString :=
+                IfThen(LQuery.FieldByName('Status').AsInteger = 1, '成功', '失败');
+              LMemTable.FieldByName('ErrorMessage').AsString := LQuery.FieldByName('ErrorMessage').AsString;
+              LMemTable.FieldByName('Result').AsString := LQuery.FieldByName('Result').AsString;
+              LMemTable.FieldByName('Duration').AsInteger := LQuery.FieldByName('Duration').AsInteger;
+              LMemTable.Post;
+              LQuery.Next;
+            end;
+          except
+            // 数据库不可用时返回空数据
+          end;
+        finally
+          LQuery.Free;
+        end;
+      end;
+    end;
+
+    FLastDataSet := LMemTable;
+    UniDataSource.DataSet := FLastDataSet;
+  except
+    LMemTable.Free;
+    raise;
+  end;
 end;
 
 procedure TTaskLogFrame.Initialize;
 begin
   inherited;
-  // TODO: 加载任务列表
+  Refresh;
 end;
 
 procedure TTaskLogFrame.SetTaskID(TaskID: Integer);
@@ -80,9 +185,18 @@ begin
 end;
 
 procedure TTaskLogFrame.UniButtonSearchClick(Sender: TObject);
+var
+  LIdx: Integer;
 begin
   // 从下拉框获取选择的任务ID
-  FTaskID := UniComboBoxTask.ItemIndex;
+  LIdx := UniComboBoxTask.ItemIndex;
+  if LIdx <= 0 then
+    FTaskID := 0
+  else if UniComboBoxTask.Items.Objects[LIdx] <> nil then
+    FTaskID := Integer(UniComboBoxTask.Items.Objects[LIdx])
+  else
+    FTaskID := 0;
+
   Refresh;
 end;
 
@@ -90,19 +204,23 @@ procedure TTaskLogFrame.UniDBGridAfterScroll(DataSet: TDataSet);
 var
   LDetail: string;
 begin
-  if not qryLogs.Eof then
+  if Assigned(FLastDataSet) and not FLastDataSet.Eof then
   begin
     LDetail := '开始时间: ' + FormatDateTime('yyyy-mm-dd hh:nn:ss',
-      qryLogs.FieldByName('StartTime').AsDateTime) + #13#10;
+      FLastDataSet.FieldByName('StartTime').AsDateTime) + #13#10;
     LDetail := LDetail + '结束时间: ' + FormatDateTime('yyyy-mm-dd hh:nn:ss',
-      qryLogs.FieldByName('EndTime').AsDateTime) + #13#10;
-    LDetail := LDetail + '执行状态: ' + Ifthen(qryLogs.FieldByName('Status').AsInteger = 1, '成功', '失败') + #13#10;
-    LDetail := LDetail + '执行时长: ' + IntToStr(qryLogs.FieldByName('Duration').AsInteger) + ' ms' + #13#10;
+      FLastDataSet.FieldByName('EndTime').AsDateTime) + #13#10;
+    LDetail := LDetail + '执行状态: ' +
+      FLastDataSet.FieldByName('StatusText').AsString + #13#10;
+    LDetail := LDetail + '执行时长: ' +
+      IntToStr(FLastDataSet.FieldByName('Duration').AsInteger) + ' ms' + #13#10;
 
-    if qryLogs.FieldByName('Status').AsInteger = 0 then
-      LDetail := LDetail + '错误信息: ' + qryLogs.FieldByName('ErrorMessage').AsString + #13#10;
+    if FLastDataSet.FieldByName('Status').AsInteger = 0 then
+      LDetail := LDetail + '错误信息: ' +
+        FLastDataSet.FieldByName('ErrorMessage').AsString + #13#10;
 
-    LDetail := LDetail + '执行结果: ' + qryLogs.FieldByName('Result').AsString;
+    LDetail := LDetail + '执行结果: ' +
+      FLastDataSet.FieldByName('Result').AsString;
 
     UniMemoDetail.Text := LDetail;
   end;

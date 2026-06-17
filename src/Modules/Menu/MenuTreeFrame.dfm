@@ -6,7 +6,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
     Top = 0
     Width = 900
     Height = 600
-    Hint = '
+    Hint = ''
     Align = alClient
     TabOrder = 0
     object pnlLeft: TUniPanel
@@ -30,7 +30,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 60
           Height = 13
-          Hint = '
+          Hint = ''
           Caption = #33756#21333#26641
           TabOrder = 1
         end
@@ -39,7 +39,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 27
           Width = 332
           Height = 523
-          Hint = '
+          Hint = ''
           Align = alCustom
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 0
@@ -61,7 +61,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 6
           Width = 80
           Height = 25
-          Hint = '
+          Hint = ''
           Caption = #20840#37096#23637#24320
           TabOrder = 0
           OnClick = btnExpandAllClick
@@ -71,7 +71,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 6
           Width = 80
           Height = 25
-          Hint = 
+          Hint = ''
           Caption = #20840#37096#25240#21472
           TabOrder = 1
           OnClick = btnCollapseAllClick
@@ -83,7 +83,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
       Top = 1
       Width = 4
       Height = 598
-      Hint = '
+      Hint = ''
       Align = alLeft
     end
     object pnlRight: TUniPanel
@@ -108,7 +108,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Width = 60
           Height = 13
           Hint = ''
-          Caption = #25628#32034:
+          Caption = #25628#32034':'
           TabOrder = 1
         end
         object edtSearch: TUniEdit
@@ -116,7 +116,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 150
           Height = 22
-          Hint = '
+          Hint = ''
           TextHint = #33756#21333#32534#30721#25110#21517#31216
           TabOrder = 2
           OnKeyPress = edtSearchKeyPress
@@ -126,7 +126,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 80
           Height = 21
-          Hint = 
+          Hint = ''
           Style = csDropDown
           ItemIndex = 0
           TabOrder = 3
@@ -141,7 +141,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Top = 8
           Width = 60
           Height = 25
-          Hint = 
+          Hint = ''
           Caption = #25628#32034
           TabOrder = 4
           OnClick = btnSearchClick
@@ -152,7 +152,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
         Top = 41
         Width = 542
         Height = 556
-        Hint = 
+        Hint = ''
         Align = alClient
         TabOrder = 0
         DataSource = UniDataSource

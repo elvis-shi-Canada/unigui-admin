@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB,
   UniContext, UniPlugin.Types,
-  UserService.Intf, UserDataModule;
+  UserService.Intf, UserDataModule, LogService;
 
 type
   /// <summary>
@@ -21,6 +21,7 @@ type
     procedure FinalizeDataModule;
     function DataSetToUserInfo(const DataSet: TDataSet): TUserInfo;
     function GetStatusText(Status: Integer): string;
+    procedure RecordOperationLog(const AModule, AOperation, ADescription: string);
   public
     constructor Create(const Context: IExecutionContext); reintroduce;
     destructor Destroy; override;
@@ -125,6 +126,37 @@ begin
   end;
 end;
 
+procedure TUniUserService.RecordOperationLog(const AModule, AOperation, ADescription: string);
+var
+  LLogService: TLogService;
+begin
+  if not Assigned(FContext) then
+    Exit;
+
+  LLogService := TLogService.Create(FContext);
+  try
+    try
+      LLogService.LogOperation(
+        FContext.GetCurrentUserID,
+        FContext.GetCurrentUserName,
+        AModule,
+        AOperation,
+        ADescription,
+        '',   // RequestData
+        '',   // ResponseData
+        '',   // IP
+        '',   // UserAgent
+        0,    // Duration
+        1     // Status: 1=成功
+      );
+    except
+      // 日志记录不应影响业务逻辑，静默处理异常
+    end;
+  finally
+    LLogService.Free;
+  end;
+end;
+
 function TUniUserService.GetUsers(const Filter: string; Status: Integer; 
   Page, PageSize: Integer): TArray<TUserInfo>;
 var
@@ -205,25 +237,25 @@ end;
 function TUniUserService.CreateUser(const UserName, Password, RealName, Email, Phone: string): Integer;
 begin
   Result := FDataModule.CreateUser(UserName, Password, RealName, Email, Phone);
-  // TODO: 记录操作日志
+  RecordOperationLog('用户管理', '创建用户', Format('创建用户: %s', [UserName]));
 end;
 
 procedure TUniUserService.UpdateUser(UserID: Integer; const RealName, Email, Phone: string);
 begin
   FDataModule.UpdateUser(UserID, RealName, Email, Phone);
-  // TODO: 记录操作日志
+  RecordOperationLog('用户管理', '更新用户', Format('更新用户ID: %d', [UserID]));
 end;
 
 procedure TUniUserService.DeleteUser(UserID: Integer);
 begin
   FDataModule.DeleteUser(UserID);
-  // TODO: 记录操作日志
+  RecordOperationLog('用户管理', '删除用户', Format('删除用户ID: %d', [UserID]));
 end;
 
 procedure TUniUserService.SetUserStatus(UserID, Status: Integer);
 begin
   FDataModule.SetUserStatus(UserID, Status);
-  // TODO: 记录操作日志
+  RecordOperationLog('用户管理', '修改状态', Format('用户ID: %d, 状态: %d', [UserID, Status]));
 end;
 
 function TUniUserService.IsUserAvailable(UserID: Integer): Boolean;
@@ -241,13 +273,13 @@ end;
 procedure TUniUserService.ChangePassword(UserID: Integer; const OldPassword, NewPassword: string);
 begin
   FDataModule.ChangePassword(UserID, OldPassword, NewPassword);
-  // TODO: 记录操作日志
+  RecordOperationLog('用户管理', '修改密码', Format('修改密码, 用户ID: %d', [UserID]));
 end;
 
 procedure TUniUserService.ResetPassword(UserID: Integer; const NewPassword: string);
 begin
   FDataModule.ResetPassword(UserID, NewPassword);
-  // TODO: 记录操作日志
+  RecordOperationLog('用户管理', '重置密码', Format('重置密码, 用户ID: %d', [UserID]));
 end;
 
 function TUniUserService.VerifyPassword(const UserName, Password: string): Boolean;

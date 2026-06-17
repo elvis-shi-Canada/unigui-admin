@@ -5,48 +5,10 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniDataModule,
+  DictionaryService.Intf;
 
 type
-  /// <summary>
-  /// 字典类型记录
-  /// </summary>
-  TDictTypeInfo = record
-    TypeID: Integer;
-    TypeCode: string;
-    TypeName: string;
-    Description: string;
-    SortOrder: Integer;
-    Status: Integer;
-    StatusText: string;
-    CreatedDate: TDateTime;
-    CreatedBy: Integer;
-    ModifiedDate: TDateTime;
-    ModifiedBy: Integer;
-    ItemCount: Integer;
-  end;
-
-  /// <summary>
-  /// 字典项记录
-  /// </summary>
-  TDictItemInfo = record
-    ItemID: Integer;
-    TypeID: Integer;
-    TypeCode: string;
-    TypeName: string;
-    ItemCode: string;
-    ItemName: string;
-    ItemValue: string;
-    SortOrder: Integer;
-    Status: Integer;
-    StatusText: string;
-    Remark: string;
-    CreatedDate: TDateTime;
-    CreatedBy: Integer;
-    ModifiedDate: TDateTime;
-    ModifiedBy: Integer;
-  end;
-
   /// <summary>
   /// 数据字典数据模块 - 提供字典类型和字典项的 CRUD 操作
   /// </summary>

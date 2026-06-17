@@ -28,6 +28,9 @@ type
     function ExportLoginLogToCsv(const FileName: string; DataSet: TDataSet): Boolean;
     function ExportOperationLogToCsv(const FileName: string; DataSet: TDataSet): Boolean;
     function ExportDataChangeLogToCsv(const FileName: string; DataSet: TDataSet): Boolean;
+
+    function ExportToJson(const FileName: string; DataSet: TDataSet; const Fields: array of string): Boolean;
+    function ExportToXml(const FileName: string; DataSet: TDataSet; const RootName, ItemName: string; const Fields: array of string): Boolean;
   public
     constructor Create(const Context: IExecutionContext); reintroduce;
     destructor Destroy; override;
@@ -46,6 +49,9 @@ type
   end;
 
 implementation
+
+uses
+  System.JSON;
 
 { TLogExport }
 
@@ -85,9 +91,11 @@ begin
       lefCsv:
         Result := ExportLoginLogToCsv(FileName, LDataSet);
       lefJson:
-        Result := False; // TODO: 实现 JSON 导出
+        Result := ExportToJson(FileName, LDataSet,
+          ['LogID', 'UserID', 'UserName', 'LoginIP', 'LoginTime', 'LogoutTime', 'Status', 'UserAgent', 'FailReason']);
       lefXml:
-        Result := False; // TODO: 实现 XML 导出
+        Result := ExportToXml(FileName, LDataSet, 'LoginLogs', 'LoginLog',
+          ['LogID', 'UserID', 'UserName', 'LoginIP', 'LoginTime', 'LogoutTime', 'Status', 'UserAgent', 'FailReason']);
     end;
   finally
     LDataSet.Free;
@@ -109,9 +117,11 @@ begin
       lefCsv:
         Result := ExportOperationLogToCsv(FileName, LDataSet);
       lefJson:
-        Result := False; // TODO: 实现 JSON 导出
+        Result := ExportToJson(FileName, LDataSet,
+          ['LogID', 'UserID', 'UserName', 'Module', 'Operation', 'Description', 'IP', 'Duration', 'Status', 'CreatedDate']);
       lefXml:
-        Result := False; // TODO: 实现 XML 导出
+        Result := ExportToXml(FileName, LDataSet, 'OperationLogs', 'OperationLog',
+          ['LogID', 'UserID', 'UserName', 'Module', 'Operation', 'Description', 'IP', 'Duration', 'Status', 'CreatedDate']);
     end;
   finally
     LDataSet.Free;
@@ -133,9 +143,11 @@ begin
       lefCsv:
         Result := ExportDataChangeLogToCsv(FileName, LDataSet);
       lefJson:
-        Result := False; // TODO: 实现 JSON 导出
+        Result := ExportToJson(FileName, LDataSet,
+          ['LogID', 'UserID', 'UserName', 'TableName', 'RecordID', 'Operation', 'IP', 'CreatedDate']);
       lefXml:
-        Result := False; // TODO: 实现 XML 导出
+        Result := ExportToXml(FileName, LDataSet, 'DataChangeLogs', 'DataChangeLog',
+          ['LogID', 'UserID', 'UserName', 'TableName', 'RecordID', 'Operation', 'IP', 'CreatedDate']);
     end;
   finally
     LDataSet.Free;
@@ -273,6 +285,154 @@ end;
 function TLogExport.ExportDataChangeLogToCsv(const FileName: string; DataSet: TDataSet): Boolean;
 begin
   Result := ExportDataChangeLogToExcel(FileName, DataSet);
+end;
+
+function TLogExport.ExportToJson(const FileName: string; DataSet: TDataSet;
+  const Fields: array of string): Boolean;
+var
+  LStream: TFileStream;
+  LWriter: TStreamWriter;
+  LFirst: Boolean;
+  I: Integer;
+  LField: TField;
+  LValue: string;
+begin
+  Result := False;
+
+  LStream := TFileStream.Create(FileName, fmCreate);
+  try
+    LWriter := TStreamWriter.Create(LStream, TEncoding.UTF8);
+    try
+      LWriter.Write('[');
+
+      DataSet.First;
+      LFirst := True;
+      while not DataSet.Eof do
+      begin
+        if not LFirst then
+          LWriter.Write(',')
+        else
+          LFirst := False;
+
+        LWriter.Write('{');
+        for I := Low(Fields) to High(Fields) do
+        begin
+          if I > Low(Fields) then
+            LWriter.Write(',');
+
+          LField := DataSet.FindField(Fields[I]);
+          LWriter.Write('"' + Fields[I] + '":');
+
+          if (LField = nil) or LField.IsNull then
+            LWriter.Write('null')
+          else
+          begin
+            case LField.DataType of
+              ftInteger, ftSmallint, ftWord, ftLargeint, ftShortint, ftByte:
+                LWriter.Write(IntToStr(LField.AsLargeInt));
+              ftFloat, ftCurrency, ftBCD, ftFMTBcd, ftSingle:
+                LWriter.Write(FloatToStr(LField.AsFloat));
+              ftBoolean:
+                if LField.AsBoolean then
+                  LWriter.Write('true')
+                else
+                  LWriter.Write('false');
+              ftDate, ftTime, ftDateTime, ftTimeStamp:
+                begin
+                  LValue := FormatDateTime('yyyy-mm-dd''T''hh:nn:ss', LField.AsDateTime);
+                  LWriter.Write('"' + LValue + '"');
+                end;
+            else
+              // String types - escape quotes and backslashes
+              LValue := LField.AsString;
+              LValue := StringReplace(LValue, '\', '\\', [rfReplaceAll]);
+              LValue := StringReplace(LValue, '"', '\"', [rfReplaceAll]);
+              LValue := StringReplace(LValue, #13#10, '\n', [rfReplaceAll]);
+              LValue := StringReplace(LValue, #10, '\n', [rfReplaceAll]);
+              LValue := StringReplace(LValue, #13, '\n', [rfReplaceAll]);
+              LValue := StringReplace(LValue, #9, '\t', [rfReplaceAll]);
+              LWriter.Write('"' + LValue + '"');
+            end;
+          end;
+        end;
+        LWriter.Write('}');
+
+        DataSet.Next;
+      end;
+
+      LWriter.Write(']');
+
+      Result := True;
+    finally
+      LWriter.Free;
+    end;
+  finally
+    LStream.Free;
+  end;
+end;
+
+function TLogExport.ExportToXml(const FileName: string; DataSet: TDataSet;
+  const RootName, ItemName: string; const Fields: array of string): Boolean;
+var
+  LStream: TFileStream;
+  LWriter: TStreamWriter;
+  I: Integer;
+  LField: TField;
+  LValue: string;
+begin
+  Result := False;
+
+  LStream := TFileStream.Create(FileName, fmCreate);
+  try
+    LWriter := TStreamWriter.Create(LStream, TEncoding.UTF8);
+    try
+      LWriter.WriteLine('<?xml version="1.0" encoding="UTF-8"?>');
+      LWriter.WriteLine('<' + RootName + '>');
+
+      DataSet.First;
+      while not DataSet.Eof do
+      begin
+        LWriter.WriteLine('  <' + ItemName + '>');
+
+        for I := Low(Fields) to High(Fields) do
+        begin
+          LField := DataSet.FindField(Fields[I]);
+
+          if (LField = nil) or LField.IsNull then
+            LWriter.WriteLine('    <' + Fields[I] + '/>')
+          else
+          begin
+            case LField.DataType of
+              ftDate, ftTime, ftDateTime, ftTimeStamp:
+                LValue := FormatDateTime('yyyy-mm-dd''T''hh:nn:ss', LField.AsDateTime);
+            else
+              LValue := LField.AsString;
+            end;
+
+            // Escape XML special characters
+            LValue := StringReplace(LValue, '&', '&amp;', [rfReplaceAll]);
+            LValue := StringReplace(LValue, '<', '&lt;', [rfReplaceAll]);
+            LValue := StringReplace(LValue, '>', '&gt;', [rfReplaceAll]);
+            LValue := StringReplace(LValue, '"', '&quot;', [rfReplaceAll]);
+            LValue := StringReplace(LValue, '''', '&apos;', [rfReplaceAll]);
+
+            LWriter.WriteLine('    <' + Fields[I] + '>' + LValue + '</' + Fields[I] + '>');
+          end;
+        end;
+
+        LWriter.WriteLine('  </' + ItemName + '>');
+        DataSet.Next;
+      end;
+
+      LWriter.WriteLine('</' + RootName + '>');
+
+      Result := True;
+    finally
+      LWriter.Free;
+    end;
+  finally
+    LStream.Free;
+  end;
 end;
 
 end.

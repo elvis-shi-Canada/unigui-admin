@@ -1,12 +1,13 @@
-unit IconSelector;
+﻿unit IconSelector;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
-  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniButton, uniLabel,
-  uniEdit, uniPanel, uniGUIForm, uniImage, uniScrollBox, uniRadioGroup,
-  UniContext, UniPlugin.Types;
+  System.UITypes,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniButton, uniLabel, UniComboBox,
+  uniEdit, uniPanel, uniGUIForm, uniImage, uniScrollBox, uniRadioGroup,  UniCheckBox,
+  UniContext, UniPlugin.Types, uniMultiItem, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -55,6 +56,8 @@ type
     procedure SelectIcon(const IconClass: string);
     procedure CreateIconButtons(ParentPanel: TUniPanel);
     procedure Cleanup;
+    function MatchesCategory(const DisplayName, Category: string): Boolean;
+    procedure IconButtonClick(Sender: TObject);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -239,9 +242,12 @@ begin
 end;
 
 procedure TIconSelector.RefreshIconGrid;
+var
+  I: Integer;
 begin
-  // 清空现有图标
-  pnlIconGrid.Controls.Clear;
+  // 清空现有图标 - UniGUI 使用 DisposeChildren
+  for I := pnlIconGrid.ControlCount - 1 downto 0 do
+    pnlIconGrid.Controls[I].Free;
 
   // 创建图标按钮
   CreateIconButtons(pnlIconGrid);
@@ -360,19 +366,7 @@ begin
     );
 
     // 点击事件
-    LButton.OnClick := procedure(Sender: TObject)
-      var
-        LBtn: TUniButton;
-        LSelectedPair: TPair<string, string>;
-      begin
-        LBtn := TUniButton(Sender);
-
-        if (LBtn.Tag >= 0) and (LBtn.Tag < FFilteredIcons.Count) then
-        begin
-          LSelectedPair := FFilteredIcons[LBtn.Tag];
-          SelectIcon(LSelectedPair.Key);
-        end;
-      end;
+    LButton.OnClick := IconButtonClick;
 
     // 计算位置
     Inc(LIndex);
@@ -445,6 +439,20 @@ begin
   end;
 
   ModalResult := mrOK;
+end;
+
+procedure TIconSelector.IconButtonClick(Sender: TObject);
+var
+  LBtn: TUniButton;
+  LSelectedPair: TPair<string, string>;
+begin
+  LBtn := TUniButton(Sender);
+
+  if (LBtn.Tag >= 0) and (LBtn.Tag < FFilteredIcons.Count) then
+  begin
+    LSelectedPair := FFilteredIcons[LBtn.Tag];
+    SelectIcon(LSelectedPair.Key);
+  end;
 end;
 
 procedure TIconSelector.btnCancelClick(Sender: TObject);

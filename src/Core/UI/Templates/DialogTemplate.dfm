@@ -1,37 +1,33 @@
 object DialogTemplate: TDialogTemplate
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
-  Caption = #23545#35805#26694
   ClientHeight = 300
   ClientWidth = 500
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma
-  Font.Style = []
+  Caption = #23545#35805#26694
+  BorderStyle = bsDialog
   OldCreateOrder = False
-  Position = poScreenCenter
-  PixelsPerInch = 96
-  TextHeight = 13
+  MonitoredKeys.Keys = <>
+  Font.Name = 'Tahoma'
+  TextHeight = 14
   object pnlContent: TUniPanel
     Left = 0
     Top = 0
     Width = 500
     Height = 240
+    Hint = ''
     Align = alClient
-    Color = clWindow
-    ParentColor = False
     TabOrder = 0
+    Caption = ''
+    Color = clWindow
     object lblMessage: TUniLabel
       Left = 20
       Top = 20
       Width = 460
       Height = 180
+      Hint = ''
       AutoSize = False
       Caption = #23545#35805#26694#20869#23481
-      WordWrap = True
+      TabOrder = 1
     end
   end
   object pnlButtons: TUniPanel
@@ -39,40 +35,39 @@ object DialogTemplate: TDialogTemplate
     Top = 240
     Width = 500
     Height = 60
+    Hint = ''
     Align = alBottom
-    Color = clBtnFace
-    ParentColor = False
     TabOrder = 1
+    Caption = ''
     object btnYes: TUniButton
       Left = 120
       Top = 15
       Width = 75
       Height = 30
-      Caption = #26159(&Y)'
+      Hint = ''
+      Caption = #26159'(&Y)'
       ModalResult = 6
-      TabOrder = 0
+      TabOrder = 1
     end
     object btnNo: TUniButton
       Left = 210
       Top = 15
       Width = 75
       Height = 30
-      Caption = #21542(&N)
+      Hint = ''
+      Caption = #21542'(&N)'
       ModalResult = 7
-      TabOrder = 1
+      TabOrder = 2
     end
     object btnCancel: TUniButton
       Left = 300
       Top = 15
       Width = 75
       Height = 30
-      Caption = '#21462#28040(&C)
+      Hint = ''
+      Caption = #21462#28040'(&C)'
       ModalResult = 2
-      TabOrder = 2
+      TabOrder = 3
     end
-  end
-  object UniThemeManager1: TUniThemeManager
-    Left = 456
-    Top = 16
   end
 end

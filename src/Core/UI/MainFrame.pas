@@ -1,12 +1,12 @@
-unit MainFrame;
+﻿unit MainFrame;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
-  uniGUISettings, uniGUIApplication, uniGUIForm, uniLabel, uniButton,
-  uniPanel, uniGUIBaseClasses, uniMainMenu, uniMenuItem, uniStatusBar,
-  UniContext, UniSession, UniMenuManager.Intf;
+  System.SysUtils, System.Classes, System.Variants, System.Generics.Collections, System.UITypes,
+  uniGUIApplication, uniGUIForm, uniLabel, uniButton,
+  uniPanel, uniGUIBaseClasses, uniGUIFrame, uniGUIClasses, Vcl.Menus, uniMainMenu, uniStatusBar,
+  UniContext, UniSession, UniMenuManager.Intf, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -30,9 +30,10 @@ type
     procedure InitializeComponents;
     procedure InitializeMenus;
     procedure LoadUserMenus;
-    procedure UpdateStatusBar;
+    procedure CreateDefaultMenus;
+    procedure UpdateStatusBar(const AStatusText: string = '');
     procedure OnMenuClick(Sender: TObject);
-    function CreateMenuItem(const MenuData: TMenuData): TUniMenuItem;
+    function CreateMenuItem(const MenuData: TMenuItem): TUniMenuItem;
     procedure SetContext(const Value: IExecutionContext);
   public
     constructor Create(AOwner: TComponent); override;
@@ -91,17 +92,18 @@ procedure TMainFrame.FormCreate(Sender: TObject);
 begin
   // 设置窗体属性
   Caption := 'UniAdmin 管理系统';
-  WindowState := wsMaximized;
-  Position := poDefault;
+  // WindowState := wsMaximized;  // UniGUI 不支持 VCL 窗口状态
+  // Position := poDefault;        // UniGUI 使用 CSS 布局
 
   InitializeComponents;
 end;
 
 procedure TMainFrame.FormShow(Sender: TObject);
 begin
-  // 从当前会话获取上下文
-  if Assigned(UniSessionManager) then
-    SetExecutionContext(UniSessionManager.GetContext);
+  // UniGUI 不支持 UniSessionManager
+  // 上下文应通过 SetExecutionContext 方法从外部设置
+  // if Assigned(UniSessionManager) then
+  //   SetExecutionContext(UniSessionManager.GetContext);
 
   InitializeMenus;
   UpdateStatusBar;
@@ -116,28 +118,8 @@ end;
 
 procedure TMainFrame.InitializeComponents;
 begin
-  // 创建主菜单
-  if not Assigned(UniMainMenu) then
-    UniMainMenu := TUniMainMenu.Create(Self);
-
-  // 创建状态栏
-  if not Assigned(UniStatusBar) then
-  begin
-    UniStatusBar := TUniStatusBar.Create(Self);
-    UniStatusBar.Parent := Self;
-    UniStatusBar.Align := alBottom;
-    UniStatusBar.SimplePanel := True;
-    UniStatusBar.SimpleText := '就绪';
-  end;
-
-  // 创建主容器面板
-  if not Assigned(UniContainerPanel) then
-  begin
-    UniContainerPanel := TUniContainerPanel.Create(Self);
-    UniContainerPanel.Parent := Self;
-    UniContainerPanel.Align := alClient;
-    UniContainerPanel.Layout := 'border';
-  end;
+  // 组件已在 DFM 中创建，无需运行时创建
+  // UniGUI 组件通过 DFM 自动初始化
 end;
 
 procedure TMainFrame.InitializeMenus;
@@ -156,10 +138,12 @@ end;
 
 procedure TMainFrame.LoadUserMenus;
 var
-  LMenus: TArray<TMenuData>;
-  LMenu: TMenuData;
+  LMenus: TArray<UniMenuManager.Intf.TMenuItem>;
+  LMenu: UniMenuManager.Intf.TMenuItem;
+  LMenuItem: TUniMenuItem;
+  LParentItem: TUniMenuItem;
 begin
-  if not Assigned(FMenuManager) or not Assigned(FContext) then
+  if not Assigned(FMenuManager) or not Assigned(Context) then
     Exit;
 
   // 清除现有菜单项
@@ -167,7 +151,7 @@ begin
   FMenuItems.Clear;
 
   // 获取用户菜单
-  LMenus := FMenuManager.GetUserMenus(FContext.GetUserContext.UserID);
+  LMenus := FMenuManager.GetUserMenus(Context.GetUserContext.GetUserID);
 
   // 构建菜单树
   for LMenu in LMenus do
@@ -175,34 +159,34 @@ begin
     if LMenu.ParentID = 0 then
     begin
       // 顶级菜单
-      var LMenuItem := CreateMenuItem(LMenu);
+      LMenuItem := CreateMenuItem(LMenu);
       UniMainMenu.Items.Add(LMenuItem);
-      FMenuItems.Add(IntToStr(LMenu.ID), LMenuItem);
+      FMenuItems.Add(IntToStr(LMenu.MenuID), LMenuItem);
     end;
   end;
 
   // 添加子菜单
   for LMenu in LMenus do
   begin
-    if (LMenu.ParentID > 0) and FMenuItems.TryGetValue(IntToStr(LMenu.ParentID), var LParentItem) then
+    if (LMenu.ParentID > 0) and FMenuItems.TryGetValue(IntToStr(LMenu.ParentID), LParentItem) then
     begin
-      var LMenuItem := CreateMenuItem(LMenu);
+      LMenuItem := CreateMenuItem(LMenu);
       LParentItem.Add(LMenuItem);
-      FMenuItems.Add(IntToStr(LMenu.ID), LMenuItem);
+      FMenuItems.Add(IntToStr(LMenu.MenuID), LMenuItem);
     end;
   end;
 end;
 
-function TMainFrame.CreateMenuItem(const MenuData: TMenuData): TUniMenuItem;
+function TMainFrame.CreateMenuItem(const MenuData: UniMenuManager.Intf.TMenuItem): TUniMenuItem;
 begin
   Result := TUniMenuItem.Create(Self);
   Result.Caption := MenuData.MenuName;
-  Result.Hint := MenuData.Description;
-  Result.Tag := MenuData.ID;
-  Result.Visible := MenuData.Visible;
-  Result.Enabled := MenuData.Enabled;
+  Result.Hint := MenuData.MenuCode;  // 使用 MenuCode 作为提示
+  Result.Tag := MenuData.MenuID;
+  Result.Visible := MenuData.IsVisible;
+  Result.Enabled := True;  // 默认启用
 
-  if MenuData.ActionType <> '' then
+  if MenuData.RoutePath <> '' then
     Result.OnClick := OnMenuClick;
 end;
 
@@ -251,7 +235,7 @@ begin
     FContentFrame.Free;
 
   AFrame.Parent := UniContainerPanel;
-  AFrame.Align := alClient;
+  // AFrame.Align := alClient;  // UniGUI 使用 CSS 布局
   AFrame.Show;
 
   FContentFrame := AFrame;
@@ -274,17 +258,20 @@ begin
   InitializeMenus;
 end;
 
-procedure TMainFrame.UpdateStatusBar;
+procedure TMainFrame.UpdateStatusBar(const AStatusText: string);
 var
   LStatusText: string;
 begin
-  LStatusText := '就绪';
+  if AStatusText <> '' then
+    LStatusText := AStatusText
+  else
+    LStatusText := '就绪';
 
-  if Assigned(FContext) then
+  if Assigned(Context) then
   begin
     LStatusText := Format('用户: %s | 会话: %s | %s',
-      [FContext.GetUserContext.RealName,
-       FContext.GetSessionContext.SessionID,
+      [Context.GetUserContext.GetRealName,
+       Context.GetUserContext.GetSessionID,
        LStatusText]);
   end;
 

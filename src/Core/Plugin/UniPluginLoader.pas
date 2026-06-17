@@ -1,4 +1,4 @@
-unit UniPluginLoader;
+﻿unit UniPluginLoader;
 
 interface
 
@@ -21,7 +21,7 @@ type
   /// 插件加载器接口
   /// </summary>
   IUniPluginLoader = interface(IInterface)
-    ['{UNI-PLUGIN-LOADER-001}']
+    ['{4E411DAB-431B-4493-9CC9-8FB5D33A179F}']
     function LoadPlugin(const PluginName: string; const UserContext: IUserContext;
       const ExecutionContext: IExecutionContext): IPlugin;
     function UnloadPlugin(const PluginName: string): Boolean;

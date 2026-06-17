@@ -1,4 +1,4 @@
-unit ConfigService;
+﻿unit ConfigService;
 
 interface
 
@@ -236,8 +236,6 @@ function TConfigService.GetConfigByID(ConfigID: Integer): TConfigInfo;
 var
   LDataSet: TDataSet;
 begin
-  Result := TConfigInfo.Create;
-
   LDataSet := FDataModule.GetConfigByID(ConfigID);
   try
     if not LDataSet.Eof then
@@ -253,8 +251,6 @@ function TConfigService.GetConfigByKey(const ConfigKey: string): TConfigInfo;
 var
   LDataSet: TDataSet;
 begin
-  Result := TConfigInfo.Create;
-
   LDataSet := FDataModule.GetConfigByKey(ConfigKey);
   try
     if not LDataSet.Eof then

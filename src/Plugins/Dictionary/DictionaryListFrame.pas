@@ -61,6 +61,9 @@ type
 
 implementation
 
+uses
+  System.Generics.Collections;
+
 { TDictionaryListFrame }
 
 constructor TDictionaryListFrame.Create(AOwner: TComponent);
@@ -243,15 +246,27 @@ begin
 end;
 
 procedure TDictionaryListFrame.btnAddClick(Sender: TObject);
+var
+  LDictCode, LDictName, LDictType, LDescription: string;
 begin
-  // TODO: 实现添加功能
-  // 显示添加对话框
-  ShowMessage('添加功能 - 待实现');
+  LDictCode := InputBox('添加字典', '字典编码:', '');
+  if LDictCode = '' then Exit;
+  LDictName := InputBox('添加字典', '字典名称:', '');
+  if LDictName = '' then Exit;
+  LDictType := InputBox('添加字典', '字典类型:', '');
+  LDescription := InputBox('添加字典', '描述:', '');
+
+  if Assigned(FDataModule) then
+  begin
+    FDataModule.AddDictionary(LDictCode, LDictName, LDictType, LDescription, 0);
+    RefreshDictionaries;
+    StatusBar.SimpleText := '添加成功';
+  end;
 end;
 
 procedure TDictionaryListFrame.btnEditClick(Sender: TObject);
 var
-  LDictID: Integer;
+  LDictID, LIdx: Integer;
 begin
   LDictID := GetSelectedDictionaryID;
   if LDictID = 0 then
@@ -260,9 +275,23 @@ begin
     Exit;
   end;
 
-  // TODO: 实现编辑功能
-  // 显示编辑对话框
-  ShowMessage('编辑功能 - 待实现');
+  // 查找当前值
+  LIdx := -1;
+  for var I := 0 to High(FDictionaries) do
+    if FDictionaries[I].ID = LDictID then begin LIdx := I; Break; end;
+  if LIdx < 0 then Exit;
+
+  var LDictCode := InputBox('编辑字典', '字典编码:', FDictionaries[LIdx].DictCode);
+  var LDictName := InputBox('编辑字典', '字典名称:', FDictionaries[LIdx].DictName);
+  var LDictType := InputBox('编辑字典', '字典类型:', FDictionaries[LIdx].DictType);
+  var LDescription := InputBox('编辑字典', '描述:', FDictionaries[LIdx].Description);
+
+  if Assigned(FDataModule) then
+  begin
+    FDataModule.UpdateDictionary(LDictID, LDictCode, LDictName, LDictType, LDescription, FDictionaries[LIdx].SortOrder);
+    RefreshDictionaries;
+    StatusBar.SimpleText := '编辑成功';
+  end;
 end;
 
 procedure TDictionaryListFrame.btnDeleteClick(Sender: TObject);
@@ -301,10 +330,35 @@ end;
 procedure TDictionaryListFrame.btnSearchClick(Sender: TObject);
 var
   LSearchText: string;
+  LList: TList<TDictionary>;
+  LDict: TDictionary;
 begin
   LSearchText := Trim(edtSearch.Text);
-  // TODO: 实现搜索功能
-  ShowMessage('搜索功能 - 待实现');
+  if LSearchText = '' then
+  begin
+    LoadDictionaries;
+    Exit;
+  end;
+
+  if Assigned(FDataModule) then
+  begin
+    var LAll := FDataModule.GetDictionaries;
+    LList := TList<TDictionary>.Create;
+    try
+      for LDict in LAll do
+      begin
+        if LDict.DictCode.Contains(LSearchText) or
+           LDict.DictName.Contains(LSearchText) or
+           LDict.Description.Contains(LSearchText) then
+          LList.Add(LDict);
+      end;
+      FDictionaries := LList.ToArray;
+      DisplayDictionaries;
+      StatusBar.SimpleText := Format('搜索完成 - 找到 %d 条记录', [Length(FDictionaries)]);
+    finally
+      LList.Free;
+    end;
+  end;
 end;
 
 procedure TDictionaryListFrame.grdDictionariesSelectCell(Sender: TObject;

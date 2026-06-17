@@ -6,7 +6,7 @@ inherited TaskLogFrame: TTaskLogFrame
     Top = 40
     Width = 800
     Height = 40
-    Hint = '
+    Hint = ''
     Align = alTop
     TabOrder = 0
     object UniLabelTask: TUniLabel
@@ -14,7 +14,7 @@ inherited TaskLogFrame: TTaskLogFrame
       Top = 12
       Width = 60
       Height = 13
-      Hint = '
+      Hint = ''
       Caption = #20219#21153
       TabOrder = 1
     end
@@ -23,7 +23,7 @@ inherited TaskLogFrame: TTaskLogFrame
       Top = 8
       Width = 200
       Height = 21
-      Hint = '
+      Hint = ''
       Style = csDropDown
       ItemIndex = -1
       TabOrder = 2
@@ -33,7 +33,7 @@ inherited TaskLogFrame: TTaskLogFrame
       Top = 8
       Width = 75
       Height = 25
-      Hint = '
+      Hint = ''
       Caption = #26597#35810
       TabOrder = 3
       OnClick = UniButtonSearchClick
@@ -44,7 +44,7 @@ inherited TaskLogFrame: TTaskLogFrame
     Top = 80
     Width = 800
     Height = 300
-    Hint = '
+    Hint = ''
     Align = alClient
     TabOrder = 1
     DataSource = UniDataSource
@@ -63,7 +63,7 @@ inherited TaskLogFrame: TTaskLogFrame
       Top = 8
       Width = 60
       Height = 13
-      Hint = '
+      Hint = ''
       Caption = #25191#34892#35814#24773
       TabOrder = 1
     end
@@ -72,9 +72,9 @@ inherited TaskLogFrame: TTaskLogFrame
       Top = 27
       Width = 784
       Height = 185
-      Hint = '
+      Hint = ''
       Lines.Strings = (
-        ')
+        '')
       TabOrder = 0
     end
   end

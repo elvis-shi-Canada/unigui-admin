@@ -3,10 +3,10 @@ unit WizardTemplate;
 interface
 
 uses
-  System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.Forms,
-  UniGUIBaseClasses, UniGUIClasses, UniThemeManager, UniGUIForm,
-  UniLabel, UniPanel, UniButton, UniMemo;
+  System.SysUtils, System.Classes, System.UITypes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms,
+  UniGUIBaseClasses, UniGUIClasses, UniGUIForm,
+  UniLabel, uniPanel, UniButton, UniMemo;
 
 type
   TWizardTemplate = class(TUniForm)
@@ -25,13 +25,10 @@ type
     pnlButtons: TUniPanel;
     btnBack: TUniButton;
     btnNext: TUniButton;
-    btnFinish: TUniButton;
     btnCancel: TUniButton;
-    UniThemeManager1: TUniThemeManager;
     procedure FormCreate(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
     procedure btnNextClick(Sender: TObject);
-    procedure btnFinishClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
   private
     { Private declarations }
@@ -107,7 +104,11 @@ begin
   // 更新按钮状态
   btnBack.Enabled := CanMoveBack;
   btnNext.Enabled := CanMoveNext;
-  btnFinish.Enabled := CanFinish;
+  // btnFinish 在最后一步时用作 Next
+  if FCurrentStep = FTotalSteps - 1 then
+    btnNext.Caption := #23436#25104(*'完成'*)
+  else
+    btnNext.Caption := #19979#19968#19968(*'下一步'*);
 
   // 更新内容
   lblStepDescription.Caption := Format('步骤 %d 说明', [FCurrentStep + 1]);
@@ -122,14 +123,14 @@ end;
 
 procedure TWizardTemplate.btnNextClick(Sender: TObject);
 begin
-  if CanMoveNext then
+  // 如果在最后一步，则完成向导
+  if FCurrentStep = FTotalSteps - 1 then
+  begin
+    if CanFinish then
+      DoFinish;
+  end
+  else if CanMoveNext then
     SetStep(FCurrentStep + 1);
-end;
-
-procedure TWizardTemplate.btnFinishClick(Sender: TObject);
-begin
-  if CanFinish then
-    DoFinish;
 end;
 
 procedure TWizardTemplate.btnCancelClick(Sender: TObject);

@@ -1,11 +1,12 @@
-unit UserProfileFrame;
+﻿unit UserProfileFrame;
 
 interface
 
 uses
-  System.SysUtils, System.Classes,
+  System.SysUtils, System.Classes, System.UITypes,
   uniGUIBaseClasses, uniGUIClasses, uniEdit, uniButton, uniLabel, uniPanel, uniImage,
-  UniContext;
+  UniContext, uniGUIForm, uniGUIFrame, Vcl.Dialogs,
+  UserService.Intf, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -41,7 +42,6 @@ type
     FUserID: Integer;
     FContext: IExecutionContext;
     
-    procedure LoadUserProfile;
     procedure ValidateInputs;
     procedure InitForm;
   public
@@ -56,7 +56,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UserService, UserPasswordDialog;
+  UserService, UserPasswordDialog, uniGUIApplication;
 
 constructor TUserProfileFrame.Create(AOwner: TComponent);
 begin
@@ -184,7 +184,12 @@ begin
     if LDialog.ShowModal = mrOK then
     begin
       ShowMessage('密码修改成功，请重新登录');
-      // TODO: 触发重新登录
+      // 关闭当前会话，要求用户重新登录
+      if Assigned(FContext) then
+      begin
+        // 在 UniGUI 中通过结束会话触发重新登录
+        UniSession.Terminate('密码已修改，请重新登录');
+      end;
     end;
   finally
     LDialog.Free;

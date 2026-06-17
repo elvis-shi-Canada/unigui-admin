@@ -1,13 +1,13 @@
-unit ConfigCategoryFrame;
+﻿unit ConfigCategoryFrame;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
-  Data.DB, FireDAC.Comp.Client,
-  uniGUIControls, uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
-  uniGrid, uniToolBar, uniLabel, uniComboBox, uniPanel, uniPageControl, uniTabSheet,
-  UniContext, UniPlugin.Types, BaseCrudFrame, ConfigDataModule;
+  System.SysUtils, System.Classes, System.Variants, Data.DB, FireDAC.Comp.Client,
+  uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
+  uniBasicGrid, uniDBGrid, uniStringGrid, uniToolBar, uniLabel, uniMultiItem,
+  uniComboBox, uniPanel, uniPageControl, UniContext, UniPlugin.Types,
+  BaseCrudFrame, ConfigDataModule, ConfigService.Intf;
 
 type
   /// <summary>
@@ -27,12 +27,15 @@ type
     UniDBGridConfigs: TUniDBGrid;
     UniDataSourceConfigs: TDataSource;
     qryConfigs: TFDQuery;
-    FSelectedCategory: string;
 
     procedure UniButtonSearchClick(Sender: TObject);
     procedure UniComboBoxStatusChange(Sender: TObject);
     procedure UniGridCategoriesCellClick(Sender: TObject; ACol, ARow: Integer);
     procedure UniDBGridConfigsDblClick(Sender: TObject);
+  private
+    FSelectedCategory: string;
+    FLastDataSet: TDataSet;
+    procedure FreeLastDataSet;
   protected
     procedure DoInitialize; override;
     procedure DoBindControls; override;
@@ -42,6 +45,7 @@ type
     procedure Initialize; override;
     procedure RefreshCategories;
     procedure RefreshConfigs;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -49,6 +53,21 @@ implementation
 {$R *.dfm}
 
 { TConfigCategoryFrame }
+
+destructor TConfigCategoryFrame.Destroy;
+begin
+  FreeLastDataSet;
+  inherited;
+end;
+
+procedure TConfigCategoryFrame.FreeLastDataSet;
+begin
+  if Assigned(FLastDataSet) then
+  begin
+    UniDataSourceConfigs.DataSet := nil;
+    FreeAndNil(FLastDataSet);
+  end;
+end;
 
 procedure TConfigCategoryFrame.DoInitialize;
 begin
@@ -105,7 +124,7 @@ begin
   LDataModule := TConfigDataModule.Create(nil);
   try
     if Supports(LDataModule, IContextAware) then
-      (LDataModule as IContextAware).SetContext(FContext);
+      (LDataModule as IContextAware).SetContext(Context);
 
     LCategories := LDataModule.GetCategories;
 
@@ -134,27 +153,25 @@ begin
   LStatus := -1;
 
   case UniComboBoxStatus.ItemIndex of
-    1: LStatus := 1;
-    2: LStatus := 0;
+    1:
+      LStatus := 1;
+    2:
+      LStatus := 0;
   end;
 
   LDataModule := TConfigDataModule.Create(nil);
   try
     if Supports(LDataModule, IContextAware) then
-      (LDataModule as IContextAware).SetContext(FContext);
+      (LDataModule as IContextAware).SetContext(Context);
 
     if FSelectedCategory <> '' then
       LDataSet := LDataModule.GetConfigsByCategory(FSelectedCategory, LStatus)
     else
       LDataSet := LDataModule.GetConfigs(LFilter, '', LStatus);
 
-    try
-      qryConfigs.Close;
-      // TODO: 复制数据到 qryConfigs
-      qryConfigs.Open;
-    finally
-      LDataSet.Free;
-    end;
+    FreeLastDataSet;
+    UniDataSourceConfigs.DataSet := LDataSet;
+    FLastDataSet := LDataSet;
   finally
     LDataModule.Free;
   end;
@@ -189,3 +206,4 @@ begin
 end;
 
 end.
+

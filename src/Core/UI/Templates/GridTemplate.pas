@@ -1,12 +1,12 @@
-unit GridTemplate;
+﻿unit GridTemplate;
 
 interface
 
 uses
   System.SysUtils, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Grids,
-  UniGUIBaseModule, UniGUIClasses, UniGUIForm, UniGUIGrid, UniGUIToolbar,
-  UniGUIButton, UniGUIEdit;
+  Vcl.Controls, Vcl.Forms,
+  UniGUIClasses, UniGUIForm,
+  uniButton, uniEdit, uniDBGrid, uniToolBar, uniBasicGrid, uniGUIBaseClasses;
 
 type
   /// <summary>
@@ -23,11 +23,11 @@ type
     UniDBGrid1: TUniDBGrid;
   private
   protected
-    procedure DoAdd; virtual;
-    procedure DoEdit; virtual;
-    procedure DoDelete; virtual;
-    procedure DoRefresh; virtual;
-    procedure DoSearch; virtual;
+    procedure DoAdd(Sender: TObject); virtual;
+    procedure DoEdit(Sender: TObject); virtual;
+    procedure DoDelete(Sender: TObject); virtual;
+    procedure DoRefresh(Sender: TObject); virtual;
+    procedure DoSearch(Sender: TObject); virtual;
   public
   end;
 
@@ -35,27 +35,27 @@ implementation
 
 {$R *.dfm}
 
-procedure TGridTemplate.DoAdd;
+procedure TGridTemplate.DoAdd(Sender: TObject);
 begin
   // 子类实现新增逻辑
 end;
 
-procedure TGridTemplate.DoEdit;
+procedure TGridTemplate.DoEdit(Sender: TObject);
 begin
   // 子类实现编辑逻辑
 end;
 
-procedure TGridTemplate.DoDelete;
+procedure TGridTemplate.DoDelete(Sender: TObject);
 begin
   // 子类实现删除逻辑
 end;
 
-procedure TGridTemplate.DoRefresh;
+procedure TGridTemplate.DoRefresh(Sender: TObject);
 begin
   // 子类实现刷新逻辑
 end;
 
-procedure TGridTemplate.DoSearch;
+procedure TGridTemplate.DoSearch(Sender: TObject);
 begin
   // 子类实现搜索逻辑
 end;
