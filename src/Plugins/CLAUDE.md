@@ -17,6 +17,37 @@ Plugins 模块展示 UniAdmin 框架的插件机制，提供：
 - **独立打包** - 插件可独立编译和分发
 - **依赖管理** - 自动解析插件依赖关系
 
+### 插件生命周期
+
+```mermaid
+stateDiagram-v2
+    [*] --> Loaded: 注册插件类
+    Loaded --> Installed: Initialize()
+    Installed --> Active: Activate()
+    Active --> Deactive: Deactivate()
+    Deactive --> Active: Activate()
+    Deactive --> Disabled: Disable()
+    Disabled --> Active: Enable()
+    Active --> [*]: Unload
+    Disabled --> [*]: Unload
+
+    note right of Loaded: 插件类已注册到 Registry
+    note right of Installed: 初始化资源、注册菜单
+    note right of Active: 完全可用，响应请求
+    note right of Deactive: 已暂停，释放运行时资源
+    note right of Disabled: 已禁用，不可激活
+```
+
+### 子模块导航
+
+| 子模块 | 路径 | 说明 |
+|--------|------|------|
+| Dictionary 字典插件 | `Plugins/Dictionary/` | 完整的插件开发示例，包含 Plugin、ListFrame、DataModule |
+| DictionaryPlugin.pas | `Plugins/Dictionary/DictionaryPlugin.pas` | 插件主类实现 |
+| DictionaryListFrame.pas | `Plugins/Dictionary/DictionaryListFrame.pas` | 插件 UI 界面 |
+| DictionaryDataModule.pas | `Plugins/Dictionary/DictionaryDataModule.pas` | 插件数据访问 |
+| plugin.json | `Plugins/Dictionary/plugin.json` | 插件元数据配置 |
+
 ---
 
 ## 目录结构
@@ -255,9 +286,10 @@ Loaded → Installed → Active → Deactive → Disabled
 
 | 日期 | 操作 | 说明 |
 |------|------|------|
+| 2026-06-24 | 更新 | 添加 Mermaid 生命周期图和子模块导航 |
 | 2026-03-02 | 初始化 | 创建 Plugins 模块文档 |
 
 ---
 
-*模块版本: 1.0*
-*最后更新: 2026-03-02*
+*模块版本: 1.1*
+*最后更新: 2026-06-24*

@@ -501,3 +501,164 @@ r'"([^"]*(?:#[0-9]+)+[^"]*)"'
 □ .dfm中中文已转义为#编码
 □ #编码格式无引号包裹
 ```
+
+
+### 1️⃣1️⃣ UniGUI 启动入口规范（预防：进程启动后立即退出 ExitCode 0）
+
+**触发场景**
+- UniGUI standalone exe 编译通过但运行无反应
+- 修改 dpr 主块后
+- 新建 UniGUI 项目
+- 怀疑服务器未启动
+
+**错误模式**
+```pascal
+// 错误：dpr 主块为空或缺少关键调用
+begin
+  SetConsoleOutputCP(CP_UTF8);
+  // 注释错误地声称"不需要 Application.Run"
+end.
+```
+进程退出码 0，无错误信息，无监听端口。
+
+根本原因：UniGUI **不存在**"首次请求自动初始化"机制。CLAUDE.md/文档中出现的 `Application.ServerModuleClass` / `MainModuleClass` / `LoginFormClass` 属性在 UniGUI 1.6 中**不存在**，是虚构 API。
+
+**正确行为**
+dpr 必须显式三步启动，且 uses 必须含 `Forms`：
+```pascal
+uses
+  Forms,  // 关键：VCL.Forms 提供 Application 全局变量
+  uniGUIApplication,
+  ServerModule in 'Core\Main\ServerModule.pas',
+  ...
+
+begin
+  ReportMemoryLeaksOnShutdown := True;
+  Application.Initialize;
+  TServerModule.Create(Application);  // 创建 ServerModule 实例
+  Application.Run;                    // 启动消息循环
+end.
+```
+ServerModule.pas 必须有 initialization 段注册类：
+```pascal
+uses ..., UniGUIVars;
+
+initialization
+  RegisterServerModuleClass(TServerModule);
+```
+参考：官方 demo `D:\BaiduNetdiskDownload\vcl\UniGUI_1600\uniGUI\Demos\Desktop\AllFeaturesDemo\mdemo.dpr`
+
+**验证方法**
+- 运行 exe，5 秒后检查进程是否存活（不应退出）
+- `Get-NetTCPConnection -OwningProcess <pid> -State Listen` 应显示配置端口（默认 8077）
+- `Invoke-WebRequest http://localhost:8077/` 应返回 200
+
+---
+
+### 1️⃣2️⃣ DFM 事件方法可见性规范（预防：Error reading ... Invalid property value）
+
+**触发场景**
+- DFM 中绑定 OnCreate/OnDestroy/OnClick 等事件
+- 新建 Form/Module/Frame 并添加事件处理方法
+- 代码重组后移动了方法声明位置
+
+**错误模式**
+```pascal
+TServerModule = class(TUniGUIServerModule)
+private
+  ...
+protected
+  procedure OnCreate(Sender: TObject);   // 错！DFM 找不到
+  procedure OnDestroy(Sender: TObject);
+public
+```
+运行时错误：`Exception EReadError ... Error reading ServerModule.OnCreate: Invalid property value`
+
+根本原因：DFM 流读取器通过 RTTI 查找方法，Delphi RTTI 默认只暴露 `published` 成员，`protected`/`private` 区的方法不可达。
+
+**正确行为**
+DFM 引用的事件处理方法必须放在默认 `published` 区（紧接 `class(...)` 后，`private` 前）：
+```pascal
+TServerModule = class(TUniGUIServerModule)
+  procedure OnCreate(Sender: TObject);    // 默认 = published
+  procedure OnDestroy(Sender: TObject);
+private
+  FConfigService: IUniConfigService;
+  ...
+protected
+  // 仅放非事件处理方法
+public
+  ...
+```
+
+**验证方法**
+- 编译后运行 exe，若无 EReadError 即正确
+- 对照官方 demo：类声明开头无可见性修饰符的方法即为 published
+- 规则：凡 DFM 中 `OnXxx = MethodName` 引用的方法，必须在 published 区
+
+---
+
+### 1️⃣3️⃣ bat/cmd 文件纯 ASCII 规范（预防：编码错误导致命令解析失败）
+
+**触发场景**
+- 在 .bat/.cmd 文件中添加中文注释
+- 用 UTF-8 编码的工具（write/编辑器）写入 bat 文件
+- bat 文件迁移自其他系统
+
+**错误模式**
+```bat
+REM 项目根目录（基于本 bat 文件位置，避免硬编码绝对路径）
+SET ROOT=%~dp0..
+```
+错误：`'文件位置，避免硬编码绝对路径)SET' 不是内部或外部命令`
+
+根本原因：
+- write 工具默认 UTF-8 编码
+- Windows cmd 以系统 ANSI 编码（中文 Windows = GBK/CP936）解析 bat
+- UTF-8 中文字节被 GBK 错切，破坏换行符识别
+- REM 行尾的中文与下一行命令合并，被当作无效命令
+
+**正确行为**
+- `.bat`/`.cmd` 文件**必须纯 ASCII**，禁止中文注释
+- 中文说明改英文，或完全删除注释
+- 项目编码规范补充：.pas 用 GBK，.dfm 用 `#编码` 转义，**.bat/.cmd 用纯 ASCII**
+
+**验证方法**
+- `Get-Content <file>.bat` 应无乱码
+- 双击或 cmd 调用 bat，无"不是内部或外部命令"错误
+- 检查：bat 文件中无任何非 ASCII 字符（`Format-Hex <file>.bat | Select-String -NotMatch "^[0-9a-fA-F\s]+" ` 应为空）
+
+---
+
+### 1️⃣4️⃣ uniGUIRegClasses 必须显式加入 dpr（预防：Class TServerControlPanelForm not found）
+
+**触发场景**
+- 访问 `/server` 监控页
+- uniGUI Web Server Monitor 功能
+- 任何 `FindClass('TServerControlPanelForm')` 调用路径
+
+**错误模式**
+```
+Class TServerControlPanelForm not found : Addr: $00F926E2
+```
+根本原因：`uniGUIRegClasses.pas` 是独立单元，不被任何 uniGUI 单元间接引用。其 initialization 段调用 `RegisterClasses([..., TServerControlPanelForm, ...])`，不加入 dpr uses 则类不注册，`FindClass` 失败。
+
+**正确行为**
+dpr uses 子句必须显式包含 `uniGUIRegClasses`：
+```pascal
+uses
+  Forms,
+  UniGUIVars,
+  uniGUIApplication,
+  uniGUIClasses,
+  uniGUIForm,
+  uniGUIRegClasses,  // 注册 TServerControlPanelForm + TUniControlLogin 等
+  ...
+```
+
+**验证方法**
+- 编译后在 exe 中访问 `/server`，不再报 EClassNotFound
+- 确认 dpr uses 含 `uniGUIRegClasses`
+
+---
+

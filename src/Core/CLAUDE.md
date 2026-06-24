@@ -20,6 +20,95 @@ Core 模块是 UniAdmin 框架的基础设施层，提供：
 - **UI 框架** - CRUD 基类和配置驱动组件
 - **服务定位** - 依赖注入和服务生命周期管理
 
+### 子模块依赖关系
+
+```mermaid
+graph TB
+    subgraph 启动层["启动层"]
+        DPR["UniAdmin.dpr"]
+        SM["Main/ServerModule"]
+        MM["Main/MainModule"]
+    end
+
+    subgraph 核心服务["核心服务层"]
+        Svc["Services/UniServices<br/>服务定位器"]
+        Cfg["Config/UniConfigService"]
+        Ctx["Context/UniContext"]
+        Sess["Session/UniSession"]
+    end
+
+    subgraph 数据层["数据层"]
+        CM["Data/UniConnectionManager"]
+        DM["Data/UniDataModule"]
+        MC["Metadata/UniMetadataCache"]
+        FM["Metadata/UniFieldMetadata"]
+    end
+
+    subgraph 安全层["安全层"]
+        Auth["Auth/UniAuthService"]
+        Perm["Permission/UniPermissionManager"]
+    end
+
+    subgraph 扩展层["扩展层"]
+        PI["Plugin/UniPlugin"]
+        MR["Plugin/UniModuleRegistry"]
+        PL["Plugin/UniPluginLoader"]
+        Menu["Menu/UniMenuManager"]
+        SMS["Menu/SystemMenuSetup"]
+    end
+
+    subgraph UI层["UI 框架层"]
+        BCF["UI/BaseCrudFrame"]
+        MA["UI/UniModelAdmin"]
+        LF["UI/LoginForm"]
+        MF["UI/MainFrame"]
+        Tpl["UI/Templates/"]
+        Sched["Scheduler/UniScheduler"]
+    end
+
+    DPR --> SM
+    DPR --> MM
+    SM --> Svc
+    MM --> Auth
+    Svc --> Cfg
+    Svc --> CM
+    Auth --> Perm
+    Auth --> Ctx
+    Auth --> Sess
+    MR --> PI
+    PL --> MR
+    BCF --> MA
+    BCF --> MC
+    MF --> Menu
+    Menu --> SMS
+
+    style 启动层 fill:#e1f5fe,stroke:#01579b
+    style 核心服务 fill:#fff3e0,stroke:#e65100
+    style 数据层 fill:#e8f5e9,stroke:#1b5e20
+    style 安全层 fill:#fce4ec,stroke:#880e4f
+    style 扩展层 fill:#f3e5f5,stroke:#4a148c
+    style UI层 fill:#f1f8e9,stroke:#33691e
+```
+
+### 子模块导航
+
+| 子模块 | 路径 | 关键文件 |
+|--------|------|----------|
+| Context 执行上下文 | `Core/Context/` | `UniContext.pas` |
+| Plugin 插件系统 | `Core/Plugin/` | `UniPlugin.Intf.pas`, `UniModuleRegistry.pas`, `UniPluginLoader.pas` |
+| Data 数据访问 | `Core/Data/` | `UniConnectionManager.pas`, `UniDataModule.pas` |
+| Metadata 元数据 | `Core/Metadata/` | `UniMetadataCache.pas`, `UniFieldMetadata.pas` |
+| Auth 认证服务 | `Core/Auth/` | `UniAuthService.Intf.pas`, `UniAuthService.pas` |
+| Menu 菜单管理 | `Core/Menu/` | `UniMenuManager.pas`, `SystemMenuSetup.pas` |
+| Permission 权限 | `Core/Permission/` | `UniPermissionManager.pas` |
+| Services 服务定位 | `Core/Services/` | `UniServices.pas` |
+| Session 会话 | `Core/Session/` | `UniSession.pas` |
+| Scheduler 调度器 | `Core/Scheduler/` | `UniScheduler.pas`, `UniTaskProcessor.pas` |
+| Config 配置 | `Core/Config/` | `UniConfigService.pas` |
+| Main 主模块 | `Core/Main/` | `ServerModule.pas`, `MainModule.pas` |
+| UI 框架 | `Core/UI/` | `BaseCrudFrame.pas`, `UniModelAdmin.pas`, `MainFrame.pas`, `LoginForm.pas` |
+| UI 模板 | `Core/UI/Templates/` | 9 个模板（Form, Dialog, Grid, Wizard 等） |
+
 ---
 
 ## 目录结构
@@ -326,9 +415,10 @@ A: 检查 `config/app.json` 中的连接字符串，确保：
 
 | 日期 | 操作 | 说明 |
 |------|------|------|
+| 2026-06-24 | 更新 | 添加 Mermaid 依赖图和子模块导航表 |
 | 2026-03-02 | 初始化 | 创建 Core 模块文档 |
 
 ---
 
-*模块版本: 1.0*
-*最后更新: 2026-03-02*
+*模块版本: 1.1*
+*最后更新: 2026-06-24*

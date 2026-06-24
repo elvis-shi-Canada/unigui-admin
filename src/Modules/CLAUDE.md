@@ -21,6 +21,66 @@ Modules 模块包含 UniAdmin 系统的核心业务功能，提供：
 - **定时任务** - 任务调度、执行日志、手动执行
 - **共享组件** - 图标选择器等通用组件
 
+### 模块依赖关系
+
+```mermaid
+graph TB
+    subgraph 业务模块层["业务模块层"]
+        User["User/ 用户管理<br/>UserListFrame + UserService"]
+        Role["Role/ 角色管理<br/>RoleListFrame + RoleDataModule"]
+        MenuM["Menu/ 菜单管理<br/>MenuTreeFrame + MenuDataModule"]
+        Dict["Dictionary/ 数据字典<br/>DictTypeFrame + DictionaryService"]
+        Cfg["Config/ 系统配置<br/>ConfigCategoryFrame + ConfigService"]
+        Log["Log/ 日志审计<br/>LoginLogFrame + LogService + LogExport"]
+        Task["Scheduler/ 定时任务<br/>TaskManageFrame + SampleTasks"]
+        Shared["Shared/ 共享组件<br/>IconSelector"]
+    end
+
+    subgraph Core依赖["Core 框架依赖"]
+        BCF["Core.UI/BaseCrudFrame"]
+        Auth["Core.Auth/UniAuthService"]
+        Perm["Core.Permission/UniPermissionManager"]
+        Data["Core.Data/UniDataModule"]
+        Meta["Core.Metadata/UniMetadataCache"]
+    end
+
+    User --> BCF
+    User --> Auth
+    User --> Data
+    Role --> BCF
+    Role --> Perm
+    Role --> Data
+    MenuM --> BCF
+    MenuM --> Data
+    Dict --> BCF
+    Dict --> Data
+    Dict --> Meta
+    Cfg --> BCF
+    Cfg --> Data
+    Log --> BCF
+    Log --> Data
+    Task --> BCF
+    Task --> Data
+    User --> Shared
+    Role --> Shared
+
+    style 业务模块层 fill:#fce4ec,stroke:#880e4f
+    style Core依赖 fill:#fff3e0,stroke:#e65100
+```
+
+### 子模块导航
+
+| 子模块 | 路径 | 主要功能 | 数据表 |
+|--------|------|----------|--------|
+| User 用户管理 | `Modules/User/` | 用户 CRUD、密码管理、个人中心 | `UniAdmin_Users`, `UniAdmin_UserRoles` |
+| Role 角色管理 | `Modules/Role/` | 角色定义、权限分配、用户关联 | `UniAdmin_Roles`, `UniAdmin_RolePermissions` |
+| Menu 菜单管理 | `Modules/Menu/` | 动态菜单树、图标配置 | `UniAdmin_Menus` |
+| Dictionary 数据字典 | `Modules/Dictionary/` | 字典类型/项管理、缓存 | `UniAdmin_DictTypes`, `UniAdmin_DictItems` |
+| Config 系统配置 | `Modules/Config/` | 配置分类管理、多类型值 | `UniAdmin_Configs` |
+| Log 日志审计 | `Modules/Log/` | 三类日志 + 多格式导出 | `UniAdmin_LoginLogs`, `UniAdmin_OperationLogs`, `UniAdmin_DataChangeLogs` |
+| Scheduler 定时任务 | `Modules/Scheduler/` | 任务管理、执行日志、示例任务 | `UniAdmin_ScheduledTasks`, `UniAdmin_TaskExecutionLogs` |
+| Shared 共享组件 | `Modules/Shared/` | 图标选择器等通用 UI 组件 | — |
+
 ---
 
 ## 目录结构
@@ -402,9 +462,10 @@ end;
 
 | 日期 | 操作 | 说明 |
 |------|------|------|
+| 2026-06-24 | 更新 | 添加 Mermaid 依赖图和子模块导航表 |
 | 2026-03-02 | 初始化 | 创建 Modules 模块文档 |
 
 ---
 
-*模块版本: 1.0*
-*最后更新: 2026-03-02*
+*模块版本: 1.1*
+*最后更新: 2026-06-24*
