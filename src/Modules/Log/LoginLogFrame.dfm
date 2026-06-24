@@ -1,92 +1,95 @@
 inherited LoginLogFrame: TLoginLogFrame
-  PixelsPerInch = 96
-  TextHeight = 13
   object UniPanelFilter: TUniPanel
     Left = 0
     Top = 40
-    Width = 800
+    Width = 640
     Height = 80
     Hint = ''
     Align = alTop
-    TabOrder = 0
+    TabOrder = 1
+    Caption = ''
     object UniLabelUserName: TUniLabel
       Left = 8
       Top = 12
-      Width = 60
+      Width = 39
       Height = 13
       Hint = ''
       Caption = #29992#25143#21517
-      TabOrder = 1
+      TabOrder = 5
     end
     object UniEditUserName: TUniEdit
       Left = 80
       Top = 8
       Width = 120
-      Height = 22
       Hint = ''
-      TextHint = #36755#20837#29992#25143#21517
-      TabOrder = 2
+      Text = ''
+      TabOrder = 1
     end
     object UniLabelIP: TUniLabel
       Left = 210
       Top = 12
-      Width = 60
+      Width = 35
       Height = 13
       Hint = ''
       Caption = 'IP'#22320#22336
-      TabOrder = 3
+      TabOrder = 6
     end
     object UniEditIP: TUniEdit
       Left = 280
       Top = 8
       Width = 120
-      Height = 22
       Hint = ''
-      TextHint = ''
-      TabOrder = 4
+      Text = ''
+      TabOrder = 2
     end
     object UniLabelStartTime: TUniLabel
       Left = 8
       Top = 44
-      Width = 60
+      Width = 52
       Height = 13
       Hint = ''
       Caption = #24320#22987#26102#38388
-      TabOrder = 5
+      TabOrder = 11
     end
     object UniDateTimePickerStart: TUniDateTimePicker
       Left = 80
       Top = 40
       Width = 120
-      Height = 22
       Hint = ''
-      TabOrder = 6
+      DateTime = 46197.000000000000000000
+      DateFormat = 'dd/MM/yyyy'
+      TimeFormat = 'HH:mm:ss'
+      TabOrder = 8
+      DisabledDates = <>
     end
     object UniLabelEndTime: TUniLabel
       Left = 210
       Top = 44
-      Width = 60
+      Width = 52
       Height = 13
       Hint = ''
       Caption = #32467#26463#26102#38388
-      TabOrder = 7
+      TabOrder = 12
     end
     object UniDateTimePickerEnd: TUniDateTimePicker
       Left = 280
       Top = 40
       Width = 120
-      Height = 22
       Hint = ''
-      TabOrder = 8
+      DateTime = 46197.000000000000000000
+      DateFormat = 'dd/MM/yyyy'
+      TimeFormat = 'HH:mm:ss'
+      TabOrder = 9
+      DisabledDates = <>
     end
     object UniLabelStatus: TUniLabel
       Left = 410
       Top = 12
-      Width = 60
+      Width = 26
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 9
+      TabOrder = 7
     end
     object UniComboBoxStatus: TUniComboBox
       Left = 480
@@ -94,13 +97,13 @@ inherited LoginLogFrame: TLoginLogFrame
       Width = 80
       Height = 21
       Hint = ''
-      Style = csDropDown
-      ItemIndex = 0
-      TabOrder = 10
+      Text = ''
       Items.Strings = (
-        '全部'
-        '成功'
-        '失败')
+        #37711#12585#20788
+        #37812#24876#23003
+        #28598#36779#35302)
+      TabOrder = 3
+      IconItems = <>
     end
     object UniButtonSearch: TUniButton
       Left = 570
@@ -109,7 +112,7 @@ inherited LoginLogFrame: TLoginLogFrame
       Height = 25
       Hint = ''
       Caption = #26597#35810
-      TabOrder = 11
+      TabOrder = 4
       OnClick = UniButtonSearchClick
     end
     object UniButtonExport: TUniButton
@@ -119,19 +122,20 @@ inherited LoginLogFrame: TLoginLogFrame
       Height = 25
       Hint = ''
       Caption = #23548#20986
-      TabOrder = 12
+      TabOrder = 10
       OnClick = UniButtonExportClick
     end
   end
   object UniDBGrid: TUniDBGrid
     Left = 0
     Top = 120
-    Width = 800
-    Height = 480
+    Width = 640
+    Height = 360
     Hint = ''
-    Align = alClient
-    TabOrder = 1
     DataSource = UniDataSource
+    LoadMask.Message = #21152#36733#25968#25454'...'
+    Align = alClient
+    TabOrder = 2
   end
   object UniDataSource: TDataSource
     Left = 8
