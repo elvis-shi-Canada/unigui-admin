@@ -1,4 +1,4 @@
-unit MainModule;
+﻿unit MainModule;
 
 interface
 
@@ -14,6 +14,8 @@ type
   /// 继承自 TUniGUIMainModule，负责会话管理和插件生命周期管理
   /// </summary>
   TMainModule = class(TUniGUIMainModule)
+    procedure OnCreate(Sender: TObject);
+    procedure OnDestroy(Sender: TObject);
   private
     FSessionLock: TCriticalSection;
     FSessions: TDictionary<string, TUniSession>;
@@ -24,11 +26,6 @@ type
     procedure CleanupInactiveSessions;
     /// <summary>获取会话超时时间（分钟）</summary>
     function GetSessionTimeoutMinutes: Integer;
-  protected
-    /// <summary>主模块创建事件</summary>
-    procedure OnCreate(Sender: TObject);
-    /// <summary>主模块销毁事件</summary>
-    procedure OnDestroy(Sender: TObject);
   public
     /// <summary>获取或创建会话实例</summary>
     /// <param name="SessionID">会话ID</param>
@@ -73,7 +70,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniConfigService, UniModuleRegistry;
+  UniConfigService, UniModuleRegistry, UniAdminLogger, uniGUIVars;
 
 var
   GMainModule: TMainModule;
@@ -100,7 +97,7 @@ begin
   FModuleRegistry := TUniModuleRegistry.GetInstance;
 
   // 记录日志
-  WriteLn('UniGUI Main Module initialized successfully.');
+  LogInfo('UniGUI Main Module initialized successfully.');
 end;
 
 procedure TMainModule.OnDestroy(Sender: TObject);
@@ -150,7 +147,7 @@ begin
   // 清理全局实例引用
   GMainModule := nil;
 
-  WriteLn('UniGUI Main Module destroyed.');
+  LogInfo('UniGUI Main Module destroyed.');
 end;
 
 function TMainModule.GetOrCreateSession(const SessionID: string): TUniSession;
@@ -185,7 +182,7 @@ begin
     FSessions.Add(SessionID, LSession);
     Result := LSession;
 
-    WriteLn(Format('Session created: %s (Total: %d)', [SessionID, FSessions.Count]));
+    LogInfo(Format('Session created: %s (Total: %d)', [SessionID, FSessions.Count]));
   finally
     FSessionLock.Release;
   end;
@@ -216,7 +213,7 @@ begin
       FSessions.Remove(SessionID);
       Result := True;
 
-      WriteLn(Format('Session removed: %s (Total: %d)', [SessionID, FSessions.Count]));
+      LogInfo(Format('Session removed: %s (Total: %d)', [SessionID, FSessions.Count]));
     end;
   finally
     FSessionLock.Release;
@@ -290,14 +287,14 @@ begin
   LSession := GetOrCreateSession(SessionID);
   if not LSession.IsAuthenticated then
   begin
-    WriteLn(Format('Session not authenticated: %s', [SessionID]));
+    LogWarn(Format('Session not authenticated: %s', [SessionID]));
     Exit(False);
   end;
 
   // 检查插件是否已注册
   if not FModuleRegistry.IsPluginRegistered(PluginID) then
   begin
-    WriteLn(Format('Plugin not registered: %s', [PluginID]));
+    LogWarn(Format('Plugin not registered: %s', [PluginID]));
     Exit(False);
   end;
 
@@ -310,13 +307,13 @@ begin
   begin
     Result := LSession.LoadPlugin(LPlugin);
     if Result then
-      WriteLn(Format('Plugin loaded for session: %s -> %s', [PluginID, SessionID]))
+      LogInfo(Format('Plugin loaded for session: %s -> %s', [PluginID, SessionID]))
     else
-      WriteLn(Format('Failed to load plugin for session: %s -> %s', [PluginID, SessionID]));
+      LogError(Format('Failed to load plugin for session: %s -> %s', [PluginID, SessionID]));
   end
   else
   begin
-    WriteLn(Format('Failed to create plugin instance: %s', [PluginID]));
+    LogError(Format('Failed to create plugin instance: %s', [PluginID]));
   end;
 end;
 
@@ -358,7 +355,7 @@ begin
   // 第二阶段：释放锁后，逐个清理不活动会话
   for LSessionID in LInactiveSessions do
   begin
-    WriteLn(Format('Cleaning up inactive session: %s', [LSessionID]));
+    LogInfo(Format('Cleaning up inactive session: %s', [LSessionID]));
     RemoveSession(LSessionID);
   end;
 
@@ -373,4 +370,7 @@ begin
     Result := 30;
 end;
 
+initialization
+  // 注册主模块类，供 InitServerModule 绑定到 FMainModuleClass
+  RegisterMainModuleClass(TMainModule);
 end.

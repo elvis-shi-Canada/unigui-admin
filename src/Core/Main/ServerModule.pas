@@ -1,10 +1,10 @@
-unit ServerModule;
+﻿unit ServerModule;
 
 interface
 
 uses
-  System.SysUtils, System.Classes, System.IOUtils,
-  UniGUIServer, UniGUIApplication, UniGUIClasses,
+  System.SysUtils, System.Classes, System.IOUtils, ShellAPI, uniGUITypes,
+  UniGUIServer, UniGUIApplication, UniGUIClasses, UniGUIVars, uniGUIMainModule,
   UniConfigService.Intf, UniModuleRegistry.Intf;
 
 type
@@ -13,6 +13,11 @@ type
   /// 继承自 TUniGUIServerModule，负责服务器级别的初始化和配置管理
   /// </summary>
   TServerModule = class(TUniGUIServerModule)
+    procedure OnCreate(Sender: TObject);
+    procedure OnDestroy(Sender: TObject);
+  protected
+    /// <summary>UniGUI 服务器模块首次初始化，完成窗体类映射绑定</summary>
+    procedure FirstInit; override;
   private
     FConfigService: IUniConfigService;
     FModuleRegistry: IUniModuleRegistry;
@@ -24,11 +29,6 @@ type
     procedure InitializeModuleRegistry;
     /// <summary>加载应用配置</summary>
     procedure LoadApplicationConfig;
-  protected
-    /// <summary>服务器模块创建事件</summary>
-    procedure OnCreate(Sender: TObject);
-    /// <summary>服务器模块销毁事件</summary>
-    procedure OnDestroy(Sender: TObject);
   public
     /// <summary>获取配置服务实例</summary>
     function GetConfigService: IUniConfigService;
@@ -38,29 +38,40 @@ type
     function GetConfigRoot: string;
   end;
 
-function GetServerModule: TServerModule;
+function UniServerModule: TServerModule;
+procedure ExploreWeb(page:PChar);
 
 implementation
 
 {$R *.dfm}
 
 uses
-  UniConfigService, UniModuleRegistry;
-
-var
-  GServerModule: TServerModule;
-
-function GetServerModule: TServerModule;
-begin
-  Result := GServerModule;
-end;
+  UniConfigService, UniModuleRegistry, UniAdminLogger;
 
 { TServerModule }
 
+procedure ExploreWeb(page:PChar);
+var Returnvalue: Integer;
+begin
+  Returnvalue := ShellExecute(0,'open',page, nil, nil, 1);
+end;
+
+
+function UniServerModule: TServerModule;
+begin
+  Result:=TServerModule(UniGUIServerInstance);
+end;
+
+procedure TServerModule.FirstInit;
+begin
+  // UniGUI 标准初始化：绑定主模块类/主窗体类/登录窗体类，设置进程路径
+  // 缺少此调用会导致 FMainFormClass/FMainModuleClass 为 nil，访问时回退到
+  // ServerMonitor 分支触发 'Class TServerControlPanelForm not found'
+  InitServerModule(Self);
+end;
+
 procedure TServerModule.OnCreate(Sender: TObject);
 begin
-  // 设置全局实例引用
-  GServerModule := Self;
 
   // 确定配置根目录（相对于可执行文件）
   FConfigRoot := TPath.Combine(ExtractFilePath(ParamStr(0)), 'config');
@@ -77,8 +88,8 @@ begin
   LoadApplicationConfig;
 
   // 记录启动日志
-  WriteLn('UniGUI Server Module initialized successfully.');
-  WriteLn('Config Root: ' + FConfigRoot);
+  LogInfo('UniGUI Server Module initialized successfully.');
+  LogInfo('Config Root: ' + FConfigRoot);
 end;
 
 procedure TServerModule.OnDestroy(Sender: TObject);
@@ -89,10 +100,8 @@ begin
   // 清理配置服务（通过接口引用计数自动释放）
   FConfigService := nil;
 
-  // 清理全局实例引用
-  GServerModule := nil;
 
-  WriteLn('UniGUI Server Module destroyed.');
+  LogInfo('UniGUI Server Module destroyed.');
 end;
 
 procedure TServerModule.InitializeConfigService;
@@ -108,13 +117,13 @@ begin
     // 如果配置目录不存在，创建它
     TDirectory.CreateDirectory(FConfigRoot);
     FConfigService.SetConfigRoot(FConfigRoot);
-    WriteLn('Created config directory: ' + FConfigRoot);
+    LogInfo('Created config directory: ' + FConfigRoot);
   end;
 
   // 加载全局配置
   if not FConfigService.LoadGlobalConfig then
   begin
-    WriteLn('Warning: Failed to load global configuration. Using defaults.');
+    LogWarn('Failed to load global configuration. Using defaults.');
   end;
 end;
 
@@ -125,7 +134,7 @@ begin
 
   // 注册表初始化完成
   // 插件类的注册由各个插件模块在初始化时完成
-  WriteLn('Module Registry initialized.');
+  LogInfo('Module Registry initialized.');
 end;
 
 procedure TServerModule.LoadApplicationConfig;
@@ -138,7 +147,7 @@ begin
 
   if not TFile.Exists(AppConfigFile) then
   begin
-    WriteLn('Warning: Application config file not found: ' + AppConfigFile);
+    LogWarn('Application config file not found: ' + AppConfigFile);
     Exit;
   end;
 
@@ -149,9 +158,10 @@ begin
 
   // 设置服务器参数
   Self.Port := ServerPort;
+  Self.Title := AppTitle;
 
-  WriteLn(Format('Application: %s (%s)', [AppName, AppTitle]));
-  WriteLn(Format('Server Port: %d', [ServerPort]));
+  LogInfo(Format('Application: %s (%s)', [AppName, AppTitle]));
+  LogInfo(Format('Server Port: %d', [ServerPort]));
 end;
 
 function TServerModule.GetConfigService: IUniConfigService;
@@ -169,4 +179,6 @@ begin
   Result := FConfigRoot;
 end;
 
+initialization
+  RegisterServerModuleClass(TServerModule);
 end.

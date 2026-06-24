@@ -1,4 +1,11 @@
-﻿program UniAdmin;
+﻿{$DEFINE UNIGUI_VCL} // Comment out this line to turn this project into an ISAPI module
+
+{$IFNDEF UNIGUI_VCL}
+library
+{$else}
+program
+{$ENDIF}
+UniAdmin;
 
 {
   UniAdmin - UniGUI 后台管理系统主程序
@@ -10,13 +17,17 @@
 uses
   System.SysUtils,
   Winapi.Windows,
+  Forms,
   UniGUIVars,
   uniGUIApplication,
   uniGUIClasses,
   uniGUIForm,
+  uniGUIRegClasses,
   IdGlobal,
   ServerModule in 'Core\Main\ServerModule.pas' {TServerModule},
   MainModule in 'Core\Main\MainModule.pas' {TMainModule},
+  UniAdminLogger.Intf in 'Core\Logging\UniAdminLogger.Intf.pas',
+  UniAdminLogger in 'Core\Logging\UniAdminLogger.pas',
   UniConfigService.Intf in 'Core\Config\UniConfigService.Intf.pas',
   UniConfigService in 'Core\Config\UniConfigService.pas',
   UniContext in 'Core\Context\UniContext.pas',
@@ -95,17 +106,19 @@ uses
   BaseCrudFrame in 'Core\UI\BaseCrudFrame.pas';
 
 {$R *.res}
+{$IFNDEF UNIGUI_VCL}
+
+exports
+  GetExtensionVersion,
+  HttpExtensionProc,
+  TerminateExtension;
+{$ENDIF}
 
 begin
-  // 设置控制台输出编码为 UTF-8
-  SetConsoleOutputCP(CP_UTF8);
-
-  // 报告内存泄漏 (仅在调试模式下)
-  {$IFDEF DEBUG}
+{$IFDEF UNIGUI_VCL}
   ReportMemoryLeaksOnShutdown := True;
-  {$ENDIF}
-
-  // UniGUI 应用程序初始化
-  // 注意: UniGUI 应用程序在 Web 服务器中运行，不需要传统的 Application.Run
-  // 服务器模块会在首次请求时自动初始化
+  Application.Initialize;
+  TServerModule.Create(Application);
+  Application.Run;
+{$ENDIF}
 end.

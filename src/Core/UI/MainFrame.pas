@@ -72,7 +72,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniServices;
+  UniServices, uniGUIVars;
 
 { TMainFrame }
 
@@ -283,4 +283,7 @@ begin
   UpdateStatusBar;
 end;
 
+initialization
+  // 注册为主窗体：TMainFrame 继承 TUniForm，IsLoginForm=False，归入 FMainFormClass
+  RegisterAppFormClass(TMainFrame);
 end.

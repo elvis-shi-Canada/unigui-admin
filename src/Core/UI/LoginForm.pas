@@ -13,7 +13,7 @@ type
   /// 登录窗体 - 提供用户认证界面
   /// 集成 IUniAuthService 实现登录功能
   /// </summary>
-  TLoginForm = class(TUniForm)
+  TLoginForm = class(TUniLoginForm)
     UniContainerPanel: TUniContainerPanel;
     UniPanel: TUniPanel;
     LblTitle: TUniLabel;
@@ -50,7 +50,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniServices;
+  UniServices, uniGUIVars;
 
 { TLoginForm }
 
@@ -193,4 +193,8 @@ begin
   end;
 end;
 
+initialization
+  // 注册为登录窗体：因继承 TUniLoginForm，IsLoginForm 类方法返回 True，
+  // RegisterAppFormClass 据此将其归入 FLoginFormClass
+  RegisterAppFormClass(TLoginForm);
 end.

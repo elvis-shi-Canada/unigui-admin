@@ -22,15 +22,15 @@ object LoginForm: TLoginForm
       Width = 300
       Height = 240
       Hint = ''
-      TabOrder = 0
+      TabOrder = 1
       Caption = ''
       object LblTitle: TUniLabel
         Left = 80
         Top = 16
-        Width = 359
+        Width = 90
         Height = 25
         Hint = ''
-        Caption = 'UniAdmin #31649#29702#31995#32479'
+        Caption = 'UniAdmin'
         ParentFont = False
         Font.Height = -19
         Font.Style = [fsBold]
