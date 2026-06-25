@@ -1,4 +1,4 @@
-unit MenuDataModule;
+﻿unit MenuDataModule;
 
 interface
 
@@ -270,7 +270,7 @@ begin
     LQuery.SQL.Text :=
       'SELECT MenuID, MenuCode, MenuName, ParentID, MenuType, Icon, Path, ' +
       'Component, Permission, SortOrder, Visible, Status, ' +
-      'CAST(0 AS BIT) AS HasChildren, ' +
+      'CAST(0 AS INTEGER) AS HasChildren, ' +
       'CAST(0 AS INT) AS Level ' +
       'FROM UniAdmin_Menus ';
 
@@ -403,7 +403,7 @@ begin
       '(MenuCode, MenuName, ParentID, MenuType, Icon, Path, Component, Permission, ' +
       'SortOrder, Visible, Status, CreatedDate, ModifiedDate) ' +
       'VALUES (:MenuCode, :MenuName, :ParentID, :MenuType, :Icon, :Path, :Component, ' +
-      ':Permission, :SortOrder, 1, 1, GETDATE(), GETDATE())';
+      ':Permission, :SortOrder, 1, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)';
 
     LQuery.Params.ParamByName('MenuCode').AsString := MenuCode;
     LQuery.Params.ParamByName('MenuName').AsString := MenuName;
@@ -417,7 +417,7 @@ begin
 
     LQuery.ExecSQL;
 
-    LQuery.SQL.Text := 'SELECT SCOPE_IDENTITY() AS NewID';
+    LQuery.SQL.Text := 'SELECT last_insert_rowid() AS NewID';
     LQuery.Open;
     Result := LQuery.FieldByName('NewID').AsInteger;
   finally
@@ -462,7 +462,7 @@ begin
     if LNeedStatus then
       LUpdates.Add('Status = :Status');
 
-    LUpdates.Add('ModifiedDate = GETDATE()');
+    LUpdates.Add('ModifiedDate = CURRENT_TIMESTAMP');
 
     LSQL := TStringList.Create;
     try
@@ -544,7 +544,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_Menus ' +
-      'SET Status = :Status, ModifiedDate = GETDATE() ' +
+      'SET Status = :Status, ModifiedDate = CURRENT_TIMESTAMP ' +
       'WHERE MenuID = :MenuID';
 
     LQuery.Params.ParamByName('MenuID').AsInteger := MenuID;
@@ -565,7 +565,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_Menus ' +
-      'SET Visible = :Visible, ModifiedDate = GETDATE() ' +
+      'SET Visible = :Visible, ModifiedDate = CURRENT_TIMESTAMP ' +
       'WHERE MenuID = :MenuID';
 
     LQuery.Params.ParamByName('MenuID').AsInteger := MenuID;
@@ -610,7 +610,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_Menus ' +
-      'SET ParentID = :ParentID, SortOrder = :SortOrder, ModifiedDate = GETDATE() ' +
+      'SET ParentID = :ParentID, SortOrder = :SortOrder, ModifiedDate = CURRENT_TIMESTAMP ' +
       'WHERE MenuID = :MenuID';
 
     LQuery.Params.ParamByName('MenuID').AsInteger := MenuID;
@@ -916,7 +916,7 @@ begin
   LQuery := TFDQuery.Create(nil);
   try
     LQuery.Connection := Connection;
-    LQuery.SQL.Text := 'SELECT ISNULL(MAX(SortOrder), 0) AS MaxSort FROM UniAdmin_Menus WHERE ParentID = :ParentID';
+    LQuery.SQL.Text := 'SELECT IFNULL(MAX(SortOrder), 0) AS MaxSort FROM UniAdmin_Menus WHERE ParentID = :ParentID';
     LQuery.Params.ParamByName('ParentID').AsInteger := ParentID;
     LQuery.Open;
     Result := LQuery.FieldByName('MaxSort').AsInteger;

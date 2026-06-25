@@ -1,4 +1,4 @@
-unit UniConfigService.Intf;
+﻿unit UniConfigService.Intf;
 
 interface
 

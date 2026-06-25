@@ -1,4 +1,4 @@
-unit UniAuthService.Intf;
+﻿unit UniAuthService.Intf;
 
 interface
 

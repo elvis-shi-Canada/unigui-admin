@@ -190,7 +190,7 @@ begin
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_Configs ' +
       '(ConfigKey, ConfigValue, Category, Description, ValueType, SortOrder, Status, CreatedDate, CreatedBy) ' +
-      'VALUES (:ConfigKey, :ConfigValue, :Category, :Description, :ValueType, :SortOrder, 1, GETDATE(), :CreatedBy)';
+      'VALUES (:ConfigKey, :ConfigValue, :Category, :Description, :ValueType, :SortOrder, 1, CURRENT_TIMESTAMP, :CreatedBy)';
 
     LQuery.Params.ParamByName('ConfigKey').AsString := ConfigKey;
     LQuery.Params.ParamByName('ConfigValue').AsString := ConfigValue;
@@ -202,7 +202,7 @@ begin
 
     LQuery.ExecSQL;
 
-    LQuery.SQL.Text := 'SELECT SCOPE_IDENTITY() AS NewID';
+    LQuery.SQL.Text := 'SELECT last_insert_rowid() AS NewID';
     LQuery.Open;
     Result := LQuery.FieldByName('NewID').AsInteger;
   finally
@@ -237,7 +237,7 @@ begin
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_Configs ' +
       'SET ConfigValue = :ConfigValue, Description = :Description, SortOrder = :SortOrder, ' +
-      'ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE ConfigID = :ConfigID';
 
     LQuery.Params.ParamByName('ConfigID').AsInteger := ConfigID;
@@ -279,7 +279,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_Configs ' +
-      'SET Status = :Status, ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'SET Status = :Status, ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE ConfigID = :ConfigID';
 
     LQuery.Params.ParamByName('ConfigID').AsInteger := ConfigID;
@@ -426,7 +426,7 @@ begin
     // 更新配置值
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_Configs ' +
-      'SET ConfigValue = :ConfigValue, ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'SET ConfigValue = :ConfigValue, ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE ConfigKey = :ConfigKey';
 
     LQuery.Params.ParamByName('ConfigKey').AsString := ConfigKey;

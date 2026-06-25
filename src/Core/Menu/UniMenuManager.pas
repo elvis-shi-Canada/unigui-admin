@@ -1,4 +1,4 @@
-unit UniMenuManager;
+﻿unit UniMenuManager;
 
 interface
 
@@ -200,7 +200,7 @@ begin
           LMenu.RoutePath := LQuery.FieldByName('RoutePath').AsString;
           LMenu.PermissionCode := LQuery.FieldByName('PermissionCode').AsString;
           LMenu.SortOrder := LQuery.FieldByName('SortOrder').AsInteger;
-          LMenu.IsVisible := LQuery.FieldByName('IsVisible').AsBoolean;
+          LMenu.IsVisible := LQuery.FieldByName('IsVisible').AsInteger <> 0;
           SetLength(LMenu.Children, 0);
 
           LList.Add(LMenu);
@@ -460,7 +460,7 @@ begin
         Result.RoutePath := LQuery.FieldByName('RoutePath').AsString;
         Result.PermissionCode := LQuery.FieldByName('PermissionCode').AsString;
         Result.SortOrder := LQuery.FieldByName('SortOrder').AsInteger;
-        Result.IsVisible := LQuery.FieldByName('IsVisible').AsBoolean;
+        Result.IsVisible := LQuery.FieldByName('IsVisible').AsInteger <> 0;
         SetLength(Result.Children, 0);
 
         // 缓存结果（线程安全）

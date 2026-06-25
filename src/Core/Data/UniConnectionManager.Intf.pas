@@ -1,4 +1,4 @@
-unit UniConnectionManager.Intf;
+﻿unit UniConnectionManager.Intf;
 
 interface
 

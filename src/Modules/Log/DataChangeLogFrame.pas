@@ -1,4 +1,4 @@
-unit DataChangeLogFrame;
+﻿unit DataChangeLogFrame;
 
 interface
 

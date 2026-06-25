@@ -1,4 +1,4 @@
-unit ConfigService.Intf;
+﻿unit ConfigService.Intf;
 
 interface
 

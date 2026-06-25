@@ -1,4 +1,4 @@
-unit DatabaseMigrator;
+﻿unit DatabaseMigrator;
 
 interface
 
@@ -39,6 +39,9 @@ type
 
 implementation
 
+uses
+  UniAdminLogger;
+
 constructor TDatabaseMigrator.Create(const Connection: TFDConnection; const MigrationsDir: string);
 begin
   inherited Create;
@@ -57,16 +60,14 @@ procedure TDatabaseMigrator.CreateMigrationTable;
 var
   SQL: string;
 begin
-  SQL := 'IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = ''SchemaMigrations'') ' +
-         'BEGIN ' +
-         'CREATE TABLE SchemaMigrations (' +
+  // SQLite 语法（CREATE TABLE IF NOT EXISTS 幂等）。MSSQL 的 sys.tables/IF NOT EXISTS/BEGIN 不兼容。
+  SQL := 'CREATE TABLE IF NOT EXISTS SchemaMigrations (' +
          '  Version VARCHAR(50) PRIMARY KEY, ' +
-         '  Description NVARCHAR(500), ' +
-         '  FileName NVARCHAR(500), ' +
-         '  AppliedAt DATETIME DEFAULT GETDATE(), ' +
+         '  Description VARCHAR(500), ' +
+         '  FileName VARCHAR(500), ' +
+         '  AppliedAt DATETIME DEFAULT CURRENT_TIMESTAMP, ' +
          '  Direction VARCHAR(10)' +
-         ')' +
-         'END';
+         ')';
 
   FConnection.ExecSQL(SQL);
 end;
@@ -141,19 +142,29 @@ end;
 function TDatabaseMigrator.ExecuteSQLFile(const FileName: string): Boolean;
 var
   SQL: TStringList;
+  Statements: TArray<string>;
+  RawStmt, Stmt: string;
 begin
   Result := False;
 
   if not FileExists(FileName) then
   begin
-    Writeln('文件不存在: ' + FileName);
+    LogError('[Migrator] 迁移文件不存在: ' + FileName);
     Exit;
   end;
 
   SQL := TStringList.Create;
   try
     SQL.LoadFromFile(FileName);
-    FConnection.ExecSQL(SQL.Text);
+    // 按分号分割多语句（SQLite/MSSQL 通用，兼容单语句文件）。
+    // 跳过空语句和纯注释行，避免 ExecSQL 收到空串报错。
+    Statements := SQL.Text.Split([';']);
+    for RawStmt in Statements do
+    begin
+      Stmt := Trim(RawStmt);
+      if Stmt <> '' then
+        FConnection.ExecSQL(Stmt);
+    end;
     Result := True;
   finally
     SQL.Free;
@@ -167,11 +178,11 @@ var
 begin
   Result := False;
 
-  Writeln('执行迁移: ' + Migration.Version + ' - ' + Migration.Description);
+  LogInfo('执行迁移: ' + Migration.Version + ' - ' + Migration.Description);
 
   if not ExecuteSQLFile(Migration.FileName) then
   begin
-    Writeln('迁移失败: ' + Migration.Version);
+    LogInfo('迁移失败: ' + Migration.Version);
     Exit;
   end;
 
@@ -226,7 +237,7 @@ begin
   Result := False;
   Success := True;
 
-  Writeln('开始数据库迁移...');
+  LogInfo('开始数据库迁移...');
 
   // 创建迁移表
   CreateMigrationTable;
@@ -239,13 +250,12 @@ begin
 
   if Length(PendingMigrations) = 0 then
   begin
-    Writeln('没有待应用的迁移');
+    LogInfo('没有待应用的迁移');
     Result := True;
     Exit;
   end;
 
-  Writeln('发现 ' + IntToStr(Length(PendingMigrations)) + ' 个待应用的迁移');
-  Writeln;
+  LogInfo('发现 ' + IntToStr(Length(PendingMigrations)) + ' 个待应用的迁移');
 
   // 执行迁移
   for Migration in PendingMigrations do
@@ -259,14 +269,12 @@ begin
 
   if Success then
   begin
-    Writeln;
-    Writeln('所有迁移执行成功');
+    LogInfo('所有迁移执行成功');
     Result := True;
   end
   else
   begin
-    Writeln;
-    Writeln('迁移过程中出现错误');
+    LogInfo('迁移过程中出现错误');
   end;
 end;
 
@@ -277,22 +285,22 @@ var
   Version: string;
 begin
   Result := False;
-  Writeln('开始回滚 ' + IntToStr(Steps) + ' 个迁移...');
+  LogInfo('开始回滚 ' + IntToStr(Steps) + ' 个迁移...');
 
   Query := TFDQuery.Create(nil);
   try
     Query.Connection := FConnection;
 
-    // 获取最新的迁移
-    Query.SQL.Text := Format('SELECT TOP %d Version FROM SchemaMigrations ' +
-                             'WHERE Direction = ''UP'' ORDER BY AppliedAt DESC', [Steps]);
+    // 获取最新的迁移（SQLite 用 LIMIT，MSSQL 用 TOP）
+    Query.SQL.Text := Format('SELECT Version FROM SchemaMigrations ' +
+                             'WHERE Direction = ''UP'' ORDER BY AppliedAt DESC LIMIT %d', [Steps]);
     Query.Open;
 
     I := 0;
     while not Query.Eof do
     begin
       Version := Query.FieldByName('Version').AsString;
-      Writeln('回滚: ' + Version);
+      LogInfo('回滚: ' + Version);
 
       // 这里应该执行回滚脚本
       // ExecuteRollbackScript(Version);
@@ -304,7 +312,7 @@ begin
       Query.Next;
     end;
 
-    Writeln('回滚完成: ' + IntToStr(I) + ' 个迁移');
+    LogInfo('回滚完成: ' + IntToStr(I) + ' 个迁移');
     Result := True;
   finally
     Query.Free;
@@ -336,7 +344,7 @@ begin
     Content.SaveToFile(FileName);
     Result := FileName;
 
-    Writeln('迁移文件创建成功: ' + FileName);
+    LogInfo('迁移文件创建成功: ' + FileName);
   finally
     Content.Free;
   end;

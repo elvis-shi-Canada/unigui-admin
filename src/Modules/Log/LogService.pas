@@ -101,9 +101,9 @@ begin
   try
     LQuery.Connection := FDataModule.Connection;
     LQuery.SQL.Text :=
-      'SELECT TOP 1 LogID FROM UniAdmin_LoginLogs ' +
+      'SELECT LogID FROM UniAdmin_LoginLogs ' +
       'WHERE UserID = :UserID AND Status = 1 ' +
-      'ORDER BY LogID DESC';
+      'ORDER BY LogID DESC LIMIT 1';
 
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
     LQuery.Open;

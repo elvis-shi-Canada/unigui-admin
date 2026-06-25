@@ -1,4 +1,4 @@
-unit RoleUserDialog;
+﻿unit RoleUserDialog;
 
 interface
 
@@ -74,6 +74,9 @@ implementation
 
 {$R *.dfm}
 
+uses
+  UniFormStyler;
+
 constructor TRoleUserDialog.Create(AOwner: TComponent);
 begin
   inherited;
@@ -111,6 +114,8 @@ end;
 
 procedure TRoleUserDialog.FormCreate(Sender: TObject);
 begin
+  TUniFormStyler.AutoStylePanels(Self);
+  TUniFormStyler.AutoStyleButtons(Self);
   Caption := '用户分配';
   Width := 700;
   Height := 500;
@@ -376,7 +381,7 @@ begin
       begin
         LQuery.SQL.Text :=
           'INSERT INTO UniAdmin_UserRoles (UserID, RoleID, CreatedDate) ' +
-          'VALUES (:UserID, :RoleID, GETDATE())';
+          'VALUES (:UserID, :RoleID, CURRENT_TIMESTAMP)';
         LQuery.ParamByName('UserID').AsInteger := LUserIDs[I];
         LQuery.ParamByName('RoleID').AsInteger := FRoleID;
         LQuery.ExecSQL;

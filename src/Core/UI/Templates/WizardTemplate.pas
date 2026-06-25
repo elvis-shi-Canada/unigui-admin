@@ -1,4 +1,4 @@
-unit WizardTemplate;
+﻿unit WizardTemplate;
 
 interface
 

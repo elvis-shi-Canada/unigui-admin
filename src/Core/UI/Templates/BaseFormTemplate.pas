@@ -33,8 +33,15 @@ implementation
 
 {$R *.dfm}
 
+uses
+  UniFormStyler;
+
 procedure TBaseFormTemplate.FormCreate(Sender: TObject);
 begin
+  // 应用统一设计系统样式
+  TUniFormStyler.AutoStylePanels(Self);
+  TUniFormStyler.AutoStyleButtons(Self);
+
   DoInitialize;
 end;
 

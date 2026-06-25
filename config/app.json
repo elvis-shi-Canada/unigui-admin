@@ -6,15 +6,15 @@
     "copyright": "© 2025 UniAdmin Team"
   },
   "server": {
-    "port": 8077,
+    "port": 9000,
     "host": "0.0.0.0",
     "sessionTimeout": 1800,
     "maxSessions": 1000
   },
   "database": {
-    "type": "MSSQL",
-    "connectionString": "Server=localhost;Port=1433;Database=UniAdmin;User_Name=sa;Password=请在此配置实际密码",
+    "type": "SQLite",
+    "connectionString": "Database=UniAdmin.db",
     "connectionTimeout": 30,
-    "note": "警告：生产环境请勿在配置文件中存储明文密码，建议使用环境变量或密钥管理服务"
+    "note": "开发环境使用 SQLite，文件位于 exe 同目录（bin/）。生产环境改用 MSSQL/MySQL 等"
   }
 }

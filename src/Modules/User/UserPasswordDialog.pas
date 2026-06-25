@@ -1,4 +1,4 @@
-unit UserPasswordDialog;
+﻿unit UserPasswordDialog;
 
 interface
 
@@ -54,7 +54,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UserService;
+  UserService, UniFormStyler;
 
 constructor TUserPasswordDialog.Create(AOwner: TComponent);
 begin
@@ -99,6 +99,8 @@ end;
 
 procedure TUserPasswordDialog.FormCreate(Sender: TObject);
 begin
+  TUniFormStyler.AutoStylePanels(Self);
+  TUniFormStyler.AutoStyleButtons(Self);
   InitForm;
 end;
 

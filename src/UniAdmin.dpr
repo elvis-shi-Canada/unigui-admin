@@ -24,6 +24,9 @@ uses
   uniGUIForm,
   uniGUIRegClasses,
   IdGlobal,
+  FireDAC.Phys.MSSQL,  // 生产环境用
+  FireDAC.Phys.SQLite, // 开发环境用（注册 SQLite 驱动工厂）
+  FireDAC.VCLUI.Wait,  // 注册 TFDGUIxWaitCursor（FireDAC 连接/执行需要 GUI 等待光标）
   ServerModule in 'Core\Main\ServerModule.pas' {TServerModule},
   MainModule in 'Core\Main\MainModule.pas' {TMainModule},
   UniAdminLogger.Intf in 'Core\Logging\UniAdminLogger.Intf.pas',
@@ -34,6 +37,8 @@ uses
   UniDataModule in 'Core\Data\UniDataModule.pas',
   UniConnectionManager.Intf in 'Core\Data\UniConnectionManager.Intf.pas',
   UniConnectionManager in 'Core\Data\UniConnectionManager.pas',
+  DatabaseInitializer in 'Core\Data\DatabaseInitializer.pas',
+  DatabaseMigrator in '..\tools\DatabaseMigrator.pas',
   UniAuthService.Intf in 'Core\Auth\UniAuthService.Intf.pas',
   UniAuthService in 'Core\Auth\UniAuthService.pas',
   UniPermissionManager.Intf in 'Core\Permission\UniPermissionManager.Intf.pas',
@@ -60,6 +65,7 @@ uses
   UniModelAdmin in 'Core\UI\UniModelAdmin.pas',
   UniPropertyEditor in 'Core\UI\UniPropertyEditor.pas',
   UniTheme in 'Core\UI\UniTheme.pas',
+  UniFormStyler in 'Core\UI\UniFormStyler.pas',
   UserListFrame in 'Modules\User\UserListFrame.pas',
   UserEditForm in 'Modules\User\UserEditForm.pas',
   UserDataModule in 'Modules\User\UserDataModule.pas',

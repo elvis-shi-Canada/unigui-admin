@@ -1,4 +1,4 @@
-unit DictionaryDataModule;
+﻿unit DictionaryDataModule;
 
 interface
 
@@ -157,7 +157,7 @@ begin
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_DictTypes ' +
       '(TypeCode, TypeName, Description, SortOrder, Status, CreatedDate, CreatedBy) ' +
-      'VALUES (:TypeCode, :TypeName, :Description, :SortOrder, 1, GETDATE(), :CreatedBy)';
+      'VALUES (:TypeCode, :TypeName, :Description, :SortOrder, 1, CURRENT_TIMESTAMP, :CreatedBy)';
 
     LQuery.Params.ParamByName('TypeCode').AsString := TypeCode;
     LQuery.Params.ParamByName('TypeName').AsString := TypeName;
@@ -167,7 +167,7 @@ begin
 
     LQuery.ExecSQL;
 
-    LQuery.SQL.Text := 'SELECT SCOPE_IDENTITY() AS NewID';
+    LQuery.SQL.Text := 'SELECT last_insert_rowid() AS NewID';
     LQuery.Open;
     Result := LQuery.FieldByName('NewID').AsInteger;
   finally
@@ -189,7 +189,7 @@ begin
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_DictTypes ' +
       'SET TypeName = :TypeName, Description = :Description, SortOrder = :SortOrder, ' +
-      'ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE TypeID = :TypeID';
 
     LQuery.Params.ParamByName('TypeID').AsInteger := TypeID;
@@ -242,7 +242,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_DictTypes ' +
-      'SET Status = :Status, ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'SET Status = :Status, ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE TypeID = :TypeID';
 
     LQuery.Params.ParamByName('TypeID').AsInteger := TypeID;
@@ -437,7 +437,7 @@ begin
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_DictItems ' +
       '(TypeID, ItemCode, ItemName, ItemValue, Remark, SortOrder, Status, CreatedDate, CreatedBy) ' +
-      'VALUES (:TypeID, :ItemCode, :ItemName, :ItemValue, :Remark, :SortOrder, 1, GETDATE(), :CreatedBy)';
+      'VALUES (:TypeID, :ItemCode, :ItemName, :ItemValue, :Remark, :SortOrder, 1, CURRENT_TIMESTAMP, :CreatedBy)';
 
     LQuery.Params.ParamByName('TypeID').AsInteger := TypeID;
     LQuery.Params.ParamByName('ItemCode').AsString := ItemCode;
@@ -449,7 +449,7 @@ begin
 
     LQuery.ExecSQL;
 
-    LQuery.SQL.Text := 'SELECT SCOPE_IDENTITY() AS NewID';
+    LQuery.SQL.Text := 'SELECT last_insert_rowid() AS NewID';
     LQuery.Open;
     Result := LQuery.FieldByName('NewID').AsInteger;
   finally
@@ -490,7 +490,7 @@ begin
       'UPDATE UniAdmin_DictItems ' +
       'SET ItemCode = :ItemCode, ItemName = :ItemName, ItemValue = :ItemValue, ' +
       'Remark = :Remark, SortOrder = :SortOrder, ' +
-      'ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE ItemID = :ItemID';
 
     LQuery.Params.ParamByName('ItemID').AsInteger := ItemID;
@@ -534,7 +534,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_DictItems ' +
-      'SET Status = :Status, ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'SET Status = :Status, ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE ItemID = :ItemID';
 
     LQuery.Params.ParamByName('ItemID').AsInteger := ItemID;

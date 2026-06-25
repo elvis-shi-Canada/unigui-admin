@@ -72,7 +72,8 @@ implementation
 {$R *.dfm}
 
 uses
-  UniServices, uniGUIVars;
+  UniServices, uniGUIVars, UniFormStyler, LoginForm, UniAuthService.Intf,
+  UserListFrame, RoleListFrame, MenuTreeFrame;
 
 { TMainFrame }
 
@@ -92,18 +93,38 @@ procedure TMainFrame.FormCreate(Sender: TObject);
 begin
   // 设置窗体属性
   Caption := 'UniAdmin 管理系统';
-  // WindowState := wsMaximized;  // UniGUI 不支持 VCL 窗口状态
-  // Position := poDefault;        // UniGUI 使用 CSS 布局
+
+  // 应用统一设计系统样式
+  TUniFormStyler.AutoStylePanels(Self);
 
   InitializeComponents;
 end;
 
 procedure TMainFrame.FormShow(Sender: TObject);
+var
+  LSessionInfo: TSessionInfo;
+  LUserContext: IUserContext;
+  LPermissions: TArray<string>;
+  LDataScopes: TDictionary<string, string>;
+  LLoginResult: TLoginResult;
 begin
-  // UniGUI 不支持 UniSessionManager
-  // 上下文应通过 SetExecutionContext 方法从外部设置
-  // if Assigned(UniSessionManager) then
-  //   SetExecutionContext(UniSessionManager.GetContext);
+  // 从登录结果创建执行上下文
+  LLoginResult := TLoginForm.LastLoginResult;
+  if LLoginResult.Success then
+  begin
+    LSessionInfo := TSessionInfo.Create(
+      uniGUIApplication.UniApplication.UniSession.SessionId,
+      LLoginResult.UserID,
+      LLoginResult.UserName,
+      LLoginResult.RealName,
+      ''  // ClientIP 由 UniGUI 管理
+    );
+    LPermissions := TArray<string>.Create('read', 'write', 'delete');
+    LDataScopes := TDictionary<string, string>.Create;
+    LDataScopes.Add('default', 'all');
+    LUserContext := TUserContextImpl.Create(LSessionInfo, LPermissions, LDataScopes);
+    SetExecutionContext(TExecutionContextImpl.Create(LUserContext, nil));
+  end;
 
   InitializeMenus;
   UpdateStatusBar;
@@ -194,14 +215,37 @@ procedure TMainFrame.OnMenuClick(Sender: TObject);
 var
   LMenuItem: TUniMenuItem;
   LMenuID: Integer;
+  LMenuData: UniMenuManager.Intf.TMenuItem;
+  LFrame: TUniFrame;
 begin
-  if Sender is TUniMenuItem then
-  begin
-    LMenuItem := TUniMenuItem(Sender);
-    LMenuID := LMenuItem.Tag;
+  if not (Sender is TUniMenuItem) then
+    Exit;
 
-    // 触发菜单事件 - 可以扩展为加载对应的功能模块
-    UpdateStatusBar('正在加载: ' + LMenuItem.Caption);
+  LMenuItem := TUniMenuItem(Sender);
+  LMenuID := LMenuItem.Tag;
+
+  UpdateStatusBar('正在加载: ' + LMenuItem.Caption);
+
+  // 根据 MenuCode 路由到对应功能模块
+  if Assigned(FMenuManager) then
+  begin
+    LMenuData := FMenuManager.GetMenuByID(LMenuID);
+    LFrame := nil;
+
+    if LMenuData.MenuCode = 'system.user' then
+      LFrame := TUserListFrame.Create(Self)
+    else if LMenuData.MenuCode = 'system.role' then
+      LFrame := TRoleListFrame.Create(Self)
+    else if LMenuData.MenuCode = 'system.menu' then
+      LFrame := TMenuTreeFrame.Create(Self);
+
+    if LFrame <> nil then
+    begin
+      ShowContent(LFrame);
+      UpdateStatusBar(LMenuItem.Caption);
+    end
+    else
+      UpdateStatusBar('功能开发中: ' + LMenuItem.Caption);
   end;
 end;
 

@@ -1,4 +1,4 @@
-unit DictionaryService.Intf;
+﻿unit DictionaryService.Intf;
 
 interface
 

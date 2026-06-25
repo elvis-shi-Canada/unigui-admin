@@ -248,7 +248,7 @@ begin
         LDict.DictType := FieldByName('dict_type').AsString;
         LDict.Description := FieldByName('description').AsString;
         LDict.SortOrder := FieldByName('sort_order').AsInteger;
-        LDict.IsActive := FieldByName('is_active').AsBoolean;
+        LDict.IsActive := FieldByName('is_active').AsInteger <> 0;
         LDict.CreatedAt := FieldByName('created_at').AsDateTime;
         LDict.CreatedBy := FieldByName('created_by').AsInteger;
         LDict.UpdatedAt := FieldByName('updated_at').AsDateTime;
@@ -291,7 +291,7 @@ begin
         LItem.ItemName := FieldByName('item_name').AsString;
         LItem.ItemValue := FieldByName('item_value').AsString;
         LItem.SortOrder := FieldByName('sort_order').AsInteger;
-        LItem.IsActive := FieldByName('is_active').AsBoolean;
+        LItem.IsActive := FieldByName('is_active').AsInteger <> 0;
         LItem.Remark := FieldByName('remark').AsString;
         LItem.CreatedAt := FieldByName('created_at').AsDateTime;
         LItem.CreatedBy := FieldByName('created_by').AsInteger;
@@ -334,7 +334,7 @@ begin
       Result.DictType := FieldByName('dict_type').AsString;
       Result.Description := FieldByName('description').AsString;
       Result.SortOrder := FieldByName('sort_order').AsInteger;
-      Result.IsActive := FieldByName('is_active').AsBoolean;
+      Result.IsActive := FieldByName('is_active').AsInteger <> 0;
       Result.CreatedAt := FieldByName('created_at').AsDateTime;
       Result.CreatedBy := FieldByName('created_by').AsInteger;
       Result.UpdatedAt := FieldByName('updated_at').AsDateTime;

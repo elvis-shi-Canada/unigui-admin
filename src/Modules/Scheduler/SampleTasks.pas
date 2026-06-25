@@ -1,4 +1,4 @@
-unit SampleTasks;
+﻿unit SampleTasks;
 
 interface
 
@@ -303,9 +303,10 @@ begin
           LQuery := TFDQuery.Create(nil);
           try
             LQuery.Connection := LConnection;
+            // SQLite 无 sys.master_files，改用 pragma_page_count 获取库大小
             LQuery.SQL.Text :=
-              'SELECT TOP 1 size * 8 / 1024 AS SizeMB FROM sys.master_files ' +
-              'WHERE database_id = DB_ID() AND type = 0';
+              'SELECT page_count * page_size / 1048576.0 AS SizeMB ' +
+              'FROM pragma_page_count(), pragma_page_size()';
             try
               LQuery.Open;
               if not LQuery.Eof then
@@ -364,7 +365,7 @@ begin
           LQuery.SQL.Text :=
             'INSERT INTO UniAdmin_OperationLogs ' +
             '(UserID, UserName, Module, Operation, Description, Status, CreatedDate) ' +
-            'VALUES (0, ''System'', ''HealthCheck'', ''Check'', :Result, 1, GETDATE())';
+            'VALUES (0, ''System'', ''HealthCheck'', ''Check'', :Result, 1, CURRENT_TIMESTAMP)';
           LQuery.Params.ParamByName('Result').AsString := LHealthStatus;
           LQuery.ExecSQL;
         finally

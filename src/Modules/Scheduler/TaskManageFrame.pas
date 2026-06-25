@@ -1,4 +1,4 @@
-unit TaskManageFrame;
+﻿unit TaskManageFrame;
 
 interface
 

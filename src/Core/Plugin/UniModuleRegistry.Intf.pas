@@ -1,4 +1,4 @@
-unit UniModuleRegistry.Intf;
+﻿unit UniModuleRegistry.Intf;
 
 interface
 

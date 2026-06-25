@@ -1,4 +1,4 @@
-unit UserDataModule;
+﻿unit UserDataModule;
 
 interface
 
@@ -213,7 +213,7 @@ begin
     LQuery.SQL.Text := 
       'INSERT INTO UniAdmin_Users ' +
       '(UserName, Password, RealName, Email, Phone, Status, CreatedDate, CreatedBy) ' +
-      'VALUES (:UserName, :Password, :RealName, :Email, :Phone, 1, GETDATE(), :CreatedBy)';
+      'VALUES (:UserName, :Password, :RealName, :Email, :Phone, 1, CURRENT_TIMESTAMP, :CreatedBy)';
     
     LQuery.Params.ParamByName('UserName').AsString := UserName;
     LQuery.Params.ParamByName('Password').AsString := HashPassword(Password);
@@ -225,7 +225,7 @@ begin
     LQuery.ExecSQL;
     
     // 返回新插入的用户 ID
-    LQuery.SQL.Text := 'SELECT SCOPE_IDENTITY() AS NewID';
+    LQuery.SQL.Text := 'SELECT last_insert_rowid() AS NewID';
     LQuery.Open;
     Result := LQuery.FieldByName('NewID').AsInteger;
   finally
@@ -270,7 +270,7 @@ begin
     LQuery.SQL.Text := 
       'UPDATE UniAdmin_Users ' +
       'SET RealName = :RealName, Email = :Email, Phone = :Phone, ' +
-      'ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE UserID = :UserID';
     
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
@@ -360,7 +360,7 @@ begin
     // 更新密码
     LQuery.SQL.Text := 
       'UPDATE UniAdmin_Users ' +
-      'SET Password = :Password, ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'SET Password = :Password, ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE UserID = :UserID';
     
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
@@ -386,7 +386,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text := 
       'UPDATE UniAdmin_Users ' +
-      'SET Password = :Password, ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'SET Password = :Password, ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE UserID = :UserID';
     
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
@@ -412,7 +412,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text := 
       'UPDATE UniAdmin_Users ' +
-      'SET Status = :Status, ModifiedDate = GETDATE(), ModifiedBy = :ModifiedBy ' +
+      'SET Status = :Status, ModifiedDate = CURRENT_TIMESTAMP, ModifiedBy = :ModifiedBy ' +
       'WHERE UserID = :UserID';
     
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
@@ -434,7 +434,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text := 
       'UPDATE UniAdmin_Users ' +
-      'SET LastLoginDate = GETDATE(), LastLoginIP = :IP ' +
+      'SET LastLoginDate = CURRENT_TIMESTAMP, LastLoginIP = :IP ' +
       'WHERE UserID = :UserID';
     
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;

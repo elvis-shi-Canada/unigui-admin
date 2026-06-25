@@ -545,9 +545,9 @@ begin
   try
     LQuery.Connection := FConnection;
     LQuery.SQL.Text :=
-      'SELECT TOP ' + IntToStr(Count) + ' * FROM UniAdmin_TaskExecutionLogs ' +
+      'SELECT * FROM UniAdmin_TaskExecutionLogs ' +
       'WHERE TaskID = :TaskID ' +
-      'ORDER BY StartTime DESC';
+      'ORDER BY StartTime DESC LIMIT ' + IntToStr(Count);
 
     LQuery.Params.ParamByName('TaskID').AsInteger := TaskID;
     LQuery.Open;

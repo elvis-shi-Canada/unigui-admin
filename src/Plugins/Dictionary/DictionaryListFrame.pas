@@ -1,4 +1,4 @@
-unit DictionaryListFrame;
+﻿unit DictionaryListFrame;
 
 interface
 

@@ -1,4 +1,4 @@
-unit PluginManagerFrame;
+﻿unit PluginManagerFrame;
 
 interface
 

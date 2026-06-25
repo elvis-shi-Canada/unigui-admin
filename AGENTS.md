@@ -662,3 +662,52 @@ uses
 
 ---
 
+### 1️⃣5️⃣ DFM 事件属性必须显式绑定（预防：FormCreate 静默不执行）
+
+**触发场景**
+- 窗体有事件处理方法（FormCreate、FormShow 等）但运行时行为异常
+- 初始化代码似乎从未执行（字段为 nil、属性未设置）
+- 从其他项目复制窗体代码后功能缺失
+
+**错误模式**
+.pas 中声明了事件方法：
+```pascal
+TLoginForm = class(TUniLoginForm)
+  procedure FormCreate(Sender: TObject);
+  procedure FormShow(Sender: TObject);
+```
+.dfm 中**缺失**对应的 `OnCreate` / `OnShow` 属性：
+```dfm
+object LoginForm: TLoginForm
+  Caption = #29992#25143#30331#24405
+  OldCreateOrder = False
+  MonitoredKeys.Keys = <>
+  // ← 缺少 OnCreate = FormCreate 和 OnShow = FormShow！
+```
+
+后果：`FormCreate` **永远不会被调用**。初始化代码静默跳过，字段保持 nil，窗体大小/属性不生效。无编译错误，无运行时异常——极难发现。
+
+**与规则 1️⃣2️⃣ 的区别**
+- 1️⃣2️⃣ 解决的是方法可见性问题（protected vs published，RTTI 找不到方法）
+- 本规则解决的是 DFM 中根本没有写 `OnCreate = FormCreate` 属性行
+
+**正确行为**
+每次创建/修改窗体后，必须验证 DFM 包含所有事件绑定：
+```dfm
+object MyForm: TMyForm
+  OnCreate = FormCreate       ← 必须存在
+  OnShow = FormShow           ← 必须存在
+  OnClose = FormClose         ← 必须存在
+  OnKeyPress = FormKeyPress   ← 必须存在
+```
+
+**验证方法**
+```bash
+# 检查 .pas 中声明的所有 procedure 是否在 .dfm 中有对应的 On 属性
+grep "procedure.*Form" MyForm.pas    # 找到所有事件方法
+grep "On.*=" MyForm.dfm              # 找到所有已绑定的事件
+```
+两者应一一对应。任何 .pas 中的事件方法在 .dfm 中找不到对应 `OnXxx = MethodName` 的，即为遗漏。
+
+---
+

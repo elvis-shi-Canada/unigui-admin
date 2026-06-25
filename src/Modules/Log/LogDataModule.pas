@@ -1,4 +1,4 @@
-unit LogDataModule;
+﻿unit LogDataModule;
 
 interface
 
@@ -145,8 +145,8 @@ begin
     if PageSize > 0 then
     begin
       LOffset := (Page - 1) * PageSize;
-      LSQL := LSQL + ' OFFSET ' + IntToStr(LOffset) + ' ROWS FETCH NEXT ' +
-               IntToStr(PageSize) + ' ROWS ONLY';
+      LSQL := LSQL + ' LIMIT ' + IntToStr(PageSize) + ' OFFSET ' +
+               IntToStr(LOffset);
     end;
 
     LQuery.SQL.Text := LSQL;
@@ -248,7 +248,7 @@ begin
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_LoginLogs ' +
       '(UserID, UserName, LoginIP, LoginTime, Status, UserAgent, FailReason) ' +
-      'VALUES (:UserID, :UserName, :IP, GETDATE(), :Status, :UserAgent, :FailReason)';
+      'VALUES (:UserID, :UserName, :IP, CURRENT_TIMESTAMP, :Status, :UserAgent, :FailReason)';
 
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
     LQuery.Params.ParamByName('UserName').AsString := UserName;
@@ -272,7 +272,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_LoginLogs ' +
-      'SET LogoutTime = GETDATE() ' +
+      'SET LogoutTime = CURRENT_TIMESTAMP ' +
       'WHERE LogID = :LogID';
 
     LQuery.Params.ParamByName('LogID').AsInteger := LogID;
@@ -324,8 +324,8 @@ begin
     if PageSize > 0 then
     begin
       LOffset := (Page - 1) * PageSize;
-      LSQL := LSQL + ' OFFSET ' + IntToStr(LOffset) + ' ROWS FETCH NEXT ' +
-               IntToStr(PageSize) + ' ROWS ONLY';
+      LSQL := LSQL + ' LIMIT ' + IntToStr(PageSize) + ' OFFSET ' +
+               IntToStr(LOffset);
     end;
 
     LQuery.SQL.Text := LSQL;
@@ -429,7 +429,7 @@ begin
       '(UserID, UserName, Module, Operation, Description, RequestData, ResponseData, ' +
       'IP, UserAgent, Duration, Status, CreatedDate) ' +
       'VALUES (:UserID, :UserName, :Module, :Operation, :Description, :RequestData, ' +
-      ':ResponseData, :IP, :UserAgent, :Duration, :Status, GETDATE())';
+      ':ResponseData, :IP, :UserAgent, :Duration, :Status, CURRENT_TIMESTAMP)';
 
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
     LQuery.Params.ParamByName('UserName').AsString := UserName;
@@ -488,8 +488,8 @@ begin
     if PageSize > 0 then
     begin
       LOffset := (Page - 1) * PageSize;
-      LSQL := LSQL + ' OFFSET ' + IntToStr(LOffset) + ' ROWS FETCH NEXT ' +
-               IntToStr(PageSize) + ' ROWS ONLY';
+      LSQL := LSQL + ' LIMIT ' + IntToStr(PageSize) + ' OFFSET ' +
+               IntToStr(LOffset);
     end;
 
     LQuery.SQL.Text := LSQL;
@@ -582,7 +582,7 @@ begin
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_DataChangeLogs ' +
       '(UserID, UserName, TableName, RecordID, Operation, OldValue, NewValue, IP, CreatedDate) ' +
-      'VALUES (:UserID, :UserName, :TableName, :RecordID, :Operation, :OldValue, :NewValue, :IP, GETDATE())';
+      'VALUES (:UserID, :UserName, :TableName, :RecordID, :Operation, :OldValue, :NewValue, :IP, CURRENT_TIMESTAMP)';
 
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
     LQuery.Params.ParamByName('UserName').AsString := UserName;

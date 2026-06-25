@@ -1,4 +1,4 @@
-unit RolePermissionDialog;
+﻿unit RolePermissionDialog;
 
 interface
 
@@ -68,6 +68,9 @@ implementation
 
 {$R *.dfm}
 
+uses
+  UniFormStyler;
+
 constructor TRolePermissionDialog.Create(AOwner: TComponent);
 begin
   inherited;
@@ -104,6 +107,8 @@ end;
 
 procedure TRolePermissionDialog.FormCreate(Sender: TObject);
 begin
+  TUniFormStyler.AutoStylePanels(Self);
+  TUniFormStyler.AutoStyleButtons(Self);
   Caption := '权限分配';
   Width := 700;
   Height := 500;
@@ -341,7 +346,7 @@ begin
       begin
         LQuery.SQL.Text :=
           'INSERT INTO UniAdmin_RolePermissions (RoleID, PermissionID, CreatedDate) ' +
-          'VALUES (:RoleID, :PermissionID, GETDATE())';
+          'VALUES (:RoleID, :PermissionID, CURRENT_TIMESTAMP)';
         LQuery.ParamByName('RoleID').AsInteger := FRoleID;
         LQuery.ParamByName('PermissionID').AsInteger := LPermissionIDs[I];
         LQuery.ExecSQL;

@@ -1,4 +1,4 @@
-unit UniMetadataCache.Intf;
+﻿unit UniMetadataCache.Intf;
 
 interface
 

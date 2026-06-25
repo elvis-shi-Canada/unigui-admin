@@ -1,4 +1,4 @@
-unit ConfigManagerFrame;
+﻿unit ConfigManagerFrame;
 
 interface
 

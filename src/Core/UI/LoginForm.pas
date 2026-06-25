@@ -17,6 +17,7 @@ type
     UniContainerPanel: TUniContainerPanel;
     UniPanel: TUniPanel;
     LblTitle: TUniLabel;
+    LblSubtitle: TUniLabel;
     LblUserName: TUniLabel;
     LblPassword: TUniLabel;
     EdtUserName: TUniEdit;
@@ -24,6 +25,7 @@ type
     ChkRememberMe: TUniCheckBox;
     BtnLogin: TUniButton;
     BtnCancel: TUniButton;
+    LblCopyright: TUniLabel;
     procedure BtnLoginClick(Sender: TObject);
     procedure BtnCancelClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -32,9 +34,14 @@ type
   private
     FAuthService: IUniAuthService;
     FLoginResult: TLoginResult;
+    class var FLastLoginResult: TLoginResult;
     procedure SetLoginResult(const Value: TLoginResult);
     function ValidateInput: Boolean;
+    /// <summary>Apply modern CSS classes to components for custom styling</summary>
+    procedure ApplyStyling;
   public
+    /// <summary>最近一次登录结果（供 MainFrame 创建执行上下文）</summary>
+    class property LastLoginResult: TLoginResult read FLastLoginResult;
     /// <summary>
     /// 静态方法 - 显示登录窗体并执行登录
     /// </summary>
@@ -67,13 +74,6 @@ begin
     end;
   end;
 
-  // 设置窗体属性
-  Caption := '用户登录';
-  Width := 400;
-  Height := 300;
-  // BorderStyle := bsDialog;    // UniGUI 不支持 VCL 属性
-  // Position := poScreenCenter;  // UniGUI 使用 CSS 布局
-
   // 设置默认值
   EdtUserName.Text := '';
   EdtPassword.Text := '';
@@ -81,11 +81,34 @@ begin
 
   FLoginResult.Success := False;
   FLoginResult.Message := '';
+
+  // 样式应用移至 UniFormAfterShow（确保客户端组件已完全初始化）
+end;
+
+procedure TLoginForm.ApplyStyling;
+begin
+  // 背景面板 - 渐变背景
+  UniContainerPanel.JSInterface.JSAssign('addCls', ['login-form-bg']);
+  // 登录卡片 - 白底 + 圆角 + 阴影
+  UniPanel.JSInterface.JSAssign('addCls', ['login-card']);
+  // 标题 + 副标题
+  LblTitle.JSInterface.JSAssign('addCls', ['login-title']);
+  LblSubtitle.JSInterface.JSAssign('addCls', ['login-subtitle']);
+  // 输入框 - 圆角 + 聚焦高亮
+  EdtUserName.JSInterface.JSAssign('addCls', ['login-input']);
+  EdtPassword.JSInterface.JSAssign('addCls', ['login-input']);
+  // 按钮 - 渐变主按钮 + 幽灵次按钮
+  BtnLogin.JSInterface.JSAssign('addCls', ['login-btn-primary']);
+  BtnCancel.JSInterface.JSAssign('addCls', ['login-btn-secondary']);
+  // 页脚版权
+  LblCopyright.JSInterface.JSAssign('addCls', ['login-footer']);
 end;
 
 procedure TLoginForm.UniFormAfterShow(Sender: TObject);
 begin
-  // 窗体显示后设置焦点到用户名输入框
+  // 窗体显示后应用样式（此时客户端组件已完全初始化）
+  ApplyStyling;
+  // 设置焦点到用户名输入框
   EdtUserName.SetFocus;
 end;
 
@@ -126,6 +149,8 @@ begin
 
       if FLoginResult.Success then
       begin
+        // 保存登录结果供 MainFrame 创建执行上下文
+        FLastLoginResult := FLoginResult;
         ModalResult := mrOk;
         // 登录成功，可以选择显示欢迎消息
         // ShowMessage('登录成功！欢迎, ' + FLoginResult.RealName);

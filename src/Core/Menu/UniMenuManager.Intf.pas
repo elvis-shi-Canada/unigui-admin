@@ -1,4 +1,4 @@
-unit UniMenuManager.Intf;
+﻿unit UniMenuManager.Intf;
 
 interface
 

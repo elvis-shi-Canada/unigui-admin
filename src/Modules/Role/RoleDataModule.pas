@@ -1,4 +1,4 @@
-unit RoleDataModule;
+﻿unit RoleDataModule;
 
 interface
 
@@ -270,7 +270,7 @@ begin
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_Roles ' +
       '(RoleCode, RoleName, Description, DataScope, SortOrder, Status, CreatedDate, ModifiedDate) ' +
-      'VALUES (:RoleCode, :RoleName, :Description, :DataScope, :SortOrder, 1, GETDATE(), GETDATE())';
+      'VALUES (:RoleCode, :RoleName, :Description, :DataScope, :SortOrder, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)';
 
     LQuery.Params.ParamByName('RoleCode').AsString := RoleCode;
     LQuery.Params.ParamByName('RoleName').AsString := RoleName;
@@ -281,7 +281,7 @@ begin
     LQuery.ExecSQL;
 
     // 返回新插入的角色 ID
-    LQuery.SQL.Text := 'SELECT SCOPE_IDENTITY() AS NewID';
+    LQuery.SQL.Text := 'SELECT last_insert_rowid() AS NewID';
     LQuery.Open;
     Result := LQuery.FieldByName('NewID').AsInteger;
   finally
@@ -328,7 +328,7 @@ begin
     if LNeedStatus then
       LUpdates.Add('Status = :Status');
 
-    LUpdates.Add('ModifiedDate = GETDATE()');
+    LUpdates.Add('ModifiedDate = CURRENT_TIMESTAMP');
 
     LSQL := TStringList.Create;
     try
@@ -416,7 +416,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'UPDATE UniAdmin_Roles ' +
-      'SET Status = :Status, ModifiedDate = GETDATE() ' +
+      'SET Status = :Status, ModifiedDate = CURRENT_TIMESTAMP ' +
       'WHERE RoleID = :RoleID';
 
     LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
@@ -443,7 +443,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_UserRoles (UserID, RoleID, CreatedDate) ' +
-      'VALUES (:UserID, :RoleID, GETDATE())';
+      'VALUES (:UserID, :RoleID, CURRENT_TIMESTAMP)';
 
     LQuery.Params.ParamByName('UserID').AsInteger := UserID;
     LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
@@ -561,7 +561,7 @@ begin
     LQuery.Connection := Connection;
     LQuery.SQL.Text :=
       'INSERT INTO UniAdmin_RolePermissions (RoleID, PermissionID, CreatedDate) ' +
-      'VALUES (:RoleID, :PermissionID, GETDATE())';
+      'VALUES (:RoleID, :PermissionID, CURRENT_TIMESTAMP)';
 
     LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
     LQuery.Params.ParamByName('PermissionID').AsInteger := PermissionID;
@@ -663,7 +663,7 @@ begin
       begin
         LQuery.SQL.Text :=
           'INSERT INTO UniAdmin_RolePermissions (RoleID, PermissionID, CreatedDate) ' +
-          'VALUES (:RoleID, :PermissionID, GETDATE())';
+          'VALUES (:RoleID, :PermissionID, CURRENT_TIMESTAMP)';
         LQuery.Params.ParamByName('RoleID').AsInteger := RoleID;
         LQuery.Params.ParamByName('PermissionID').AsInteger := LPermissionID;
         LQuery.ExecSQL;

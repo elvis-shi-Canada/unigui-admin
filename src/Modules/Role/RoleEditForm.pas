@@ -67,6 +67,9 @@ implementation
 
 {$R *.dfm}
 
+uses
+  UniFormStyler;
+
 constructor TRoleEditForm.Create(AOwner: TComponent);
 begin
   inherited;
@@ -94,6 +97,8 @@ end;
 
 procedure TRoleEditForm.FormCreate(Sender: TObject);
 begin
+  TUniFormStyler.AutoStylePanels(Self);
+  TUniFormStyler.AutoStyleButtons(Self);
   InitForm;
 end;
 

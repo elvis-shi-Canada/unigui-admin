@@ -1,4 +1,4 @@
-unit UniAuthService;
+﻿unit UniAuthService;
 
 interface
 
@@ -196,7 +196,7 @@ begin
     // 更新密码
     LNewHash := HashPassword(NewPassword);
     LQuery.Close;
-    LQuery.SQL.Text := 'UPDATE UniAdmin_Users SET Password = :Password, ModifiedDate = GETDATE() WHERE UserID = :UserID';
+    LQuery.SQL.Text := 'UPDATE UniAdmin_Users SET Password = :Password, ModifiedDate = CURRENT_TIMESTAMP WHERE UserID = :UserID';
     LQuery.ParamByName('Password').AsString := LNewHash;
     LQuery.ParamByName('UserID').AsInteger := UserID;
 

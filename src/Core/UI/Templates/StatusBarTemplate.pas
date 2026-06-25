@@ -1,4 +1,4 @@
-unit StatusBarTemplate;
+﻿unit StatusBarTemplate;
 
 interface
 

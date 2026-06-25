@@ -1,4 +1,4 @@
-unit LogExport;
+﻿unit LogExport;
 
 interface
 

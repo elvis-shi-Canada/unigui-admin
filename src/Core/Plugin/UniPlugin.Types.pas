@@ -1,4 +1,4 @@
-unit UniPlugin.Types;
+﻿unit UniPlugin.Types;
 
 interface
 

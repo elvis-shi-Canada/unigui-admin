@@ -109,6 +109,9 @@ type
 
 implementation
 
+uses
+  UniAdminLogger;
+
 { TModuleConfig }
 
 constructor TModuleConfig.Create(const ModuleName, ConfigFile: string);
@@ -311,13 +314,45 @@ end;
 function TModuleConfig.GetString(const Key: string; const DefaultValue: string): string;
 var
   Value: Variant;
+  Parts: TArray<string>;
+  RootJSON, Node: TJSONValue;
+  i: Integer;
 begin
   FCriticalSection.Enter;
   try
+    // 1. 直接查完整键（向后兼容）
     if FConfigValues.TryGetValue(Key, Value) then
-      Result := VarToStr(Value)
-    else
-      Result := DefaultValue;
+      Exit(VarToStr(Value));
+
+    // 2. 点号路径：解析嵌套 JSON 对象（如 'database.connectionString'）
+    //    LoadFromFile 把嵌套对象存为顶层键→JSON 字符串，需逐段深入
+    if Pos('.', Key) > 0 then
+    begin
+      Parts := Key.Split(['.']);
+      if FConfigValues.TryGetValue(Parts[0], Value) then
+      begin
+        RootJSON := TJSONObject.ParseJSONValue(VarToStr(Value));
+        try
+          Node := RootJSON;
+          for i := 1 to High(Parts) do
+          begin
+            if (Node is TJSONObject) and (TJSONObject(Node).Values[Parts[i]] <> nil) then
+              Node := TJSONObject(Node).Values[Parts[i]]
+            else
+            begin
+              Node := nil;
+              Break;
+            end;
+          end;
+          if Node <> nil then
+            Exit(Node.Value);
+        finally
+          RootJSON.Free;
+        end;
+      end;
+    end;
+
+    Result := DefaultValue;
   finally
     FCriticalSection.Leave;
   end;
@@ -740,7 +775,7 @@ procedure TUniConfigService.Initialize;
 begin
   // 默认配置目录为程序目录下的 Config 文件夹
   FConfigRoot := TPath.Combine(ExtractFilePath(ParamStr(0)), 'Config');
-  FGlobalConfigFile := TPath.Combine(FConfigRoot, 'global.json');
+  FGlobalConfigFile := TPath.Combine(FConfigRoot, 'app.json');
 
   // 确保配置目录存在
   if not TDirectory.Exists(FConfigRoot) then
@@ -770,7 +805,7 @@ begin
   FCriticalSection.Enter;
   try
     FConfigRoot := Path;
-    FGlobalConfigFile := TPath.Combine(FConfigRoot, 'global.json');
+    FGlobalConfigFile := TPath.Combine(FConfigRoot, 'app.json');
 
     // 确保目录存在
     if not TDirectory.Exists(FConfigRoot) then

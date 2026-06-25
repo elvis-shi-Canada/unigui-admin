@@ -1,4 +1,4 @@
-unit DictionaryPlugin;
+﻿unit DictionaryPlugin;
 
 interface
 

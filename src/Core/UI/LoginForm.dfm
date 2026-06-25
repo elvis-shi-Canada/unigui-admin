@@ -1,104 +1,164 @@
 object LoginForm: TLoginForm
   Left = 0
   Top = 0
-  ClientHeight = 300
-  ClientWidth = 400
+  ClientHeight = 560
+  ClientWidth = 440
   Caption = #29992#25143#30331#24405
   OldCreateOrder = False
+  OnAfterShow = UniFormAfterShow
+  OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
   MonitoredKeys.Keys = <>
   TextHeight = 15
   object UniContainerPanel: TUniContainerPanel
     Left = 0
     Top = 0
-    Width = 400
-    Height = 300
+    Width = 440
+    Height = 560
     Hint = ''
     ParentColor = False
     Align = alClient
     TabOrder = 0
     object UniPanel: TUniPanel
-      Left = 50
+      Left = 30
       Top = 30
-      Width = 300
-      Height = 240
+      Width = 380
+      Height = 500
       Hint = ''
       TabOrder = 1
       Caption = ''
+      Color = clWindow
       object LblTitle: TUniLabel
-        Left = 80
-        Top = 16
-        Width = 90
-        Height = 25
+        Left = 28
+        Top = 44
+        Width = 324
+        Height = 33
         Hint = ''
+        Alignment = taCenter
+        AutoSize = False
         Caption = 'UniAdmin'
         ParentFont = False
-        Font.Height = -19
+        Font.Color = 1710618
+        Font.Height = -28
         Font.Style = [fsBold]
-        TabOrder = 1
-      end
-      object LblUserName: TUniLabel
-        Left = 16
-        Top = 64
-        Width = 39
-        Height = 13
-        Hint = ''
-        Caption = #29992#25143#21517
         TabOrder = 2
       end
-      object EdtUserName: TUniEdit
-        Left = 16
-        Top = 83
-        Width = 268
+      object LblSubtitle: TUniLabel
+        Left = 28
+        Top = 86
+        Width = 324
+        Height = 18
         Hint = ''
-        Text = ''
+        Alignment = taCenter
+        AutoSize = False
+        Caption = #31649#29702#31995#32479
+        ParentFont = False
+        Font.Color = 10066329
+        Font.Height = -13
         TabOrder = 3
       end
-      object LblPassword: TUniLabel
-        Left = 16
-        Top = 112
-        Width = 26
-        Height = 13
+      object LblUserName: TUniLabel
+        Left = 28
+        Top = 130
+        Width = 324
+        Height = 16
         Hint = ''
-        Caption = #23494#30721
+        AutoSize = False
+        Caption = #29992#25143#21517
+        ParentFont = False
+        Font.Color = 3355443
+        Font.Height = -13
+        Font.Style = [fsBold]
         TabOrder = 4
       end
-      object EdtPassword: TUniEdit
-        Left = 16
-        Top = 131
-        Width = 268
+      object EdtUserName: TUniEdit
+        Left = 28
+        Top = 152
+        Width = 324
+        Height = 38
         Hint = ''
-        PasswordChar = '*'
+        ParentFont = False
+        Font.Height = -14
+        EmptyText = #35831#36755#20837#29992#25143#21517
         Text = ''
         TabOrder = 5
       end
-      object ChkRememberMe: TUniCheckBox
-        Left = 16
-        Top = 160
-        Width = 100
-        Height = 17
+      object LblPassword: TUniLabel
+        Left = 28
+        Top = 206
+        Width = 324
+        Height = 16
         Hint = ''
-        Caption = #35760#20303#25105
+        AutoSize = False
+        Caption = #23494#30721
+        ParentFont = False
+        Font.Color = 3355443
+        Font.Height = -13
+        Font.Style = [fsBold]
         TabOrder = 6
       end
+      object EdtPassword: TUniEdit
+        Left = 28
+        Top = 228
+        Width = 324
+        Height = 38
+        Hint = ''
+        PasswordChar = '*'
+        ParentFont = False
+        Font.Height = -14
+        EmptyText = #35831#36755#20837#23494#30721
+        Text = ''
+        TabOrder = 7
+      end
+      object ChkRememberMe: TUniCheckBox
+        Left = 28
+        Top = 282
+        Width = 140
+        Height = 20
+        Hint = ''
+        Caption = #35760#20303#25105
+        TabOrder = 8
+      end
       object BtnLogin: TUniButton
-        Left = 80
-        Top = 192
-        Width = 80
-        Height = 25
+        Left = 28
+        Top = 316
+        Width = 324
+        Height = 44
         Hint = ''
         Caption = #30331#24405
-        TabOrder = 7
+        ParentFont = False
+        Font.Color = 16777215
+        Font.Height = -14
+        Font.Style = [fsBold]
+        TabOrder = 9
         OnClick = BtnLoginClick
       end
       object BtnCancel: TUniButton
-        Left = 170
-        Top = 192
-        Width = 80
-        Height = 25
+        Left = 28
+        Top = 372
+        Width = 324
+        Height = 40
         Hint = ''
         Caption = #21462#28040
-        TabOrder = 8
+        ParentFont = False
+        Font.Color = 6710886
+        Font.Height = -14
+        TabOrder = 10
         OnClick = BtnCancelClick
+      end
+      object LblCopyright: TUniLabel
+        Left = 28
+        Top = 452
+        Width = 324
+        Height = 16
+        Hint = ''
+        Alignment = taCenter
+        AutoSize = False
+        Caption = #169' 2026 UniAdmin'
+        ParentFont = False
+        Font.Color = 10066329
+        Font.Height = -11
+        TabOrder = 11
       end
     end
   end

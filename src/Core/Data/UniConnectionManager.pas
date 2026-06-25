@@ -1,4 +1,4 @@
-unit UniConnectionManager;
+﻿unit UniConnectionManager;
 
 interface
 
@@ -32,6 +32,9 @@ type
   end;
 
 implementation
+
+uses
+  UniAdminLogger;
 
 { TUniConnectionManager }
 
@@ -120,13 +123,12 @@ end;
 
 function TUniConnectionManager.GetDefaultConnection: TFDConnection;
 var
-  LDbType: string;
+  LDbType, LConnStr, LExeDir: string;
   LParams: TConnectionParams;
 begin
   if not Assigned(FDefaultConnection) then
   begin
-    // 从配置读取数据库类型和连接信息
-    // NOTE: Using GetGlobalString/GetGlobalInteger as per actual interface
+    // 从配置读取数据库类型
     LDbType := FConfigService.GetGlobalString('database.type', 'MSSQL');
 
     if SameText(LDbType, 'MSSQL') then
@@ -142,13 +144,43 @@ begin
     else
       LParams.DatabaseType := dbMSSQL;
 
-    LParams.Server := FConfigService.GetGlobalString('database.server', 'localhost');
-    LParams.Port := FConfigService.GetGlobalInteger('database.port', 1433);
-    LParams.Database := FConfigService.GetGlobalString('database.name', '');
-    LParams.UserName := FConfigService.GetGlobalString('database.user', 'sa');
-    LParams.Password := FConfigService.GetGlobalString('database.password', '');
+    // 优先使用 app.json 的完整连接串（database.connectionString）
+    LConnStr := FConfigService.GetGlobalString('database.connectionString', '');
 
-    FDefaultConnection := GetConnection(LParams);
+    // SQLite 相对路径解析为 exe 目录绝对路径，确保库文件稳定落在 exe 同目录（bin/）
+    // 而不依赖运行时工作目录（IDE 运行时 cwd 可能是项目根）
+    if (LParams.DatabaseType = dbSQLite) and (LConnStr <> '') then
+    begin
+      LExeDir := ExtractFilePath(ParamStr(0));
+      if LExeDir <> '' then
+        LConnStr := StringReplace(LConnStr, 'Database=', 'Database=' + LExeDir, [rfIgnoreCase]);
+    end;
+
+    if LConnStr <> '' then
+    begin
+      FDefaultConnection := TFDConnection.Create(nil);
+      try
+        // 顺序关键：先设 Params.Text（连接参数），再设 DriverName（驱动）。
+        // 反过来会导致 Params.Text 重置时清掉 DriverName。
+        FDefaultConnection.Params.Text := LConnStr;
+        FDefaultConnection.DriverName := GetDriverName(LParams.DatabaseType);
+        FDefaultConnection.Connected := True;
+        FConnections.Add(FDefaultConnection);
+      except
+        FreeAndNil(FDefaultConnection);
+        raise;
+      end;
+    end
+    else
+    begin
+      // 向后兼容：使用分散字段构造连接
+      LParams.Server := FConfigService.GetGlobalString('database.server', 'localhost');
+      LParams.Port := FConfigService.GetGlobalInteger('database.port', 1433);
+      LParams.Database := FConfigService.GetGlobalString('database.name', '');
+      LParams.UserName := FConfigService.GetGlobalString('database.user', 'sa');
+      LParams.Password := FConfigService.GetGlobalString('database.password', '');
+      FDefaultConnection := GetConnection(LParams);
+    end;
   end;
 
   Result := FDefaultConnection;

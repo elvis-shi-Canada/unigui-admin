@@ -1,4 +1,4 @@
-unit UniPermissionManager;
+﻿unit UniPermissionManager;
 
 interface
 
@@ -358,7 +358,7 @@ begin
     // 插入新记录
     LQuery.Close;
     LQuery.SQL.Text := 'INSERT INTO UniAdmin_UserRoles (UserID, RoleID, CreatedDate) ' +
-                      'VALUES (:UserID, :RoleID, GETDATE())';
+                      'VALUES (:UserID, :RoleID, CURRENT_TIMESTAMP)';
     LQuery.ParamByName('UserID').AsInteger := UserID;
     LQuery.ParamByName('RoleID').AsInteger := RoleID;
 

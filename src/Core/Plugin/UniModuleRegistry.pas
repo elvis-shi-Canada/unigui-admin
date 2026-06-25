@@ -1,4 +1,4 @@
-unit UniModuleRegistry;
+﻿unit UniModuleRegistry;
 
 interface
 

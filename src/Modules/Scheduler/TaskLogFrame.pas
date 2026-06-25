@@ -1,4 +1,4 @@
-unit TaskLogFrame;
+﻿unit TaskLogFrame;
 
 interface
 
@@ -131,11 +131,11 @@ begin
         var LQuery := TFDQuery.Create(nil);
         try
           LQuery.SQL.Text :=
-            'SELECT TOP 100 LogID, TaskID, StartTime, EndTime, Status, ' +
+            'SELECT LogID, TaskID, StartTime, EndTime, Status, ' +
             'ErrorMessage, Result, Duration ' +
             'FROM UniAdmin_TaskExecutionLogs ' +
             'WHERE TaskID = :TaskID ' +
-            'ORDER BY StartTime DESC';
+            'ORDER BY StartTime DESC LIMIT 100';
           LQuery.Params.ParamByName('TaskID').AsInteger := FTaskID;
           try
             LQuery.Open;

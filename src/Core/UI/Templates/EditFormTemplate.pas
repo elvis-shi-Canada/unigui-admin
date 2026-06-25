@@ -48,8 +48,15 @@ implementation
 
 {$R *.dfm}
 
+uses
+  UniFormStyler;
+
 procedure TEditFormTemplate.FormCreate(Sender: TObject);
 begin
+  // 应用统一设计系统样式
+  TUniFormStyler.AutoStylePanels(Self);
+  TUniFormStyler.AutoStyleButtons(Self);
+
   FEditMode := (Tag <> 0);
   if FEditMode then
     lblTitle.Caption := '编辑信息'

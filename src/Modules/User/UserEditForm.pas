@@ -61,7 +61,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UserService;
+  UserService, UniFormStyler;
 
 var
   UserService: IUniUserService;
@@ -86,6 +86,8 @@ end;
 
 procedure TUserEditForm.FormCreate(Sender: TObject);
 begin
+  TUniFormStyler.AutoStylePanels(Self);
+  TUniFormStyler.AutoStyleButtons(Self);
   InitForm;
 end;
 

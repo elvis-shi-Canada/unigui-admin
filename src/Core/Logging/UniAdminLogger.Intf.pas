@@ -1,4 +1,4 @@
-unit UniAdminLogger.Intf;
+﻿unit UniAdminLogger.Intf;
 
 interface
 

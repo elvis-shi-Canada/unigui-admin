@@ -3,8 +3,11 @@ object MainFrame: TMainFrame
   Top = 0
   ClientHeight = 600
   ClientWidth = 900
-  Caption = 'UniAdmin #31649#29702#31995#32479'
+  Caption = 'UniAdmin '#31649#29702#31995#32479
   OldCreateOrder = False
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnShow = FormShow
   MonitoredKeys.Keys = <>
   TextHeight = 15
   object UniContainerPanel: TUniContainerPanel

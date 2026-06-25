@@ -1,4 +1,4 @@
-unit UniPermissionManager.Intf;
+﻿unit UniPermissionManager.Intf;
 
 interface
 

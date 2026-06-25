@@ -1,4 +1,4 @@
-unit DialogTemplate;
+﻿unit DialogTemplate;
 
 interface
 
@@ -26,11 +26,18 @@ implementation
 
 {$R *.dfm}
 
+uses
+  UniFormStyler;
+
 class function TDialogTemplate.ShowDialog(const Message: string): Integer;
 begin
   with TDialogTemplate.Create(nil) do
   try
     lblMessage.Caption := Message;
+    // 应用统一设计系统样式
+    TUniFormStyler.StyleAsCard(pnlContent);
+    TUniFormStyler.StylePrimaryButton(btnYes);
+    TUniFormStyler.StyleDangerButton(btnNo);
     Result := ShowModal;
   finally
     Free;

@@ -29,6 +29,8 @@ type
     procedure InitializeModuleRegistry;
     /// <summary>加载应用配置</summary>
     procedure LoadApplicationConfig;
+    /// <summary>初始化数据库连接与核心服务（Auth/Metadata/Menu/Permission）</summary>
+    procedure InitializeDatabaseServices;
   public
     /// <summary>获取配置服务实例</summary>
     function GetConfigService: IUniConfigService;
@@ -46,7 +48,9 @@ implementation
 {$R *.dfm}
 
 uses
-  UniConfigService, UniModuleRegistry, UniAdminLogger;
+  UniConfigService, UniModuleRegistry, UniAdminLogger,
+  UniConnectionManager, UniServices, DatabaseInitializer, DatabaseMigrator,
+  FireDAC.Comp.Client;
 
 { TServerModule }
 
@@ -72,6 +76,9 @@ end;
 
 procedure TServerModule.OnCreate(Sender: TObject);
 begin
+  // 切换工作目录到 exe 目录（bin/），确保 SQLite 库文件、config 等相对路径稳定
+  // （IDE 运行时 cwd 默认是项目根，会导致库文件/config 落错位置）
+  SetCurrentDir(ExtractFilePath(ParamStr(0)));
 
   // 确定配置根目录（相对于可执行文件）
   FConfigRoot := TPath.Combine(ExtractFilePath(ParamStr(0)), 'config');
@@ -86,6 +93,7 @@ begin
   InitializeConfigService;
   InitializeModuleRegistry;
   LoadApplicationConfig;
+  InitializeDatabaseServices;
 
   // 记录启动日志
   LogInfo('UniGUI Server Module initialized successfully.');
@@ -162,6 +170,36 @@ begin
 
   LogInfo(Format('Application: %s (%s)', [AppName, AppTitle]));
   LogInfo(Format('Server Port: %d', [ServerPort]));
+end;
+
+procedure TServerModule.InitializeDatabaseServices;
+var
+  LConnection: TFDConnection;
+  LMigrator: TDatabaseMigrator;
+  LMigrationsDir: string;
+begin
+  // 建立数据库连接 → 自动建表/灌初始数据 → 应用增量迁移 → 初始化服务定位器
+  // 任一步失败都记录错误但不崩溃，服务器仍可启动
+  try
+    LConnection := TUniConnectionManager.GetInstance.GetDefaultConnection;
+    // 1. 首次连接自动建基础表 + 灌入 admin（开发环境 SQLite 零配置）
+    TDatabaseInitializer.Initialize(LConnection);
+    // 2. 应用增量迁移脚本（Database/Migrations/*.sql，按版本号，SchemaMigrations 记录）
+    //    与 DatabaseInitializer 并存：Initializer 建基础表，Migrator 管后续 Schema 演进
+    LMigrationsDir := TPath.Combine(ExtractFilePath(ParamStr(0)), 'Database', 'Migrations');
+    LMigrator := TDatabaseMigrator.Create(LConnection, LMigrationsDir);
+    try
+      LMigrator.Migrate;
+    finally
+      LMigrator.Free;
+    end;
+    // 3. 初始化服务定位器
+    TUniServices.Initialize(LConnection);
+    LogInfo('Core services initialized: Auth/Metadata/Menu/Permission');
+  except
+    on E: Exception do
+      LogError('Core services init failed (check DB config in app.json): ' + E.Message);
+  end;
 end;
 
 function TServerModule.GetConfigService: IUniConfigService;

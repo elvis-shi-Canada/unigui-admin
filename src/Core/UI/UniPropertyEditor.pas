@@ -1,4 +1,4 @@
-unit UniPropertyEditor;
+﻿unit UniPropertyEditor;
 
 interface
 

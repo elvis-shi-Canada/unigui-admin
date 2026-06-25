@@ -1,4 +1,4 @@
-unit SplitterTemplate;
+﻿unit SplitterTemplate;
 
 interface
 
