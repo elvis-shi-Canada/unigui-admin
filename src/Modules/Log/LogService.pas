@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client,
-  UniContext, UniPlugin.Types, LogDataModule;
+  UniContext, UniPlugin.Types, LogDataModule, MainModule;
 
 type
   /// <summary>
@@ -71,7 +71,7 @@ end;
 
 procedure TLogService.InitializeDataModule;
 begin
-  FDataModule := TLogDataModule.Create(nil);
+  FDataModule := TLogDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(FDataModule, IContextAware) then
     (FDataModule as IContextAware).SetContext(FContext);
   FDataModule.Open;

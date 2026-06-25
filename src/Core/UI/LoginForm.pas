@@ -57,15 +57,15 @@ implementation
 {$R *.dfm}
 
 uses
-  UniServices, uniGUIVars;
+  UniServices, uniGUIVars, MainModule;
 
 { TLoginForm }
 
 procedure TLoginForm.FormCreate(Sender: TObject);
 begin
-  // 从服务定位器获取认证服务
+  // 从当前会话的服务容器获取认证服务
   try
-    FAuthService := TUniServices.AuthService;
+    FAuthService := GetMainModule.Services.AuthService;
   except
     on E: Exception do
     begin

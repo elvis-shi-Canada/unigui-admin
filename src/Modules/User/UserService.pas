@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB,
   UniContext, UniPlugin.Types,
-  UserService.Intf, UserDataModule, LogService;
+  UserService.Intf, UserDataModule, LogService, MainModule;
 
 type
   /// <summary>
@@ -68,7 +68,7 @@ end;
 
 procedure TUniUserService.InitializeDataModule;
 begin
-  FDataModule := TUserDataModule.Create(nil);
+  FDataModule := TUserDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(FDataModule, IContextAware) then
     (FDataModule as IContextAware).SetContext(FContext);
   FDataModule.Open;

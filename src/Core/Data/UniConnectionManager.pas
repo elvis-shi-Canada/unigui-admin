@@ -13,11 +13,12 @@ type
     class var FInstance: IUniConnectionManager;
     class var FLock: TObject;
     FConnections: TObjectList<TFDConnection>;
-    FDefaultConnection: TFDConnection;
     FConfigService: IUniConfigService;
 
     function BuildConnectionString(const Params: TConnectionParams): string;
     function GetDriverName(const DbType: TDatabaseType): string;
+    /// <summary>创建并配置默认连接（工厂方法，调用者负责释放）</summary>
+    function CreateDefaultConnection: TFDConnection;
   public
     constructor Create;
     destructor Destroy; override;
@@ -62,9 +63,7 @@ end;
 
 destructor TUniConnectionManager.Destroy;
 begin
-  FConnections.Free;
-  if Assigned(FDefaultConnection) then
-    FDefaultConnection.Free;
+  FConnections.Free;  // TObjectList(OwnsObjects=True) 释放所有连接
   inherited;
 end;
 
@@ -121,77 +120,77 @@ begin
   end;
 end;
 
-function TUniConnectionManager.GetDefaultConnection: TFDConnection;
+function TUniConnectionManager.CreateDefaultConnection: TFDConnection;
 var
   LDbType, LConnStr, LExeDir: string;
   LParams: TConnectionParams;
 begin
-  if not Assigned(FDefaultConnection) then
+  // 从配置读取数据库类型
+  LDbType := FConfigService.GetGlobalString('database.type', 'MSSQL');
+
+  if SameText(LDbType, 'MSSQL') then
+    LParams.DatabaseType := dbMSSQL
+  else if SameText(LDbType, 'MySQL') then
+    LParams.DatabaseType := dbMySQL
+  else if SameText(LDbType, 'Oracle') then
+    LParams.DatabaseType := dbOracle
+  else if SameText(LDbType, 'PostgreSQL') then
+    LParams.DatabaseType := dbPostgreSQL
+  else if SameText(LDbType, 'SQLite') then
+    LParams.DatabaseType := dbSQLite
+  else
+    LParams.DatabaseType := dbMSSQL;
+
+  // 优先使用 app.json 的完整连接串（database.connectionString）
+  LConnStr := FConfigService.GetGlobalString('database.connectionString', '');
+
+  // SQLite 相对路径解析为 exe 目录绝对路径
+  if (LParams.DatabaseType = dbSQLite) and (LConnStr <> '') then
   begin
-    // 从配置读取数据库类型
-    LDbType := FConfigService.GetGlobalString('database.type', 'MSSQL');
-
-    if SameText(LDbType, 'MSSQL') then
-      LParams.DatabaseType := dbMSSQL
-    else if SameText(LDbType, 'MySQL') then
-      LParams.DatabaseType := dbMySQL
-    else if SameText(LDbType, 'Oracle') then
-      LParams.DatabaseType := dbOracle
-    else if SameText(LDbType, 'PostgreSQL') then
-      LParams.DatabaseType := dbPostgreSQL
-    else if SameText(LDbType, 'SQLite') then
-      LParams.DatabaseType := dbSQLite
-    else
-      LParams.DatabaseType := dbMSSQL;
-
-    // 优先使用 app.json 的完整连接串（database.connectionString）
-    LConnStr := FConfigService.GetGlobalString('database.connectionString', '');
-
-    // SQLite 相对路径解析为 exe 目录绝对路径，确保库文件稳定落在 exe 同目录（bin/）
-    // 而不依赖运行时工作目录（IDE 运行时 cwd 可能是项目根）
-    if (LParams.DatabaseType = dbSQLite) and (LConnStr <> '') then
-    begin
-      LExeDir := ExtractFilePath(ParamStr(0));
-      if LExeDir <> '' then
-        LConnStr := StringReplace(LConnStr, 'Database=', 'Database=' + LExeDir, [rfIgnoreCase]);
-    end;
-
-    if LConnStr <> '' then
-    begin
-      FDefaultConnection := TFDConnection.Create(nil);
-      try
-        // 顺序关键：先设 Params.Text（连接参数），再设 DriverName（驱动）。
-        // 反过来会导致 Params.Text 重置时清掉 DriverName。
-        FDefaultConnection.Params.Text := LConnStr;
-        FDefaultConnection.DriverName := GetDriverName(LParams.DatabaseType);
-        FDefaultConnection.Connected := True;
-        FConnections.Add(FDefaultConnection);
-      except
-        FreeAndNil(FDefaultConnection);
-        raise;
-      end;
-    end
-    else
-    begin
-      // 向后兼容：使用分散字段构造连接
-      LParams.Server := FConfigService.GetGlobalString('database.server', 'localhost');
-      LParams.Port := FConfigService.GetGlobalInteger('database.port', 1433);
-      LParams.Database := FConfigService.GetGlobalString('database.name', '');
-      LParams.UserName := FConfigService.GetGlobalString('database.user', 'sa');
-      LParams.Password := FConfigService.GetGlobalString('database.password', '');
-      FDefaultConnection := GetConnection(LParams);
-    end;
+    LExeDir := ExtractFilePath(ParamStr(0));
+    if LExeDir <> '' then
+      LConnStr := StringReplace(LConnStr, 'Database=', 'Database=' + LExeDir, [rfIgnoreCase]);
   end;
 
-  Result := FDefaultConnection;
+  if LConnStr <> '' then
+  begin
+    Result := TFDConnection.Create(nil);
+    try
+      // 顺序关键：先设 Params.Text（连接参数），再设 DriverName（驱动）。
+      Result.Params.Text := LConnStr;
+      Result.DriverName := GetDriverName(LParams.DatabaseType);
+      Result.Connected := True;
+    except
+      Result.Free;
+      raise;
+    end;
+  end
+  else
+  begin
+    // 向后兼容：使用分散字段构造连接
+    LParams.Server := FConfigService.GetGlobalString('database.server', 'localhost');
+    LParams.Port := FConfigService.GetGlobalInteger('database.port', 1433);
+    LParams.Database := FConfigService.GetGlobalString('database.name', '');
+    LParams.UserName := FConfigService.GetGlobalString('database.user', 'sa');
+    LParams.Password := FConfigService.GetGlobalString('database.password', '');
+    Result := GetConnection(LParams);
+    // 从 FConnections 取出——调用者（MainModule → TUniServices）拥有生命周期
+    FConnections.Extract(Result);
+  end;
+end;
+
+function TUniConnectionManager.GetDefaultConnection: TFDConnection;
+begin
+  Result := CreateDefaultConnection;
 end;
 
 procedure TUniConnectionManager.ReleaseConnection(var Connection: TFDConnection);
 begin
   if Assigned(Connection) then
   begin
-    if Connection <> FDefaultConnection then
-      FConnections.Remove(Connection);
+    if Connection.Connected then
+      Connection.Connected := False;
+    FConnections.Remove(Connection);  // TObjectList(OwnsObjects=True) 自动释放
     Connection := nil;
   end;
 end;

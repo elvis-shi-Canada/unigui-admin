@@ -77,7 +77,7 @@ implementation
 {$R *.dfm}
 
 uses
-  ComCtrls;
+  ComCtrls, MainModule;
 
 constructor TMenuTreeFrame.Create(AOwner: TComponent);
 begin
@@ -102,10 +102,9 @@ procedure TMenuTreeFrame.DoInitialize;
 begin
   inherited;
 
-  // 创建菜单数据模块 (使用 Self 作为 Owner，然后设置 Context)
-  FMenuDM := TMenuDataModule.Create(Self);
+  // 创建菜单数据模块 (使用 Self 作为 Owner，共享会话连接)
+  FMenuDM := TMenuDataModule.CreateWithConnection(Self, GetMainModule.Connection);
   FMenuDM.SetContext(Context);
-  FMenuDM.SetConnection(TFDConnection(ModelAdmin.Connection));
 
   // 设置数据源
   UniDataSource.DataSet := FQuery;
@@ -436,9 +435,8 @@ begin
 
   // 执行移动
   try
-    LMenuDM := TMenuDataModule.Create(Self);
+    LMenuDM := TMenuDataModule.CreateWithConnection(Self, GetMainModule.Connection);
     LMenuDM.SetContext(Context);
-    LMenuDM.SetConnection(TFDConnection(ModelAdmin.Connection));
     try
       LMenuDM.MoveMenu(LMenuID, LTargetParentID, -1);
 

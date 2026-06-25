@@ -7,7 +7,7 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel,
-  UniContext, UniPlugin.Types, BaseCrudFrame, DictionaryDataModule;
+  UniContext, UniPlugin.Types, BaseCrudFrame, DictionaryDataModule, MainModule;
 
 type
   /// <summary>
@@ -82,7 +82,7 @@ begin
     2: LStatus := 0; // 禁用
   end;
 
-  LDataModule := TDictionaryDataModule.Create(nil);
+  LDataModule := TDictionaryDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   try
     if Supports(LDataModule, IContextAware) then
       (LDataModule as IContextAware).SetContext(Context);

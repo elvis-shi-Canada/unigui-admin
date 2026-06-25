@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB,
   UniContext, UniPlugin.Types,
-  DictionaryService.Intf, DictionaryDataModule;
+  DictionaryService.Intf, DictionaryDataModule, MainModule;
 
 type
   /// <summary>
@@ -82,7 +82,7 @@ end;
 
 procedure TDictionaryService.InitializeDataModule;
 begin
-  FDataModule := TDictionaryDataModule.Create(nil);
+  FDataModule := TDictionaryDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(FDataModule, IContextAware) then
     (FDataModule as IContextAware).SetContext(FContext);
   FDataModule.Open;

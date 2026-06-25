@@ -73,7 +73,7 @@ implementation
 
 uses
   UniServices, uniGUIVars, UniFormStyler, LoginForm, UniAuthService.Intf,
-  UserListFrame, RoleListFrame, MenuTreeFrame;
+  UserListFrame, RoleListFrame, MenuTreeFrame, MainModule;
 
 { TMainFrame }
 
@@ -146,7 +146,7 @@ end;
 procedure TMainFrame.InitializeMenus;
 begin
   try
-    FMenuManager := TUniServices.MenuManager;
+    FMenuManager := GetMainModule.Services.MenuManager;
     LoadUserMenus;
   except
     on E: Exception do

@@ -6,7 +6,9 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.SyncObjs,
   System.DateUtils,
   UniGUIMainModule, UniGUIApplication, UniGUIClasses,
-  UniSession, UniConfigService.Intf, UniModuleRegistry.Intf, UniPlugin.Intf, UniPlugin.Types;
+  UniSession, UniConfigService.Intf, UniModuleRegistry.Intf, UniPlugin.Intf, UniPlugin.Types,
+  FireDAC.Comp.Client,
+  UniConnectionManager.Intf, UniServices;
 
 type
   /// <summary>
@@ -21,6 +23,8 @@ type
     FSessions: TDictionary<string, TUniSession>;
     FConfigService: IUniConfigService;
     FModuleRegistry: IUniModuleRegistry;
+    FConnection: TFDConnection;
+    FServices: IUniServices;
 
     /// <summary>清理非活动会话</summary>
     procedure CleanupInactiveSessions;
@@ -61,6 +65,11 @@ type
     /// <param name="SessionID">会话ID</param>
     /// <returns>如果加载成功返回True</returns>
     function LoadPluginForSession(const PluginID, SessionID: string): Boolean;
+
+    /// <summary>获取当前会话的数据库连接</summary>
+    property Connection: TFDConnection read FConnection;
+    /// <summary>获取当前会话的服务容器</summary>
+    property Services: IUniServices read FServices;
   end;
 
 function GetMainModule: TMainModule;
@@ -70,7 +79,8 @@ implementation
 {$R *.dfm}
 
 uses
-  UniConfigService, UniModuleRegistry, UniAdminLogger, uniGUIVars;
+  UniConfigService, UniModuleRegistry, UniAdminLogger, uniGUIVars,
+  UniConnectionManager;
 
 var
   GMainModule: TMainModule;
@@ -95,6 +105,11 @@ begin
   // 注意：这些是全局单例，在整个应用中共享
   FConfigService := TUniConfigService.GetInstance;
   FModuleRegistry := TUniModuleRegistry.GetInstance;
+
+  // 创建当前会话的数据库连接（每会话一个独立连接）
+  FConnection := TUniConnectionManager.GetInstance.GetDefaultConnection;
+  // 创建服务容器，持有该连接（OwnsConnection=True，销毁时释放连接）
+  FServices := TUniServices.Create(FConnection, True);
 
   // 记录日志
   LogInfo('UniGUI Main Module initialized successfully.');
@@ -139,6 +154,10 @@ begin
   // 释放线程安全锁
   FSessionLock.Free;
   FSessionLock := nil;
+
+  // 释放服务容器（连带释放数据库连接）
+  FServices := nil;
+  FConnection := nil;
 
   // 清理接口引用（不释放单例，只是减少引用计数）
   FConfigService := nil;

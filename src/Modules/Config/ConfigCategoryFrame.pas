@@ -7,7 +7,7 @@ uses
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniStringGrid, uniToolBar, uniLabel, uniMultiItem,
   uniComboBox, uniPanel, uniPageControl, UniContext, UniPlugin.Types,
-  BaseCrudFrame, ConfigDataModule, ConfigService.Intf;
+  BaseCrudFrame, ConfigDataModule, ConfigService.Intf, MainModule;
 
 type
   /// <summary>
@@ -121,7 +121,7 @@ var
   LCategory: TConfigCategoryInfo;
   I: Integer;
 begin
-  LDataModule := TConfigDataModule.Create(nil);
+  LDataModule := TConfigDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   try
     if Supports(LDataModule, IContextAware) then
       (LDataModule as IContextAware).SetContext(Context);
@@ -159,7 +159,7 @@ begin
       LStatus := 0;
   end;
 
-  LDataModule := TConfigDataModule.Create(nil);
+  LDataModule := TConfigDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   try
     if Supports(LDataModule, IContextAware) then
       (LDataModule as IContextAware).SetContext(Context);

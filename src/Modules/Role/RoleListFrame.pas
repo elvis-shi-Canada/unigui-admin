@@ -9,7 +9,7 @@ uses
   uniMultiItem, uniComboBox, uniLabel, uniGUIApplication,
   UniContext, UniPlugin.Types, UniModelAdmin,
   BaseCrudFrame, RoleDataModule,
-  RolePermissionDialog, RoleUserDialog, Vcl.Dialogs;
+  RolePermissionDialog, RoleUserDialog, Vcl.Dialogs, MainModule;
 
 type
   /// <summary>
@@ -81,8 +81,8 @@ procedure TRoleListFrame.DoInitialize;
 begin
   inherited;
 
-  // 创建角色数据模块
-  FRoleDM := TRoleDataModule.Create(Self);
+  // 创建角色数据模块（共享会话连接）
+  FRoleDM := TRoleDataModule.CreateWithConnection(Self, GetMainModule.Connection);
   FRoleDM.SetContext(Context);
 
   // 设置数据源

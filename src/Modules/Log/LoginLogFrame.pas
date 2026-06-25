@@ -8,6 +8,7 @@ uses
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel, uniDateTimePicker,
   UniContext, UniPlugin.Types, BaseCrudFrame, LogDataModule, FireDAC.Stan.Intf,
+  MainModule,
   FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
   FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
   FireDAC.Comp.DataSet, Vcl.Controls, Vcl.Forms;
@@ -100,7 +101,7 @@ begin
     2: LStatus := 0; // 失败
   end;
 
-  LDataModule := TLogDataModule.Create(nil);
+  LDataModule := TLogDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   try
     if Supports(LDataModule, IContextAware) then
       (LDataModule as IContextAware).SetContext(Context);

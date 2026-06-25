@@ -7,7 +7,7 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel, uniDateTimePicker,
-  UniContext, UniPlugin.Types, BaseCrudFrame, LogDataModule;
+  UniContext, UniPlugin.Types, BaseCrudFrame, LogDataModule, MainModule;
 
 type
   /// <summary>
@@ -81,7 +81,7 @@ begin
   LStartTime := UniDateTimePickerStart.DateTime;
   LEndTime := UniDateTimePickerEnd.DateTime;
 
-  LDataModule := TLogDataModule.Create(nil);
+  LDataModule := TLogDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   try
     if Supports(LDataModule, IContextAware) then
       (LDataModule as IContextAware).SetContext(Context);

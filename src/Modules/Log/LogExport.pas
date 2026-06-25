@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client,
-  UniContext, UniPlugin.Types, LogDataModule;
+  UniContext, UniPlugin.Types, LogDataModule, MainModule;
 
 type
   /// <summary>
@@ -59,7 +59,7 @@ constructor TLogExport.Create(const Context: IExecutionContext);
 begin
   inherited Create;
   FContext := Context;
-  FDataModule := TLogDataModule.Create(nil);
+  FDataModule := TLogDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(FDataModule, IContextAware) then
     (FDataModule as IContextAware).SetContext(Context);
   FDataModule.Open;

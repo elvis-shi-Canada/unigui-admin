@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB,
   UniContext, UniPlugin.Types,
-  ConfigService.Intf, ConfigDataModule;
+  ConfigService.Intf, ConfigDataModule, MainModule;
 
 type
   /// <summary>
@@ -79,7 +79,7 @@ end;
 
 procedure TConfigService.InitializeDataModule;
 begin
-  FDataModule := TConfigDataModule.Create(nil);
+  FDataModule := TConfigDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(FDataModule, IContextAware) then
     (FDataModule as IContextAware).SetContext(FContext);
   FDataModule.Open;

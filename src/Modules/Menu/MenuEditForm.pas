@@ -74,7 +74,7 @@ implementation
 
 uses
   Data.DB, FireDAC.Comp.Client,
-  MenuDataModule, UniFormStyler;
+  MenuDataModule, UniFormStyler, MainModule;
 
 var
   MenuDataModule: TMenuDataModule;
@@ -96,7 +96,7 @@ end;
 procedure TMenuEditForm.SetContext(const Context: IExecutionContext);
 begin
   FContext := Context;
-  MenuDataModule := TMenuDataModule.Create(nil);
+  MenuDataModule := TMenuDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(MenuDataModule, IContextAware) then
     (MenuDataModule as IContextAware).SetContext(Context);
   MenuDataModule.Open;

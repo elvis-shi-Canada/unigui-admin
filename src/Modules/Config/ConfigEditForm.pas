@@ -8,7 +8,7 @@ uses
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniLabel, uniMultiItem, uniComboBox, uniPanel, uniGUIForm, uniMemo, uniCheckBox,
   UniContext, UniPlugin.Types, ConfigDataModule, ConfigService.Intf,
-  Vcl.Controls, Vcl.Forms;
+  Vcl.Controls, Vcl.Forms, MainModule;
 
 type
   /// <summary>
@@ -62,7 +62,7 @@ begin
   FConfigID := ConfigID;
   FIsEditMode := (ConfigID > 0);
 
-  FDataModule := TConfigDataModule.Create(nil);
+  FDataModule := TConfigDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(FDataModule, IContextAware) then
     (FDataModule as IContextAware).SetContext(Context);
   FDataModule.Open;

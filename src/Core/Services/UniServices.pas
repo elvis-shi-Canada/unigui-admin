@@ -10,75 +10,46 @@ uses
 
 type
   /// <summary>
-  /// 服务定位器 - 提供对所有核心服务的统一访问
-  /// 负责服务的初始化、生命周期管理和访问控制
+  /// 服务容器接口 - 提供对当前会话所有核心服务的统一访问
   /// </summary>
-  TUniServices = class
-  private
-    class var FConnection: TFDConnection;
-    class var FConnectionManager: IUniConnectionManager;
-    class var FAuthService: IUniAuthService;
-    class var FMetadataCache: IUniMetadataCache;
-    class var FMenuManager: IUniMenuManager;
-    class var FPermissionManager: IUniPermissionManager;
-    class var FInitialized: Boolean;
-    class var FLock: TObject;
+  IUniServices = interface(IInterface)
+    ['{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}']
+    function Connection: TFDConnection;
+    function ConnectionManager: IUniConnectionManager;
+    function AuthService: IUniAuthService;
+    function MetadataCache: IUniMetadataCache;
+    function MenuManager: IUniMenuManager;
+    function PermissionManager: IUniPermissionManager;
+  end;
 
-    class procedure InitializeServices; static;
-    class procedure FinalizeServices; static;
-    class function GetIsInitialized: Boolean; static;
+  /// <summary>
+  /// 服务容器 - 每会话实例，持有该会话的数据库连接和所有核心服务
+  /// 由 TMainModule 创建和管理生命周期
+  /// </summary>
+  TUniServices = class(TInterfacedObject, IUniServices)
+  private
+    FConnection: TFDConnection;
+    FOwnsConnection: Boolean;
+    FConnectionManager: IUniConnectionManager;
+    FAuthService: IUniAuthService;
+    FMetadataCache: IUniMetadataCache;
+    FMenuManager: IUniMenuManager;
+    FPermissionManager: IUniPermissionManager;
   public
     /// <summary>
-    /// 初始化服务定位器
+    /// 创建服务容器实例
     /// </summary>
-    /// <param name="Connection">数据库连接对象</param>
-    /// <exception cref="Exception">连接对象为空或未连接时抛出异常</exception>
-    class procedure Initialize(const Connection: TFDConnection); static;
+    /// <param name="Connection">该会话的数据库连接（必须已连接）</param>
+    /// <param name="OwnsConnection">是否在销毁时释放连接</param>
+    constructor Create(const Connection: TFDConnection; const OwnsConnection: Boolean = False);
+    destructor Destroy; override;
 
-    /// <summary>
-    /// 关闭服务定位器并释放所有服务
-    /// </summary>
-    class procedure Shutdown; static;
-
-    /// <summary>
-    /// 检查服务是否已初始化
-    /// </summary>
-    class property IsInitialized: Boolean read GetIsInitialized;
-
-    /// <summary>
-    /// 获取数据库连接对象
-    /// </summary>
-    class function Connection: TFDConnection; static;
-
-    /// <summary>
-    /// 获取连接管理器服务
-    /// </summary>
-    /// <exception cref="Exception">服务未初始化时抛出异常</exception>
-    class function ConnectionManager: IUniConnectionManager; static;
-
-    /// <summary>
-    /// 获取认证服务
-    /// </summary>
-    /// <exception cref="Exception">服务未初始化时抛出异常</exception>
-    class function AuthService: IUniAuthService; static;
-
-    /// <summary>
-    /// 获取元数据缓存服务
-    /// </summary>
-    /// <exception cref="Exception">服务未初始化时抛出异常</exception>
-    class function MetadataCache: IUniMetadataCache; static;
-
-    /// <summary>
-    /// 获取菜单管理器服务
-    /// </summary>
-    /// <exception cref="Exception">服务未初始化时抛出异常</exception>
-    class function MenuManager: IUniMenuManager; static;
-
-    /// <summary>
-    /// 获取权限管理器服务
-    /// </summary>
-    /// <exception cref="Exception">服务未初始化时抛出异常</exception>
-    class function PermissionManager: IUniPermissionManager; static;
+    function Connection: TFDConnection;
+    function ConnectionManager: IUniConnectionManager;
+    function AuthService: IUniAuthService;
+    function MetadataCache: IUniMetadataCache;
+    function MenuManager: IUniMenuManager;
+    function PermissionManager: IUniPermissionManager;
   end;
 
 implementation
@@ -89,53 +60,26 @@ uses
 
 { TUniServices }
 
-class procedure TUniServices.Initialize(const Connection: TFDConnection);
+constructor TUniServices.Create(const Connection: TFDConnection; const OwnsConnection: Boolean);
 begin
+  inherited Create;
   if not Assigned(Connection) then
     raise Exception.Create('Connection object cannot be nil');
-
   if not Connection.Connected then
     raise Exception.Create('Connection must be opened before initializing services');
 
   FConnection := Connection;
-  InitializeServices;
+  FOwnsConnection := OwnsConnection;
+
+  // 初始化所有核心服务（使用构造函数直接创建，而非 GetInstance 单例）
+  FConnectionManager := TUniConnectionManager.GetInstance;
+  FAuthService := TUniAuthService.Create(FConnection);
+  FMetadataCache := TUniMetadataCache.Create(FConnection);
+  FMenuManager := TUniMenuManager.Create(FConnection);
+  FPermissionManager := TUniPermissionManager.Create(FConnection);
 end;
 
-class procedure TUniServices.InitializeServices;
-begin
-  TMonitor.Enter(FLock);
-  try
-    if FInitialized then
-      Exit;
-
-    if Assigned(FConnection) and FConnection.Connected then
-    begin
-      // 初始化所有核心服务
-      FConnectionManager := TUniConnectionManager.GetInstance;
-      FAuthService := TUniAuthService.GetInstance(FConnection);
-      FMetadataCache := TUniMetadataCache.GetInstance(FConnection);
-      FMenuManager := TUniMenuManager.GetInstance(FConnection);
-      FPermissionManager := TUniPermissionManager.GetInstance(FConnection);
-
-      FInitialized := True;
-    end;
-  finally
-    TMonitor.Exit(FLock);
-  end;
-end;
-
-class procedure TUniServices.Shutdown;
-begin
-  TMonitor.Enter(FLock);
-  try
-    FinalizeServices;
-    FConnection := nil;
-  finally
-    TMonitor.Exit(FLock);
-  end;
-end;
-
-class procedure TUniServices.FinalizeServices;
+destructor TUniServices.Destroy;
 begin
   // 按照依赖关系的逆序释放服务
   FPermissionManager := nil;
@@ -144,66 +88,45 @@ begin
   FAuthService := nil;
   FConnectionManager := nil;
 
-  FInitialized := False;
+  if FOwnsConnection and Assigned(FConnection) then
+  begin
+    if FConnection.Connected then
+      FConnection.Connected := False;
+    FConnection.Free;
+  end;
+  FConnection := nil;
+
+  inherited;
 end;
 
-class function TUniServices.GetIsInitialized: Boolean;
-begin
-  Result := FInitialized;
-end;
-
-class function TUniServices.Connection: TFDConnection;
+function TUniServices.Connection: TFDConnection;
 begin
   Result := FConnection;
 end;
 
-class function TUniServices.ConnectionManager: IUniConnectionManager;
+function TUniServices.ConnectionManager: IUniConnectionManager;
 begin
-  if not Assigned(FConnectionManager) then
-    raise Exception.Create('ConnectionManager not initialized. Call TUniServices.Initialize first.');
   Result := FConnectionManager;
 end;
 
-class function TUniServices.AuthService: IUniAuthService;
+function TUniServices.AuthService: IUniAuthService;
 begin
-  if not Assigned(FAuthService) then
-    raise Exception.Create('AuthService not initialized. Call TUniServices.Initialize first.');
   Result := FAuthService;
 end;
 
-class function TUniServices.MetadataCache: IUniMetadataCache;
+function TUniServices.MetadataCache: IUniMetadataCache;
 begin
-  if not Assigned(FMetadataCache) then
-    raise Exception.Create('MetadataCache not initialized. Call TUniServices.Initialize first.');
   Result := FMetadataCache;
 end;
 
-class function TUniServices.MenuManager: IUniMenuManager;
+function TUniServices.MenuManager: IUniMenuManager;
 begin
-  if not Assigned(FMenuManager) then
-    raise Exception.Create('MenuManager not initialized. Call TUniServices.Initialize first.');
   Result := FMenuManager;
 end;
 
-class function TUniServices.PermissionManager: IUniPermissionManager;
+function TUniServices.PermissionManager: IUniPermissionManager;
 begin
-  if not Assigned(FPermissionManager) then
-    raise Exception.Create('PermissionManager not initialized. Call TUniServices.Initialize first.');
   Result := FPermissionManager;
 end;
-
-initialization
-  TUniServices.FLock := TObject.Create;
-  TUniServices.FInitialized := False;
-  TUniServices.FConnection := nil;
-  TUniServices.FConnectionManager := nil;
-  TUniServices.FAuthService := nil;
-  TUniServices.FMetadataCache := nil;
-  TUniServices.FMenuManager := nil;
-  TUniServices.FPermissionManager := nil;
-
-finalization
-  TUniServices.Shutdown;
-  FreeAndNil(TUniServices.FLock);
 
 end.

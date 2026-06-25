@@ -711,3 +711,95 @@ grep "On.*=" MyForm.dfm              # 找到所有已绑定的事件
 
 ---
 
+### 1️⃣6️⃣ Delphi inline var 必须显式初始化（预防：W1036 Variable might not have been initialized）
+
+**触发场景**
+- 使用 Delphi 12+ 的 `var` 内联变量声明
+- 在循环中设置变量值，循环外使用该变量
+- 布尔标志变量在搜索/匹配循环中
+
+**错误模式**
+```pascal
+var LFound: Boolean;  // 危险！未初始化
+for var Item in List do
+  if Condition then
+  begin
+    LFound := True;
+    Break;
+  end;
+if not LFound then  // 非确定性行为 — 可能跳过异常
+  raise Exception.Create('Not found');
+```
+
+根本原因：Delphi 12 的 `var` 内联变量**不会**自动零初始化。未初始化的布尔值可能是 True 或 False，取决于栈上的随机值。
+
+**正确行为**
+```pascal
+var LFound: Boolean := False;  // 必须显式初始化
+```
+
+**验证方法**
+- 编译时关注 W1036 警告
+- 搜索 `var \w+: Boolean;` 模式，确认有 `:=` 初始化
+- 预期输出：无 W1036 编译警告
+
+---
+
+### 1️⃣7️⃣ class var 对象必须在 finalization 中释放（预防：Memory Leak）
+
+**触发场景**
+- 在 `initialization` 段创建 `class var` 对象
+- 单例模式中创建全局实例
+- 主题/配置等全局资源管理
+
+**错误模式**
+```pascal
+class var FCurrentTheme: TUniTheme;
+
+initialization
+  FCurrentTheme := TUniTheme.Create(nil);  // 创建
+
+finalization
+  // 只释放了其他资源，忘记释放 FCurrentTheme！
+  // → 内存泄漏：TUniTheme x 1 (205-220 bytes)
+```
+
+**正确行为**
+```pascal
+finalization
+  if Assigned(FCurrentTheme) then
+    FreeAndNil(FCurrentTheme);
+```
+
+**验证方法**
+- 审计所有 `initialization`/`finalization` 对
+- 每个 `initialization` 中的 Create 必须有对应的 `finalization` Free
+- 预期输出：应用退出时无内存泄漏报告
+
+---
+
+### 1️⃣8️⃣ TColor 常量必须在 $00000000..$7FFFFFFF 范围内（预防：W1012 Subrange bounds）
+
+**触发场景**
+- 使用十六进制颜色常量
+- 设置阴影色、透明色等特殊颜色
+
+**错误模式**
+```pascal
+FColorScheme.ShadowColor := $80000000;  // W1012: 超出 TColor 范围
+```
+
+根本原因：TColor 是 32 位有符号整数（Longint），最大值 $7FFFFFFF (2147483647)。$80000000 = 2147483648 超出正数范围。
+
+**正确行为**
+```pascal
+FColorScheme.ShadowColor := $00808080;  // 中等灰色，在有效范围内
+```
+
+**验证方法**
+- 编译时关注 W1012 警告
+- 检查所有 $8xxxxxxx 颜色常量
+- 预期输出：无 W1012 编译警告
+
+---
+

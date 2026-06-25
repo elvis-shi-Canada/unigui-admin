@@ -15,6 +15,7 @@ type
   private
     FContext: IExecutionContext;
     FConnection: TFDConnection;
+    FOwnsConnection: Boolean;
   protected
     function GetCurrentUserID: Integer;
     function GetCurrentUserName: string;
@@ -29,6 +30,7 @@ type
     procedure ApplyDataScope(const Query: TFDQuery; const Resource: string); virtual;
   public
     constructor Create(AOwner: TComponent); override;
+    constructor CreateWithConnection(AOwner: TComponent; const AConnection: TFDConnection); virtual;
     destructor Destroy; override;
 
     /// <summary>
@@ -60,18 +62,37 @@ implementation
 constructor TUniDataModule.Create(AOwner: TComponent);
 begin
   inherited;
-  // 创建连接组件
+  // 创建连接组件（默认拥有所有权）
+  FOwnsConnection := True;
   FConnection := TFDConnection.Create(nil);
+end;
+
+constructor TUniDataModule.CreateWithConnection(AOwner: TComponent; const AConnection: TFDConnection);
+begin
+  inherited Create(AOwner);
+  if Assigned(AConnection) then
+  begin
+    // 共享外部连接，不拥有所有权
+    FOwnsConnection := False;
+    FConnection := AConnection;
+  end
+  else
+  begin
+    // 未提供连接时，创建自己的连接
+    FOwnsConnection := True;
+    FConnection := TFDConnection.Create(nil);
+  end;
 end;
 
 destructor TUniDataModule.Destroy;
 begin
-  if Assigned(FConnection) then
+  if FOwnsConnection and Assigned(FConnection) then
   begin
     if FConnection.Connected then
       FConnection.Connected := False;
     FreeAndNil(FConnection);
   end;
+  FConnection := nil;
   inherited;
 end;
 

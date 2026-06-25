@@ -68,7 +68,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniFormStyler;
+  UniFormStyler, MainModule;
 
 constructor TRoleEditForm.Create(AOwner: TComponent);
 begin
@@ -86,7 +86,7 @@ end;
 procedure TRoleEditForm.SetContext(const Context: IExecutionContext);
 begin
   FContext := Context;
-  FRoleDM := TRoleDataModule.Create(Self);
+  FRoleDM := TRoleDataModule.CreateWithConnection(Self, GetMainModule.Connection);
   FRoleDM.SetContext(Context);
 end;
 
