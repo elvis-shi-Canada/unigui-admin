@@ -1,4 +1,4 @@
-﻿unit UniMenuManager.Intf;
+﻿unit UniAdminMenuManager.Intf;
 
 interface
 
@@ -26,7 +26,7 @@ type
   /// 菜单管理器接口
   /// 提供菜单树的查询、管理和缓存功能
   /// </summary>
-  IUniMenuManager = interface(IInterface)
+  IUniAdminMenuManager = interface(IInterface)
     ['{E1C9A8F2-D7B5-7E3C-A4F8-8B9D1E2F5C7A}']
 
 

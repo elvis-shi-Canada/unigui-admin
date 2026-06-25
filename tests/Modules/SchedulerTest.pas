@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   DUnitX.TestFramework,
   UniContext, UniPlugin.Types,
-  UniScheduler, UniTaskProcessor;
+  UniAdminScheduler, UniTaskProcessor;
 
 type
   /// <summary>
@@ -16,7 +16,7 @@ type
   TSchedulerTest = class(TObject)
   private
     FContext: IExecutionContext;
-    FScheduler: TUniScheduler;
+    FScheduler: TUniAdminScheduler;
 
     procedure CreateTestContext;
   public
@@ -74,7 +74,7 @@ procedure TSchedulerTest.Setup;
 begin
   CreateTestContext;
   // TODO: 初始化调度器（需要数据库连接）
-  // FScheduler := TUniScheduler.Create(FContext, nil);
+  // FScheduler := TUniAdminScheduler.Create(FContext, nil);
 end;
 
 procedure TSchedulerTest.TearDown;

@@ -1,4 +1,4 @@
-﻿unit UniModuleRegistry.Intf;
+﻿unit UniAdminModuleRegistry.Intf;
 
 interface
 
@@ -75,7 +75,7 @@ type
   /// 插件注册表接口
   /// 提供插件类的注册、查找和依赖管理功能
   /// </summary>
-  IUniModuleRegistry = interface(IInterface)
+  IUniAdminModuleRegistry = interface(IInterface)
     ['{C7D8E5A2-9F4B-3E7C-D1A8-8B9F2E4C6A7D}']
 
 

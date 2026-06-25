@@ -1,4 +1,4 @@
-﻿unit UniTheme;
+﻿unit UniAdminTheme;
 
 interface
 
@@ -100,7 +100,7 @@ type
   /// 主题管理器 - 管理应用程序主题
   /// 支持运行时主题切换和深色/浅色模式
   /// </summary>
-  TUniTheme = class(TComponent)
+  TUniAdminTheme = class(TComponent)
   private
     FThemeName: string;
     FMode: TThemeMode;
@@ -111,7 +111,7 @@ type
 
     FOnThemeChange: TThemeChangeEvent;
 
-    class var FCurrentTheme: TUniTheme;
+    class var FCurrentTheme: TUniAdminTheme;
     class var FThemes: TDictionary<string, TThemeDefinition>;
 
     procedure SetThemeName(const Value: string);
@@ -227,9 +227,9 @@ begin
   FRadiusScheme.Full := 9999;
 end;
 
-{ TUniTheme }
+{ TUniAdminTheme }
 
-constructor TUniTheme.Create(AOwner: TComponent);
+constructor TUniAdminTheme.Create(AOwner: TComponent);
 var
   LTheme: TThemeDefinition;
 begin
@@ -248,12 +248,12 @@ begin
   end;
 end;
 
-destructor TUniTheme.Destroy;
+destructor TUniAdminTheme.Destroy;
 begin
   inherited;
 end;
 
-class procedure TUniTheme.Initialize;
+class procedure TUniAdminTheme.Initialize;
 var
   LScheme: TColorScheme;
 begin
@@ -264,7 +264,7 @@ begin
   RegisterTheme(TThemeDefinition.Create('Blue Dark', tmDark));
 
   // 设置当前主题
-  FCurrentTheme := TUniTheme.Create(nil);
+  FCurrentTheme := TUniAdminTheme.Create(nil);
 
   // 自定义蓝色主题
   if FThemes.ContainsKey('Blue Light') then
@@ -284,7 +284,7 @@ begin
   end;
 end;
 
-class procedure TUniTheme.RegisterTheme(ATheme: TThemeDefinition);
+class procedure TUniAdminTheme.RegisterTheme(ATheme: TThemeDefinition);
 begin
   if not Assigned(FThemes) then
     Exit;
@@ -295,7 +295,7 @@ begin
     FThemes.Add(ATheme.Name, ATheme);
 end;
 
-class procedure TUniTheme.UnregisterTheme(const AThemeName: string);
+class procedure TUniAdminTheme.UnregisterTheme(const AThemeName: string);
 begin
   if not Assigned(FThemes) then
     Exit;
@@ -307,7 +307,7 @@ begin
   end;
 end;
 
-class function TUniTheme.GetThemeNames: TArray<string>;
+class function TUniAdminTheme.GetThemeNames: TArray<string>;
 begin
   if not Assigned(FThemes) then
   begin
@@ -318,7 +318,7 @@ begin
   Result := FThemes.Keys.ToArray;
 end;
 
-procedure TUniTheme.ApplyTheme(const AThemeName: string);
+procedure TUniAdminTheme.ApplyTheme(const AThemeName: string);
 var
   LTheme: TThemeDefinition;
 begin
@@ -339,7 +339,7 @@ begin
     FOnThemeChange(Self, AThemeName);
 end;
 
-procedure TUniTheme.ToggleTheme;
+procedure TUniAdminTheme.ToggleTheme;
 var
   LTargetTheme: string;
 begin
@@ -360,18 +360,18 @@ begin
   end;
 end;
 
-procedure TUniTheme.ResetToDefault;
+procedure TUniAdminTheme.ResetToDefault;
 begin
   ApplyTheme('Default Light');
 end;
 
-procedure TUniTheme.SetThemeName(const Value: string);
+procedure TUniAdminTheme.SetThemeName(const Value: string);
 begin
   if FThemeName <> Value then
     ApplyTheme(Value);
 end;
 
-procedure TUniTheme.SetMode(const Value: TThemeMode);
+procedure TUniAdminTheme.SetMode(const Value: TThemeMode);
 begin
   if FMode <> Value then
   begin
@@ -388,67 +388,67 @@ begin
   end;
 end;
 
-procedure TUniTheme.ApplyColorScheme(const AScheme: TColorScheme);
+procedure TUniAdminTheme.ApplyColorScheme(const AScheme: TColorScheme);
 begin
   FColorScheme := AScheme;
 end;
 
-procedure TUniTheme.ApplyFontScheme(const AScheme: TFontScheme);
+procedure TUniAdminTheme.ApplyFontScheme(const AScheme: TFontScheme);
 begin
   FFontScheme := AScheme;
 end;
 
-procedure TUniTheme.ApplySpacingScheme(const AScheme: TSpacingScheme);
+procedure TUniAdminTheme.ApplySpacingScheme(const AScheme: TSpacingScheme);
 begin
   FSpacingScheme := AScheme;
 end;
 
-procedure TUniTheme.ApplyRadiusScheme(const AScheme: TRadiusScheme);
+procedure TUniAdminTheme.ApplyRadiusScheme(const AScheme: TRadiusScheme);
 begin
   FRadiusScheme := AScheme;
 end;
 
-function TUniTheme.GetPrimaryColor: TColor;
+function TUniAdminTheme.GetPrimaryColor: TColor;
 begin
   Result := FColorScheme.PrimaryColor;
 end;
 
-function TUniTheme.GetSecondaryColor: TColor;
+function TUniAdminTheme.GetSecondaryColor: TColor;
 begin
   Result := FColorScheme.SecondaryColor;
 end;
 
-function TUniTheme.GetAccentColor: TColor;
+function TUniAdminTheme.GetAccentColor: TColor;
 begin
   Result := FColorScheme.AccentColor;
 end;
 
-function TUniTheme.GetBackgroundColor: TColor;
+function TUniAdminTheme.GetBackgroundColor: TColor;
 begin
   Result := FColorScheme.BackgroundColor;
 end;
 
-function TUniTheme.GetPanelColor: TColor;
+function TUniAdminTheme.GetPanelColor: TColor;
 begin
   Result := FColorScheme.PanelColor;
 end;
 
-function TUniTheme.GetHeaderColor: TColor;
+function TUniAdminTheme.GetHeaderColor: TColor;
 begin
   Result := FColorScheme.HeaderColor;
 end;
 
-function TUniTheme.GetFontColor: TColor;
+function TUniAdminTheme.GetFontColor: TColor;
 begin
   Result := FColorScheme.FontColor;
 end;
 
-function TUniTheme.GetBorderColor: TColor;
+function TUniAdminTheme.GetBorderColor: TColor;
 begin
   Result := FColorScheme.BorderColor;
 end;
 
-procedure TUniTheme.SaveThemeConfig(const AFileName: string);
+procedure TUniAdminTheme.SaveThemeConfig(const AFileName: string);
 var
   LIni: TStringList;
 begin
@@ -474,7 +474,7 @@ begin
   end;
 end;
 
-procedure TUniTheme.LoadThemeConfig(const AFileName: string);
+procedure TUniAdminTheme.LoadThemeConfig(const AFileName: string);
 var
   LIni: TStringList;
   LThemeName: string;
@@ -497,18 +497,18 @@ begin
 end;
 
 initialization
-  TUniTheme.FThemes := TDictionary<string, TThemeDefinition>.Create;
-  TUniTheme.Initialize;
+  TUniAdminTheme.FThemes := TDictionary<string, TThemeDefinition>.Create;
+  TUniAdminTheme.Initialize;
 
 finalization
-  if Assigned(TUniTheme.FThemes) then
+  if Assigned(TUniAdminTheme.FThemes) then
   begin
-    for var LTheme in TUniTheme.FThemes.Values do
+    for var LTheme in TUniAdminTheme.FThemes.Values do
       LTheme.Free;
-    TUniTheme.FThemes.Clear;
-    TUniTheme.FThemes.Free;
+    TUniAdminTheme.FThemes.Clear;
+    TUniAdminTheme.FThemes.Free;
   end;
-  if Assigned(TUniTheme.FCurrentTheme) then
-    FreeAndNil(TUniTheme.FCurrentTheme);
+  if Assigned(TUniAdminTheme.FCurrentTheme) then
+    FreeAndNil(TUniAdminTheme.FCurrentTheme);
 
 end.

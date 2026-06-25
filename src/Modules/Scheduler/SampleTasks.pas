@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.IOUtils, Data.DB, FireDAC.Comp.Client,
-  UniContext, UniPlugin.Types, UniScheduler, UniTaskProcessor;
+  UniContext, UniPlugin.Types, UniAdminScheduler, UniTaskProcessor;
 
 type
   /// <summary>

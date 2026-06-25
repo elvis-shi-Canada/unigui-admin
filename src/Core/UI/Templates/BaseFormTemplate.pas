@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes,
   Vcl.Controls, Vcl.Forms,
   UniGUIClasses, UniGUIForm, uniButton, uniPanel,
-  UniTheme, uniLabel, uniGUIBaseClasses;
+  UniAdminTheme, uniLabel, uniGUIBaseClasses;
 
 type
   /// <summary>
@@ -34,13 +34,13 @@ implementation
 {$R *.dfm}
 
 uses
-  UniFormStyler;
+  UniAdminFormStyler;
 
 procedure TBaseFormTemplate.FormCreate(Sender: TObject);
 begin
   // 应用统一设计系统样式
-  TUniFormStyler.AutoStylePanels(Self);
-  TUniFormStyler.AutoStyleButtons(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStyleButtons(Self);
 
   DoInitialize;
 end;

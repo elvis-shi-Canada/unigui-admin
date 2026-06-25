@@ -31,39 +31,38 @@ graph TB
     end
 
     subgraph 核心服务["核心服务层"]
-        Svc["Services/UniServices<br/>服务定位器"]
-        Cfg["Config/UniConfigService"]
+        Svc["Services/UniAdminServices<br/>服务定位器"]
+        Cfg["Config/UniAdminConfigService"]
         Ctx["Context/UniContext"]
-        Sess["Session/UniSession"]
     end
 
     subgraph 数据层["数据层"]
-        CM["Data/UniConnectionManager"]
-        DM["Data/UniDataModule"]
-        MC["Metadata/UniMetadataCache"]
+        CM["Data/UniAdminConnectionManager"]
+        DM["Data/UniAdminDataModule"]
+        MC["Metadata/UniAdminMetadataCache"]
         FM["Metadata/UniFieldMetadata"]
     end
 
     subgraph 安全层["安全层"]
-        Auth["Auth/UniAuthService"]
-        Perm["Permission/UniPermissionManager"]
+        Auth["Auth/UniAdminAuthService"]
+        Perm["Permission/UniAdminPermissionManager"]
     end
 
     subgraph 扩展层["扩展层"]
         PI["Plugin/UniPlugin"]
-        MR["Plugin/UniModuleRegistry"]
-        PL["Plugin/UniPluginLoader"]
-        Menu["Menu/UniMenuManager"]
+        MR["Plugin/UniAdminModuleRegistry"]
+        PL["Plugin/UniAdminPluginLoader"]
+        Menu["Menu/UniAdminMenuManager"]
         SMS["Menu/SystemMenuSetup"]
     end
 
     subgraph UI层["UI 框架层"]
         BCF["UI/BaseCrudFrame"]
-        MA["UI/UniModelAdmin"]
+        MA["UI/UniAdminModel"]
         LF["UI/LoginForm"]
         MF["UI/MainFrame"]
         Tpl["UI/Templates/"]
-        Sched["Scheduler/UniScheduler"]
+        Sched["Scheduler/UniAdminScheduler"]
     end
 
     DPR --> SM
@@ -74,7 +73,7 @@ graph TB
     Svc --> CM
     Auth --> Perm
     Auth --> Ctx
-    Auth --> Sess
+    MM --> Ctx
     MR --> PI
     PL --> MR
     BCF --> MA
@@ -94,19 +93,18 @@ graph TB
 
 | 子模块 | 路径 | 关键文件 |
 |--------|------|----------|
-| Context 执行上下文 | `Core/Context/` | `UniContext.pas` |
-| Plugin 插件系统 | `Core/Plugin/` | `UniPlugin.Intf.pas`, `UniModuleRegistry.pas`, `UniPluginLoader.pas` |
-| Data 数据访问 | `Core/Data/` | `UniConnectionManager.pas`, `UniDataModule.pas` |
-| Metadata 元数据 | `Core/Metadata/` | `UniMetadataCache.pas`, `UniFieldMetadata.pas` |
-| Auth 认证服务 | `Core/Auth/` | `UniAuthService.Intf.pas`, `UniAuthService.pas` |
-| Menu 菜单管理 | `Core/Menu/` | `UniMenuManager.pas`, `SystemMenuSetup.pas` |
-| Permission 权限 | `Core/Permission/` | `UniPermissionManager.pas` |
-| Services 服务定位 | `Core/Services/` | `UniServices.pas` |
-| Session 会话 | `Core/Session/` | `UniSession.pas` |
-| Scheduler 调度器 | `Core/Scheduler/` | `UniScheduler.pas`, `UniTaskProcessor.pas` |
-| Config 配置 | `Core/Config/` | `UniConfigService.pas` |
+| Context 执行上下文 | `Core/Context/` | `UniContext.pas`（接口 + TSessionInfo/TUserContextImpl/TExecutionContextImpl 会话类型） |
+| Plugin 插件系统 | `Core/Plugin/` | `UniPlugin.Intf.pas`, `UniAdminModuleRegistry.pas`, `UniAdminPluginLoader.pas` |
+| Data 数据访问 | `Core/Data/` | `UniAdminConnectionManager.pas`, `UniAdminDataModule.pas` |
+| Metadata 元数据 | `Core/Metadata/` | `UniAdminMetadataCache.pas`, `UniFieldMetadata.pas` |
+| Auth 认证服务 | `Core/Auth/` | `UniAdminAuthService.Intf.pas`, `UniAdminAuthService.pas` |
+| Menu 菜单管理 | `Core/Menu/` | `UniAdminMenuManager.pas`, `SystemMenuSetup.pas` |
+| Permission 权限 | `Core/Permission/` | `UniAdminPermissionManager.pas` |
+| Services 服务定位 | `Core/Services/` | `UniAdminServices.pas` |
+| Scheduler 调度器 | `Core/Scheduler/` | `UniAdminScheduler.pas`, `UniTaskProcessor.pas` |
+| Config 配置 | `Core/Config/` | `UniAdminConfigService.pas` |
 | Main 主模块 | `Core/Main/` | `ServerModule.pas`, `MainModule.pas` |
-| UI 框架 | `Core/UI/` | `BaseCrudFrame.pas`, `UniModelAdmin.pas`, `MainFrame.pas`, `LoginForm.pas` |
+| UI 框架 | `Core/UI/` | `BaseCrudFrame.pas`, `UniAdminModel.pas`, `MainFrame.pas`, `LoginForm.pas` |
 | UI 模板 | `Core/UI/Templates/` | 9 个模板（Form, Dialog, Grid, Wizard 等） |
 
 ---
@@ -115,44 +113,42 @@ graph TB
 
 ```
 Core/
-├── Context/                # 执行上下文
-│   └── UniContext.pas     # 上下文接口和实现
+├── Context/                # 执行上下文（含会话类型 TSessionInfo 等）
+│   └── UniContext.pas     # 接口 IDatabaseConfig/IUserContext/IExecutionContext + 实现
 ├── Plugin/                 # 插件系统
 │   ├── UniPlugin.Intf.pas          # 插件接口
 │   ├── UniPlugin.Types.pas         # 插件类型定义
 │   ├── UniPlugin.pas               # 插件基类
-│   ├── UniModuleRegistry.Intf.pas  # 模块注册接口
-│   ├── UniModuleRegistry.pas       # 模块注册实现
+│   ├── UniAdminModuleRegistry.Intf.pas  # 模块注册接口
+│   ├── UniAdminModuleRegistry.pas       # 模块注册实现
 │   ├── UniModuleRegistration.pas   # 模块注册配置
-│   └── UniPluginLoader.pas         # 插件加载器
+│   └── UniAdminPluginLoader.pas         # 插件加载器
 ├── Data/                   # 数据访问
-│   ├── UniConnectionManager.Intf.pas  # 连接管理接口
-│   ├── UniConnectionManager.pas      # 连接管理实现
-│   └── UniDataModule.pas             # 数据模块基类
+│   ├── UniAdminConnectionManager.Intf.pas  # 连接管理接口
+│   ├── UniAdminConnectionManager.pas      # 连接管理实现
+│   └── UniAdminDataModule.pas             # 数据模块基类
 ├── Metadata/               # 元数据管理
-│   ├── UniMetadataCache.Intf.pas     # 元数据缓存接口
-│   ├── UniMetadataCache.pas          # 元数据缓存实现
+│   ├── UniAdminMetadataCache.Intf.pas     # 元数据缓存接口
+│   ├── UniAdminMetadataCache.pas          # 元数据缓存实现
 │   └── UniFieldMetadata.pas          # 字段元数据
 ├── Auth/                   # 认证服务
-│   ├── UniAuthService.Intf.pas        # 认证接口
-│   └── UniAuthService.pas            # 认证实现
+│   ├── UniAdminAuthService.Intf.pas        # 认证接口
+│   └── UniAdminAuthService.pas            # 认证实现
 ├── Menu/                   # 菜单管理
-│   ├── UniMenuManager.Intf.pas        # 菜单接口
-│   ├── UniMenuManager.pas            # 菜单实现
+│   ├── UniAdminMenuManager.Intf.pas        # 菜单接口
+│   ├── UniAdminMenuManager.pas            # 菜单实现
 │   └── SystemMenuSetup.pas           # 系统菜单配置
 ├── Permission/             # 权限管理
-│   ├── UniPermissionManager.Intf.pas  # 权限接口
-│   └── UniPermissionManager.pas      # 权限实现
+│   ├── UniAdminPermissionManager.Intf.pas  # 权限接口
+│   └── UniAdminPermissionManager.pas      # 权限实现
 ├── Services/               # 核心服务
-│   └── UniServices.pas      # 服务定位器
-├── Session/                # 会话管理
-│   └── UniSession.pas       # 会话上下文
+│   └── UniAdminServices.pas      # 服务定位器
 ├── Scheduler/              # 调度器
-│   ├── UniScheduler.pas     # 任务调度器
+│   ├── UniAdminScheduler.pas     # 任务调度器
 │   └── UniTaskProcessor.pas # 任务处理器
 ├── Config/                 # 配置服务
-│   ├── UniConfigService.Intf.pas  # 配置接口
-│   └── UniConfigService.pas      # 配置实现
+│   ├── UniAdminConfigService.Intf.pas  # 配置接口
+│   └── UniAdminConfigService.pas      # 配置实现
 ├── Main/                   # 主模块
 │   ├── ServerModule.pas    # UniGUI 服务器模块
 │   └── MainModule.pas      # UniGUI 主模块
@@ -160,10 +156,10 @@ Core/
     ├── LoginForm.pas       # 登录窗体
     ├── MainFrame.pas       # 主窗体
     ├── BaseCrudFrame.pas   # CRUD 基类
-    ├── UniModelAdmin.pas   # 模型管理组件
-    ├── UniPropertyEditor.pas # 属性编辑器
-    ├── UniLayout.pas       # 布局组件
-    ├── UniTheme.pas        # 主题组件
+    ├── UniAdminModel.pas   # 模型管理组件
+    ├── UniAdminPropertyEditor.pas # 属性编辑器
+    ├── UniAdminLayout.pas       # 布局组件
+    ├── UniAdminTheme.pas        # 主题组件
     └── Templates/          # UI 模板
         ├── BaseFormTemplate.pas
         ├── DialogTemplate.pas
@@ -210,9 +206,9 @@ LoginForm (用户登录)
     ↓
 MainFrame (主界面加载)
     ↓
-插件加载 (UniModuleRegistry)
+插件加载 (UniAdminModuleRegistry)
     ↓
-菜单生成 (UniMenuManager)
+菜单生成 (UniAdminMenuManager)
 ```
 
 ---
@@ -235,10 +231,10 @@ end;
 
 ### 认证服务接口
 
-**IUniAuthService** (`UniAuthService.Intf.pas`)
+**IUniAdminAuthService** (`UniAdminAuthService.Intf.pas`)
 
 ```pascal
-IUniAuthService = interface(IInterface)
+IUniAdminAuthService = interface(IInterface)
   ['{GUID}']
   function Login(const UserName, Password: string): Boolean;
   procedure Logout;
@@ -249,10 +245,10 @@ end;
 
 ### 菜单管理接口
 
-**IUniMenuManager** (`UniMenuManager.Intf.pas`)
+**IUniAdminMenuManager** (`UniAdminMenuManager.Intf.pas`)
 
 ```pascal
-IUniMenuManager = interface(IInterface)
+IUniAdminMenuManager = interface(IInterface)
   ['{GUID}']
   function GetMenuTree(const UserID: Integer): TMenuNodeArray;
   procedure AddMenuItem(const Item: TMenuItem);
@@ -263,10 +259,10 @@ end;
 
 ### 权限管理接口
 
-**IUniPermissionManager** (`UniPermissionManager.Intf.pas`)
+**IUniAdminPermissionManager** (`UniAdminPermissionManager.Intf.pas`)
 
 ```pascal
-IUniPermissionManager = interface(IInterface)
+IUniAdminPermissionManager = interface(IInterface)
   ['{GUID}']
   function CheckPermission(const UserID: Integer; const Permission: string): Boolean;
   function GetUserPermissions(const UserID: Integer): TPermissionArray;
@@ -364,10 +360,10 @@ A: 参考 `DictionaryPlugin.pas` 实现示例：
 
 ### Q: 如何扩展权限系统?
 
-A: 实现 `IUniPermissionManager` 接口并注册：
+A: 实现 `IUniAdminPermissionManager` 接口并注册：
 
 ```pascal
-TUniServices.RegisterService<IUniPermissionManager>(TCustomPermissionManager);
+TUniAdminServices.RegisterService<IUniAdminPermissionManager>(TCustomPermissionManager);
 ```
 
 ### Q: 数据库连接失败怎么办?
@@ -385,27 +381,27 @@ A: 检查 `config/app.json` 中的连接字符串，确保：
 
 - `UniPlugin.Intf.pas` - 插件接口
 - `UniPlugin.Types.pas` - 插件类型定义
-- `UniModuleRegistry.Intf.pas` - 模块注册接口
-- `UniAuthService.Intf.pas` - 认证接口
-- `UniMenuManager.Intf.pas` - 菜单接口
-- `UniPermissionManager.Intf.pas` - 权限接口
-- `UniMetadataCache.Intf.pas` - 元数据接口
-- `UniConfigService.Intf.pas` - 配置接口
+- `UniAdminModuleRegistry.Intf.pas` - 模块注册接口
+- `UniAdminAuthService.Intf.pas` - 认证接口
+- `UniAdminMenuManager.Intf.pas` - 菜单接口
+- `UniAdminPermissionManager.Intf.pas` - 权限接口
+- `UniAdminMetadataCache.Intf.pas` - 元数据接口
+- `UniAdminConfigService.Intf.pas` - 配置接口
 
 ### 核心实现文件
 
 - `UniPlugin.pas` - 插件基类
-- `UniModuleRegistry.pas` - 模块注册
-- `UniAuthService.pas` - 认证实现
-- `UniMenuManager.pas` - 菜单实现
-- `UniPermissionManager.pas` - 权限实现
-- `UniMetadataCache.pas` - 元数据缓存
-- `UniConfigService.pas` - 配置实现
+- `UniAdminModuleRegistry.pas` - 模块注册
+- `UniAdminAuthService.pas` - 认证实现
+- `UniAdminMenuManager.pas` - 菜单实现
+- `UniAdminPermissionManager.pas` - 权限实现
+- `UniAdminMetadataCache.pas` - 元数据缓存
+- `UniAdminConfigService.pas` - 配置实现
 
 ### UI 框架文件
 
 - `BaseCrudFrame.pas` - CRUD 基类
-- `UniModelAdmin.pas` - 模型管理组件
+- `UniAdminModel.pas` - 模型管理组件
 - `LoginForm.pas` - 登录窗体
 - `MainFrame.pas` - 主窗体
 

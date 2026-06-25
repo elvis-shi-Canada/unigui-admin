@@ -1,20 +1,20 @@
-﻿unit UniMetadataCache;
+﻿unit UniAdminMetadataCache;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.Character,
   FireDAC.Comp.Client,
-  UniMetadataCache.Intf, UniFieldMetadata;
+  UniAdminMetadataCache.Intf, UniFieldMetadata;
 
 type
   /// <summary>
   /// 元数据缓存实现
   /// 从数据库自动读取表结构信息并缓存
   /// </summary>
-  TUniMetadataCache = class(TInterfacedObject, IUniMetadataCache)
+  TUniAdminMetadataCache = class(TInterfacedObject, IUniAdminMetadataCache)
   private
-    class var FInstance: IUniMetadataCache;
+    class var FInstance: IUniAdminMetadataCache;
     class var FLock: TObject;
     FTables: TDictionary<string, TTableMetadata>;
     FConnection: TFDConnection;
@@ -38,21 +38,21 @@ type
     /// 注意: 当前实现为全局单例，不支持多连接场景
     /// TODO: 未来版本考虑支持按连接管理的多实例模式
     /// </summary>
-    class function GetInstance(const Connection: TFDConnection): IUniMetadataCache; static;
+    class function GetInstance(const Connection: TFDConnection): IUniAdminMetadataCache; static;
   end;
 
 implementation
 
-{ TUniMetadataCache }
+{ TUniAdminMetadataCache }
 
-class function TUniMetadataCache.GetInstance(const Connection: TFDConnection): IUniMetadataCache;
+class function TUniAdminMetadataCache.GetInstance(const Connection: TFDConnection): IUniAdminMetadataCache;
 begin
   if FInstance = nil then
   begin
     TMonitor.Enter(FLock);
     try
       if FInstance = nil then
-        FInstance := TUniMetadataCache.Create(Connection);
+        FInstance := TUniAdminMetadataCache.Create(Connection);
     finally
       TMonitor.Exit(FLock);
     end;
@@ -60,14 +60,14 @@ begin
   Result := FInstance;
 end;
 
-constructor TUniMetadataCache.Create(const Connection: TFDConnection);
+constructor TUniAdminMetadataCache.Create(const Connection: TFDConnection);
 begin
   inherited Create;
   FConnection := Connection;
   FTables := TDictionary<string, TTableMetadata>.Create;
 end;
 
-destructor TUniMetadataCache.Destroy;
+destructor TUniAdminMetadataCache.Destroy;
 var
   LPair: TPair<string, TTableMetadata>;
 begin
@@ -77,7 +77,7 @@ begin
   inherited;
 end;
 
-function TUniMetadataCache.IsValidTableName(const TableName: string): Boolean;
+function TUniAdminMetadataCache.IsValidTableName(const TableName: string): Boolean;
 var
   I: Integer;
   C: Char;
@@ -93,7 +93,7 @@ begin
   end;
 end;
 
-function TUniMetadataCache.GetFieldTypeFromDB(const TypeName: string;
+function TUniAdminMetadataCache.GetFieldTypeFromDB(const TypeName: string;
   Size, Precision: Integer): TFieldType;
 var
   LTypeName: string;
@@ -119,7 +119,7 @@ begin
     Result := ftUnknown;
 end;
 
-function TUniMetadataCache.LoadTableMetadata(const TableName: string): TTableMetadata;
+function TUniAdminMetadataCache.LoadTableMetadata(const TableName: string): TTableMetadata;
 var
   LQuery: TFDQuery;
   LField: TFieldMetadata;
@@ -211,7 +211,7 @@ begin
   end;
 end;
 
-function TUniMetadataCache.GetTableMetadata(const TableName: string): TTableMetadata;
+function TUniAdminMetadataCache.GetTableMetadata(const TableName: string): TTableMetadata;
 begin
   if not FTables.ContainsKey(TableName) then
   begin
@@ -220,22 +220,22 @@ begin
   Result := FTables[TableName];
 end;
 
-procedure TUniMetadataCache.RegisterTable(const Metadata: TTableMetadata);
+procedure TUniAdminMetadataCache.RegisterTable(const Metadata: TTableMetadata);
 begin
   FTables.AddOrSetValue(Metadata.TableName, Metadata);
 end;
 
-function TUniMetadataCache.HasTable(const TableName: string): Boolean;
+function TUniAdminMetadataCache.HasTable(const TableName: string): Boolean;
 begin
   Result := FTables.ContainsKey(TableName);
 end;
 
-function TUniMetadataCache.GetAllTables: TArray<string>;
+function TUniAdminMetadataCache.GetAllTables: TArray<string>;
 begin
   Result := FTables.Keys.ToArray;
 end;
 
-procedure TUniMetadataCache.Refresh;
+procedure TUniAdminMetadataCache.Refresh;
 var
   LTableNames: TArray<string>;
   LTableName: string;
@@ -249,7 +249,7 @@ begin
   end;
 end;
 
-procedure TUniMetadataCache.Clear;
+procedure TUniAdminMetadataCache.Clear;
 var
   LPair: TPair<string, TTableMetadata>;
 begin
@@ -259,10 +259,10 @@ begin
 end;
 
 initialization
-  TUniMetadataCache.FLock := TObject.Create;
+  TUniAdminMetadataCache.FLock := TObject.Create;
 
 finalization
-  TUniMetadataCache.FInstance := nil;
-  FreeAndNil(TUniMetadataCache.FLock);
+  TUniAdminMetadataCache.FInstance := nil;
+  FreeAndNil(TUniAdminMetadataCache.FLock);
 
 end.

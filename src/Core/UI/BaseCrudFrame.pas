@@ -6,8 +6,8 @@ uses
   System.SysUtils, System.Classes, System.Variants,
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniBasicGrid, uniDBGrid,
-  uniToolBar, uniGUIForm, uniGUIFrame, uniSession,
-  UniContext, UniPlugin.Types, UniModelAdmin, Vcl.Controls, Vcl.Forms;
+  uniToolBar, uniGUIForm, uniGUIFrame,
+  UniContext, UniPlugin.Types, UniAdminModel, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -16,7 +16,7 @@ type
   /// </summary>
   TBaseCrudFrame = class(TUniFrame)
   private
-    FModelAdmin: TUniModelAdmin;
+    FModelAdmin: TUniAdminModel;
     FContext: IExecutionContext;
 
     procedure UpdateButtonStates;
@@ -98,7 +98,7 @@ type
     /// </summary>
     procedure Refresh; virtual;
 
-    property ModelAdmin: TUniModelAdmin read FModelAdmin;
+    property ModelAdmin: TUniAdminModel read FModelAdmin;
     property Context: IExecutionContext read FContext;
     property PermissionPrefix: string read FPermissionPrefix write FPermissionPrefix;
   end;
@@ -112,7 +112,7 @@ implementation
 constructor TBaseCrudFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  FModelAdmin := TUniModelAdmin.Create(Self);
+  FModelAdmin := TUniAdminModel.Create(Self);
   FModelAdmin.OnStateChange := DoStateChange;
   FPermissionPrefix := ''; // 子类设置
 end;

@@ -12,7 +12,7 @@ type
   /// <summary>
   /// 用户服务类 - 用户业务逻辑实现
   /// </summary>
-  TUniUserService = class(TInterfacedObject, IUniUserService)
+  TUserService = class(TInterfacedObject, IUserService)
   private
     FContext: IExecutionContext;
     FDataModule: TUserDataModule;
@@ -51,22 +51,22 @@ type
 
 implementation
 
-{ TUniUserService }
+{ TUserService }
 
-constructor TUniUserService.Create(const Context: IExecutionContext);
+constructor TUserService.Create(const Context: IExecutionContext);
 begin
   inherited Create;
   FContext := Context;
   InitializeDataModule;
 end;
 
-destructor TUniUserService.Destroy;
+destructor TUserService.Destroy;
 begin
   FinalizeDataModule;
   inherited;
 end;
 
-procedure TUniUserService.InitializeDataModule;
+procedure TUserService.InitializeDataModule;
 begin
   FDataModule := TUserDataModule.CreateWithConnection(nil, GetMainModule.Connection);
   if Supports(FDataModule, IContextAware) then
@@ -74,7 +74,7 @@ begin
   FDataModule.Open;
 end;
 
-procedure TUniUserService.FinalizeDataModule;
+procedure TUserService.FinalizeDataModule;
 begin
   if Assigned(FDataModule) then
   begin
@@ -83,7 +83,7 @@ begin
   end;
 end;
 
-function TUniUserService.DataSetToUserInfo(const DataSet: TDataSet): TUserInfo;
+function TUserService.DataSetToUserInfo(const DataSet: TDataSet): TUserInfo;
 begin
   Result.UserID := DataSet.FieldByName('UserID').AsInteger;
   Result.UserName := DataSet.FieldByName('UserName').AsString;
@@ -116,7 +116,7 @@ begin
   Result.ModifiedBy := DataSet.FieldByName('ModifiedBy').AsInteger;
 end;
 
-function TUniUserService.GetStatusText(Status: Integer): string;
+function TUserService.GetStatusText(Status: Integer): string;
 begin
   case Status of
     0: Result := '禁用';
@@ -126,7 +126,7 @@ begin
   end;
 end;
 
-procedure TUniUserService.RecordOperationLog(const AModule, AOperation, ADescription: string);
+procedure TUserService.RecordOperationLog(const AModule, AOperation, ADescription: string);
 var
   LLogService: TLogService;
 begin
@@ -157,7 +157,7 @@ begin
   end;
 end;
 
-function TUniUserService.GetUsers(const Filter: string; Status: Integer; 
+function TUserService.GetUsers(const Filter: string; Status: Integer; 
   Page, PageSize: Integer): TArray<TUserInfo>;
 var
   LDataSet: TDataSet;
@@ -188,7 +188,7 @@ begin
   end;
 end;
 
-function TUniUserService.GetUsersCount(const Filter: string; Status: Integer): Integer;
+function TUserService.GetUsersCount(const Filter: string; Status: Integer): Integer;
 var
   LDataSet: TDataSet;
 begin
@@ -200,7 +200,7 @@ begin
   end;
 end;
 
-function TUniUserService.GetUserByID(UserID: Integer): TUserInfo;
+function TUserService.GetUserByID(UserID: Integer): TUserInfo;
 var
   LDataSet: TDataSet;
 begin
@@ -217,7 +217,7 @@ begin
   end;
 end;
 
-function TUniUserService.GetUserByName(const UserName: string): TUserInfo;
+function TUserService.GetUserByName(const UserName: string): TUserInfo;
 var
   LDataSet: TDataSet;
 begin
@@ -234,31 +234,31 @@ begin
   end;
 end;
 
-function TUniUserService.CreateUser(const UserName, Password, RealName, Email, Phone: string): Integer;
+function TUserService.CreateUser(const UserName, Password, RealName, Email, Phone: string): Integer;
 begin
   Result := FDataModule.CreateUser(UserName, Password, RealName, Email, Phone);
   RecordOperationLog('用户管理', '创建用户', Format('创建用户: %s', [UserName]));
 end;
 
-procedure TUniUserService.UpdateUser(UserID: Integer; const RealName, Email, Phone: string);
+procedure TUserService.UpdateUser(UserID: Integer; const RealName, Email, Phone: string);
 begin
   FDataModule.UpdateUser(UserID, RealName, Email, Phone);
   RecordOperationLog('用户管理', '更新用户', Format('更新用户ID: %d', [UserID]));
 end;
 
-procedure TUniUserService.DeleteUser(UserID: Integer);
+procedure TUserService.DeleteUser(UserID: Integer);
 begin
   FDataModule.DeleteUser(UserID);
   RecordOperationLog('用户管理', '删除用户', Format('删除用户ID: %d', [UserID]));
 end;
 
-procedure TUniUserService.SetUserStatus(UserID, Status: Integer);
+procedure TUserService.SetUserStatus(UserID, Status: Integer);
 begin
   FDataModule.SetUserStatus(UserID, Status);
   RecordOperationLog('用户管理', '修改状态', Format('用户ID: %d, 状态: %d', [UserID, Status]));
 end;
 
-function TUniUserService.IsUserAvailable(UserID: Integer): Boolean;
+function TUserService.IsUserAvailable(UserID: Integer): Boolean;
 var
   LInfo: TUserInfo;
 begin
@@ -270,29 +270,29 @@ begin
   end;
 end;
 
-procedure TUniUserService.ChangePassword(UserID: Integer; const OldPassword, NewPassword: string);
+procedure TUserService.ChangePassword(UserID: Integer; const OldPassword, NewPassword: string);
 begin
   FDataModule.ChangePassword(UserID, OldPassword, NewPassword);
   RecordOperationLog('用户管理', '修改密码', Format('修改密码, 用户ID: %d', [UserID]));
 end;
 
-procedure TUniUserService.ResetPassword(UserID: Integer; const NewPassword: string);
+procedure TUserService.ResetPassword(UserID: Integer; const NewPassword: string);
 begin
   FDataModule.ResetPassword(UserID, NewPassword);
   RecordOperationLog('用户管理', '重置密码', Format('重置密码, 用户ID: %d', [UserID]));
 end;
 
-function TUniUserService.VerifyPassword(const UserName, Password: string): Boolean;
+function TUserService.VerifyPassword(const UserName, Password: string): Boolean;
 begin
   Result := FDataModule.VerifyPassword(UserName, Password);
 end;
 
-function TUniUserService.UserNameExists(const UserName: string): Boolean;
+function TUserService.UserNameExists(const UserName: string): Boolean;
 begin
   Result := FDataModule.UserNameExists(UserName);
 end;
 
-function TUniUserService.EmailExists(const Email: string): Boolean;
+function TUserService.EmailExists(const Email: string): Boolean;
 begin
   Result := FDataModule.EmailExists(Email);
 end;

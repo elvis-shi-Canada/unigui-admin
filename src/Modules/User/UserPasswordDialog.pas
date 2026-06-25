@@ -54,7 +54,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UserService, UniFormStyler;
+  UserService, UniAdminFormStyler;
 
 constructor TUserPasswordDialog.Create(AOwner: TComponent);
 begin
@@ -99,8 +99,8 @@ end;
 
 procedure TUserPasswordDialog.FormCreate(Sender: TObject);
 begin
-  TUniFormStyler.AutoStylePanels(Self);
-  TUniFormStyler.AutoStyleButtons(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStyleButtons(Self);
   InitForm;
 end;
 
@@ -208,7 +208,7 @@ end;
 procedure TUserPasswordDialog.ValidateInputs;
 var
   LOldPassword, LNewPassword, LConfirmPassword: string;
-  LService: IUniUserService;
+  LService: IUserService;
 begin
   LOldPassword := Trim(edtOldPassword.Text);
   LNewPassword := Trim(edtNewPassword.Text);
@@ -238,7 +238,7 @@ begin
   // 用户模式下验证旧密码
   if not FIsAdmin then
   begin
-    LService := TUniUserService.Create(FContext);
+    LService := TUserService.Create(FContext);
     if not LService.VerifyPassword(FUserName, LOldPassword) then
       raise Exception.Create('旧密码不正确');
   end;
@@ -247,14 +247,14 @@ end;
 procedure TUserPasswordDialog.btnOKClick(Sender: TObject);
 var
   LNewPassword: string;
-  LService: IUniUserService;
+  LService: IUserService;
 begin
   try
     // 验证输入
     ValidateInputs;
     
     LNewPassword := Trim(edtNewPassword.Text);
-    LService := TUniUserService.Create(FContext);
+    LService := TUserService.Create(FContext);
     
     // 执行密码修改
     if FIsAdmin then

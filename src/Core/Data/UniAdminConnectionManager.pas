@@ -1,19 +1,19 @@
-﻿unit UniConnectionManager;
+﻿unit UniAdminConnectionManager;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   FireDAC.Comp.Client,
-  UniConnectionManager.Intf, UniConfigService.Intf, UniConfigService;
+  UniAdminConnectionManager.Intf, UniAdminConfigService.Intf, UniAdminConfigService;
 
 type
-  TUniConnectionManager = class(TInterfacedObject, IUniConnectionManager)
+  TUniAdminConnectionManager = class(TInterfacedObject, IUniAdminConnectionManager)
   private
-    class var FInstance: IUniConnectionManager;
+    class var FInstance: IUniAdminConnectionManager;
     class var FLock: TObject;
     FConnections: TObjectList<TFDConnection>;
-    FConfigService: IUniConfigService;
+    FConfigService: IUniAdminConfigService;
 
     function BuildConnectionString(const Params: TConnectionParams): string;
     function GetDriverName(const DbType: TDatabaseType): string;
@@ -28,8 +28,8 @@ type
     procedure ReleaseConnection(var Connection: TFDConnection);
     function TestConnection(const Params: TConnectionParams): Boolean;
 
-    class function GetInstance: IUniConnectionManager; static;
-    class property Instance: IUniConnectionManager read GetInstance;
+    class function GetInstance: IUniAdminConnectionManager; static;
+    class property Instance: IUniAdminConnectionManager read GetInstance;
   end;
 
 implementation
@@ -37,16 +37,16 @@ implementation
 uses
   UniAdminLogger;
 
-{ TUniConnectionManager }
+{ TUniAdminConnectionManager }
 
-class function TUniConnectionManager.GetInstance: IUniConnectionManager;
+class function TUniAdminConnectionManager.GetInstance: IUniAdminConnectionManager;
 begin
   if FInstance = nil then
   begin
     TMonitor.Enter(FLock);
     try
       if FInstance = nil then
-        FInstance := TUniConnectionManager.Create;
+        FInstance := TUniAdminConnectionManager.Create;
     finally
       TMonitor.Exit(FLock);
     end;
@@ -54,20 +54,20 @@ begin
   Result := FInstance;
 end;
 
-constructor TUniConnectionManager.Create;
+constructor TUniAdminConnectionManager.Create;
 begin
   inherited Create;
   FConnections := TObjectList<TFDConnection>.Create;
-  FConfigService := TUniConfigService.GetInstance;
+  FConfigService := TUniAdminConfigService.GetInstance;
 end;
 
-destructor TUniConnectionManager.Destroy;
+destructor TUniAdminConnectionManager.Destroy;
 begin
   FConnections.Free;  // TObjectList(OwnsObjects=True) 释放所有连接
   inherited;
 end;
 
-function TUniConnectionManager.GetDriverName(const DbType: TDatabaseType): string;
+function TUniAdminConnectionManager.GetDriverName(const DbType: TDatabaseType): string;
 begin
   case DbType of
     dbMSSQL: Result := 'MSSQL';
@@ -80,7 +80,7 @@ begin
   end;
 end;
 
-function TUniConnectionManager.BuildConnectionString(const Params: TConnectionParams): string;
+function TUniAdminConnectionManager.BuildConnectionString(const Params: TConnectionParams): string;
 begin
   case Params.DatabaseType of
     dbMSSQL:
@@ -106,7 +106,7 @@ begin
   end;
 end;
 
-function TUniConnectionManager.GetConnection(const Params: TConnectionParams): TFDConnection;
+function TUniAdminConnectionManager.GetConnection(const Params: TConnectionParams): TFDConnection;
 begin
   Result := TFDConnection.Create(nil);
   try
@@ -120,7 +120,7 @@ begin
   end;
 end;
 
-function TUniConnectionManager.CreateDefaultConnection: TFDConnection;
+function TUniAdminConnectionManager.CreateDefaultConnection: TFDConnection;
 var
   LDbType, LConnStr, LExeDir: string;
   LParams: TConnectionParams;
@@ -174,17 +174,17 @@ begin
     LParams.UserName := FConfigService.GetGlobalString('database.user', 'sa');
     LParams.Password := FConfigService.GetGlobalString('database.password', '');
     Result := GetConnection(LParams);
-    // 从 FConnections 取出——调用者（MainModule → TUniServices）拥有生命周期
+    // 从 FConnections 取出——调用者（MainModule → TUniAdminServices）拥有生命周期
     FConnections.Extract(Result);
   end;
 end;
 
-function TUniConnectionManager.GetDefaultConnection: TFDConnection;
+function TUniAdminConnectionManager.GetDefaultConnection: TFDConnection;
 begin
   Result := CreateDefaultConnection;
 end;
 
-procedure TUniConnectionManager.ReleaseConnection(var Connection: TFDConnection);
+procedure TUniAdminConnectionManager.ReleaseConnection(var Connection: TFDConnection);
 begin
   if Assigned(Connection) then
   begin
@@ -195,7 +195,7 @@ begin
   end;
 end;
 
-function TUniConnectionManager.TestConnection(const Params: TConnectionParams): Boolean;
+function TUniAdminConnectionManager.TestConnection(const Params: TConnectionParams): Boolean;
 var
   LConn: TFDConnection;
 begin
@@ -210,11 +210,11 @@ begin
 end;
 
 initialization
-  TUniConnectionManager.FLock := TObject.Create;
-  TUniConnectionManager.GetInstance;
+  TUniAdminConnectionManager.FLock := TObject.Create;
+  TUniAdminConnectionManager.GetInstance;
 
 finalization
-  TUniConnectionManager.FInstance := nil;
-  FreeAndNil(TUniConnectionManager.FLock);
+  TUniAdminConnectionManager.FInstance := nil;
+  FreeAndNil(TUniAdminConnectionManager.FLock);
 
 end.

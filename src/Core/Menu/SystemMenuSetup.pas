@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   Data.DB,
   UniContext, UniPlugin.Types,
-  UniMenuManager;
+  UniAdminMenuManager;
 
 type
   /// <summary>

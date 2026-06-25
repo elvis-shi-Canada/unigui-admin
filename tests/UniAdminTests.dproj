@@ -74,9 +74,8 @@
         <DCCReference Include="..\src\Core\Plugin\UniPlugin.Intf.pas"/>
         <DCCReference Include="..\src\Core\Plugin\UniPlugin.Types.pas"/>
         <DCCReference Include="..\src\Core\Context\UniContext.pas"/>
-        <DCCReference Include="..\src\Core\Plugin\UniModuleRegistry.pas"/>
-        <DCCReference Include="..\src\Core\Plugin\UniModuleRegistry.Intf.pas"/>
-        <DCCReference Include="..\src\Core\Session\UniSession.pas"/>
+        <DCCReference Include="..\src\Core\Plugin\UniAdminModuleRegistry.pas"/>
+        <DCCReference Include="..\src\Core\Plugin\UniAdminModuleRegistry.Intf.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

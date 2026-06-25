@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
-  UniContext, UniPlugin.Types, UniScheduler;
+  UniContext, UniPlugin.Types, UniAdminScheduler;
 
 type
   /// <summary>

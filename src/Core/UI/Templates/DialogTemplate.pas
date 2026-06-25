@@ -27,7 +27,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniFormStyler;
+  UniAdminFormStyler;
 
 class function TDialogTemplate.ShowDialog(const Message: string): Integer;
 begin
@@ -35,9 +35,9 @@ begin
   try
     lblMessage.Caption := Message;
     // 应用统一设计系统样式
-    TUniFormStyler.StyleAsCard(pnlContent);
-    TUniFormStyler.StylePrimaryButton(btnYes);
-    TUniFormStyler.StyleDangerButton(btnNo);
+    TUniAdminFormStyler.StyleAsCard(pnlContent);
+    TUniAdminFormStyler.StylePrimaryButton(btnYes);
+    TUniAdminFormStyler.StyleDangerButton(btnNo);
     Result := ShowModal;
   finally
     Free;

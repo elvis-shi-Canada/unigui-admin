@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.IOUtils, ShellAPI, uniGUITypes,
   UniGUIServer, UniGUIApplication, UniGUIClasses, UniGUIVars, uniGUIMainModule,
-  UniConfigService.Intf, UniModuleRegistry.Intf, FireDAC.Phys.MSSQLDef,
+  UniAdminConfigService.Intf, UniAdminModuleRegistry.Intf, FireDAC.Phys.MSSQLDef,
   FireDAC.Stan.ExprFuncs, FireDAC.Phys.SQLiteWrapper.Stat,
   FireDAC.Phys.SQLiteDef, FireDAC.Stan.Intf, FireDAC.Stan.Option,
   FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
@@ -27,8 +27,8 @@ type
     /// <summary>UniGUI 服务器模块首次初始化，完成窗体类映射绑定</summary>
     procedure FirstInit; override;
   private
-    FConfigService: IUniConfigService;
-    FModuleRegistry: IUniModuleRegistry;
+    FConfigService: IUniAdminConfigService;
+    FModuleRegistry: IUniAdminModuleRegistry;
     FConfigRoot: string;
 
     /// <summary>初始化配置服务</summary>
@@ -41,9 +41,9 @@ type
     procedure InitializeDatabaseServices;
   public
     /// <summary>获取配置服务实例</summary>
-    function GetConfigService: IUniConfigService;
+    function GetConfigService: IUniAdminConfigService;
     /// <summary>获取插件注册表实例</summary>
-    function GetModuleRegistry: IUniModuleRegistry;
+    function GetModuleRegistry: IUniAdminModuleRegistry;
     /// <summary>获取配置根目录</summary>
     function GetConfigRoot: string;
   end;
@@ -56,8 +56,8 @@ implementation
 {$R *.dfm}
 
 uses
-  UniConfigService, UniModuleRegistry, UniAdminLogger,
-  UniConnectionManager, DatabaseInitializer, DatabaseMigrator;
+  UniAdminConfigService, UniAdminModuleRegistry, UniAdminLogger,
+  UniAdminConnectionManager, DatabaseInitializer, DatabaseMigrator;
 
 { TServerModule }
 
@@ -122,7 +122,7 @@ end;
 procedure TServerModule.InitializeConfigService;
 begin
   // 获取配置服务单例实例
-  FConfigService := TUniConfigService.GetInstance;
+  FConfigService := TUniAdminConfigService.GetInstance;
 
   // 设置配置根目录
   if TDirectory.Exists(FConfigRoot) then
@@ -145,7 +145,7 @@ end;
 procedure TServerModule.InitializeModuleRegistry;
 begin
   // 获取插件注册表单例实例
-  FModuleRegistry := TUniModuleRegistry.GetInstance;
+  FModuleRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册表初始化完成
   // 插件类的注册由各个插件模块在初始化时完成
@@ -188,7 +188,7 @@ begin
   // 建立数据库连接 → 自动建表/灌初始数据 → 应用增量迁移
   // 任一步失败都记录错误但不崩溃，服务器仍可启动
   try
-    LConnection := TUniConnectionManager.GetInstance.GetDefaultConnection;
+    LConnection := TUniAdminConnectionManager.GetInstance.GetDefaultConnection;
     try
       // 1. 首次连接自动建基础表 + 灌入 admin（开发环境 SQLite 零配置）
       TDatabaseInitializer.Initialize(LConnection);
@@ -203,7 +203,7 @@ begin
       end;
       LogInfo('Database migration completed successfully.');
     finally
-      TUniConnectionManager.GetInstance.ReleaseConnection(LConnection);
+      TUniAdminConnectionManager.GetInstance.ReleaseConnection(LConnection);
     end;
   except
     on E: Exception do
@@ -211,12 +211,12 @@ begin
   end;
 end;
 
-function TServerModule.GetConfigService: IUniConfigService;
+function TServerModule.GetConfigService: IUniAdminConfigService;
 begin
   Result := FConfigService;
 end;
 
-function TServerModule.GetModuleRegistry: IUniModuleRegistry;
+function TServerModule.GetModuleRegistry: IUniAdminModuleRegistry;
 begin
   Result := FModuleRegistry;
 end;

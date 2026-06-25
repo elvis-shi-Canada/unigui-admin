@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections, System.UITypes,
   uniGUIApplication, uniGUIForm, uniLabel, uniButton,
   uniPanel, uniGUIBaseClasses, uniGUIFrame, uniGUIClasses, Vcl.Menus, uniMainMenu, uniStatusBar,
-  UniContext, UniSession, UniMenuManager.Intf, Vcl.Controls, Vcl.Forms;
+  UniContext, UniAdminMenuManager.Intf, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
@@ -23,7 +23,7 @@ type
     procedure FormShow(Sender: TObject);
   private
     FContext: IExecutionContext;
-    FMenuManager: IUniMenuManager;
+    FMenuManager: IUniAdminMenuManager;
     FMenuItems: TDictionary<string, TUniMenuItem>;
     FContentFrame: TComponent;
 
@@ -72,7 +72,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniServices, uniGUIVars, UniFormStyler, LoginForm, UniAuthService.Intf,
+  UniAdminServices, uniGUIVars, UniAdminFormStyler, LoginForm, UniAdminAuthService.Intf,
   UserListFrame, RoleListFrame, MenuTreeFrame, MainModule;
 
 { TMainFrame }
@@ -95,36 +95,17 @@ begin
   Caption := 'UniAdmin 管理系统';
 
   // 应用统一设计系统样式
-  TUniFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
 
   InitializeComponents;
 end;
 
 procedure TMainFrame.FormShow(Sender: TObject);
-var
-  LSessionInfo: TSessionInfo;
-  LUserContext: IUserContext;
-  LPermissions: TArray<string>;
-  LDataScopes: TDictionary<string, string>;
-  LLoginResult: TLoginResult;
 begin
-  // 从登录结果创建执行上下文
-  LLoginResult := TLoginForm.LastLoginResult;
-  if LLoginResult.Success then
-  begin
-    LSessionInfo := TSessionInfo.Create(
-      uniGUIApplication.UniApplication.UniSession.SessionId,
-      LLoginResult.UserID,
-      LLoginResult.UserName,
-      LLoginResult.RealName,
-      ''  // ClientIP 由 UniGUI 管理
-    );
-    LPermissions := TArray<string>.Create('read', 'write', 'delete');
-    LDataScopes := TDictionary<string, string>.Create;
-    LDataScopes.Add('default', 'all');
-    LUserContext := TUserContextImpl.Create(LSessionInfo, LPermissions, LDataScopes);
-    SetExecutionContext(TExecutionContextImpl.Create(LUserContext, nil));
-  end;
+  // 从 MainModule（每会话）取登录时构造好的执行上下文（含真实权限）。
+  // 登录态不再经 LoginForm 的 class var 传递，避免多会话并发覆盖。
+  if GetMainModule.Context <> nil then
+    SetExecutionContext(GetMainModule.Context);
 
   InitializeMenus;
   UpdateStatusBar;
@@ -159,8 +140,8 @@ end;
 
 procedure TMainFrame.LoadUserMenus;
 var
-  LMenus: TArray<UniMenuManager.Intf.TMenuItem>;
-  LMenu: UniMenuManager.Intf.TMenuItem;
+  LMenus: TArray<UniAdminMenuManager.Intf.TMenuItem>;
+  LMenu: UniAdminMenuManager.Intf.TMenuItem;
   LMenuItem: TUniMenuItem;
   LParentItem: TUniMenuItem;
 begin
@@ -198,7 +179,7 @@ begin
   end;
 end;
 
-function TMainFrame.CreateMenuItem(const MenuData: UniMenuManager.Intf.TMenuItem): TUniMenuItem;
+function TMainFrame.CreateMenuItem(const MenuData: UniAdminMenuManager.Intf.TMenuItem): TUniMenuItem;
 begin
   Result := TUniMenuItem.Create(Self);
   Result.Caption := MenuData.MenuName;
@@ -215,7 +196,7 @@ procedure TMainFrame.OnMenuClick(Sender: TObject);
 var
   LMenuItem: TUniMenuItem;
   LMenuID: Integer;
-  LMenuData: UniMenuManager.Intf.TMenuItem;
+  LMenuData: UniAdminMenuManager.Intf.TMenuItem;
   LFrame: TUniFrame;
 begin
   if not (Sender is TUniMenuItem) then

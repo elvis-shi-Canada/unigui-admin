@@ -5,14 +5,14 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Hash,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule,
+  UniContext, UniPlugin.Types, UniAdminDataModule,
   UserService.Intf;
 
 type
   /// <summary>
   /// 用户数据模块 - 提供用户表的 CRUD 操作
   /// </summary>
-  TUserDataModule = class(TUniDataModule)
+  TUserDataModule = class(TUniAdminDataModule)
   private
     function HashPassword(const Password: string): string;
     function ValidateEmail(const Email: string): Boolean;

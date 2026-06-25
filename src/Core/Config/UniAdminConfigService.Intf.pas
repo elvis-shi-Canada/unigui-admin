@@ -1,4 +1,4 @@
-﻿unit UniConfigService.Intf;
+﻿unit UniAdminConfigService.Intf;
 
 interface
 
@@ -140,7 +140,7 @@ type
   /// 统一配置服务接口
   /// 提供全局配置管理功能，支持多模块配置
   /// </summary>
-  IUniConfigService = interface(IInterface)
+  IUniAdminConfigService = interface(IInterface)
     ['{D9E0C7B4-8F5A-6D3E-B2C9-9A7F1D3E5B8C}']
 
     /// <summary>获取配置文件根目录</summary>

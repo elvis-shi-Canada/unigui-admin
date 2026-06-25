@@ -1,10 +1,10 @@
-﻿unit UniPluginLoader;
+﻿unit UniAdminPluginLoader;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
-  UniContext, UniPlugin.Intf, UniModuleRegistry.Intf;
+  UniContext, UniPlugin.Intf, UniAdminModuleRegistry.Intf;
 
 type
   /// <summary>
@@ -20,7 +20,7 @@ type
   /// <summary>
   /// 插件加载器接口
   /// </summary>
-  IUniPluginLoader = interface(IInterface)
+  IUniAdminPluginLoader = interface(IInterface)
     ['{4E411DAB-431B-4493-9CC9-8FB5D33A179F}']
     function LoadPlugin(const PluginName: string; const UserContext: IUserContext;
       const ExecutionContext: IExecutionContext): IPlugin;
@@ -36,14 +36,14 @@ type
   /// 插件加载器实现
   /// 负责根据注册表信息创建和管理插件实例
   /// </summary>
-  TUniPluginLoader = class(TInterfacedObject, IUniPluginLoader)
+  TUniAdminPluginLoader = class(TInterfacedObject, IUniAdminPluginLoader)
   private
     FLoadedPlugins: TDictionary<string, IPlugin>;
-    FRegistry: IUniModuleRegistry;
+    FRegistry: IUniAdminModuleRegistry;
 
     function ValidateDependencies(const PluginName: string): Boolean;
   public
-    constructor Create(const Registry: IUniModuleRegistry);
+    constructor Create(const Registry: IUniAdminModuleRegistry);
     destructor Destroy; override;
 
     function LoadPlugin(const PluginName: string; const UserContext: IUserContext;
@@ -58,23 +58,23 @@ type
 
 implementation
 
-{ TUniPluginLoader }
+{ TUniAdminPluginLoader }
 
-constructor TUniPluginLoader.Create(const Registry: IUniModuleRegistry);
+constructor TUniAdminPluginLoader.Create(const Registry: IUniAdminModuleRegistry);
 begin
   inherited Create;
   FRegistry := Registry;
   FLoadedPlugins := TDictionary<string, IPlugin>.Create;
 end;
 
-destructor TUniPluginLoader.Destroy;
+destructor TUniAdminPluginLoader.Destroy;
 begin
   UnloadAllPlugins;
   FLoadedPlugins.Free;
   inherited;
 end;
 
-function TUniPluginLoader.ValidateDependencies(const PluginName: string): Boolean;
+function TUniAdminPluginLoader.ValidateDependencies(const PluginName: string): Boolean;
 var
   LDeps: TArray<string>;
   LDepName: string;
@@ -89,7 +89,7 @@ begin
   end;
 end;
 
-function TUniPluginLoader.LoadPlugin(const PluginName: string; const UserContext: IUserContext;
+function TUniAdminPluginLoader.LoadPlugin(const PluginName: string; const UserContext: IUserContext;
   const ExecutionContext: IExecutionContext): IPlugin;
 var
   LLoadOrder: TArray<string>;
@@ -109,7 +109,7 @@ begin
   FLoadedPlugins.Add(PluginName, Result);
 end;
 
-function TUniPluginLoader.UnloadPlugin(const PluginName: string): Boolean;
+function TUniAdminPluginLoader.UnloadPlugin(const PluginName: string): Boolean;
 var
   LPlugin: IPlugin;
   LDependents: TArray<string>;
@@ -134,7 +134,7 @@ begin
   end;
 end;
 
-function TUniPluginLoader.LoadAllPlugins(const UserContext: IUserContext;
+function TUniAdminPluginLoader.LoadAllPlugins(const UserContext: IUserContext;
   const ExecutionContext: IExecutionContext): TArray<TPluginLoadStatus>;
 var
   LLoadOrder: TArray<string>;
@@ -173,17 +173,17 @@ begin
   end;
 end;
 
-function TUniPluginLoader.IsPluginLoaded(const PluginName: string): Boolean;
+function TUniAdminPluginLoader.IsPluginLoaded(const PluginName: string): Boolean;
 begin
   Result := FLoadedPlugins.ContainsKey(PluginName);
 end;
 
-function TUniPluginLoader.GetLoadedPlugins: TArray<string>;
+function TUniAdminPluginLoader.GetLoadedPlugins: TArray<string>;
 begin
   Result := FLoadedPlugins.Keys.ToArray;
 end;
 
-procedure TUniPluginLoader.UnloadAllPlugins;
+procedure TUniAdminPluginLoader.UnloadAllPlugins;
 var
   LPluginName: string;
   LLoadOrder: TArray<string>;

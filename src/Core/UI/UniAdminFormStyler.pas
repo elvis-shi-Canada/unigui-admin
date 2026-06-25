@@ -1,4 +1,4 @@
-﻿unit UniFormStyler;
+﻿unit UniAdminFormStyler;
 
 interface
 
@@ -13,7 +13,7 @@ type
   /// 为项目中所有窗体提供一致的 CSS 类应用方法。
   /// 配合 ServerModule.CustomCSS 中定义的统一设计系统使用。
   /// </summary>
-  TUniFormStyler = class
+  TUniAdminFormStyler = class
   public
     // ---------- 面板样式 ----------
     /// <summary>将面板样式为卡片（白底 + 圆角 + 阴影）</summary>
@@ -47,17 +47,17 @@ type
 
 implementation
 
-{ TUniFormStyler }
+{ TUniAdminFormStyler }
 
 // ---------- 面板样式 ----------
 
-class procedure TUniFormStyler.StyleAsCard(APanel: TUniPanel);
+class procedure TUniAdminFormStyler.StyleAsCard(APanel: TUniPanel);
 begin
   if APanel <> nil then
     APanel.JSInterface.JSAssign('addCls', ['uni-card']);
 end;
 
-class procedure TUniFormStyler.StyleAsHeader(APanel: TUniPanel);
+class procedure TUniAdminFormStyler.StyleAsHeader(APanel: TUniPanel);
 begin
   if APanel <> nil then
   begin
@@ -67,7 +67,7 @@ begin
   end;
 end;
 
-class procedure TUniFormStyler.StyleAsFooter(APanel: TUniPanel);
+class procedure TUniAdminFormStyler.StyleAsFooter(APanel: TUniPanel);
 begin
   if APanel <> nil then
     APanel.JSInterface.JSAssign('addCls', ['uni-footer']);
@@ -75,25 +75,25 @@ end;
 
 // ---------- 按钮样式 ----------
 
-class procedure TUniFormStyler.StylePrimaryButton(AButton: TUniButton);
+class procedure TUniAdminFormStyler.StylePrimaryButton(AButton: TUniButton);
 begin
   if AButton <> nil then
     AButton.JSInterface.JSAssign('addCls', ['uni-btn-primary']);
 end;
 
-class procedure TUniFormStyler.StyleSuccessButton(AButton: TUniButton);
+class procedure TUniAdminFormStyler.StyleSuccessButton(AButton: TUniButton);
 begin
   if AButton <> nil then
     AButton.JSInterface.JSAssign('addCls', ['uni-btn-success']);
 end;
 
-class procedure TUniFormStyler.StyleDangerButton(AButton: TUniButton);
+class procedure TUniAdminFormStyler.StyleDangerButton(AButton: TUniButton);
 begin
   if AButton <> nil then
     AButton.JSInterface.JSAssign('addCls', ['uni-btn-danger']);
 end;
 
-class procedure TUniFormStyler.StyleWarningButton(AButton: TUniButton);
+class procedure TUniAdminFormStyler.StyleWarningButton(AButton: TUniButton);
 begin
   if AButton <> nil then
     AButton.JSInterface.JSAssign('addCls', ['uni-btn-warning']);
@@ -101,7 +101,7 @@ end;
 
 // ---------- 批量样式 ----------
 
-class procedure TUniFormStyler.AutoStyleButtons(AForm: TUniForm);
+class procedure TUniAdminFormStyler.AutoStyleButtons(AForm: TUniForm);
 var
   I: Integer;
   LBtn: TUniButton;
@@ -135,7 +135,7 @@ begin
   end;
 end;
 
-class procedure TUniFormStyler.AutoStyleButtons(AFrame: TUniFrame);
+class procedure TUniAdminFormStyler.AutoStyleButtons(AFrame: TUniFrame);
 var
   I: Integer;
   LBtn: TUniButton;
@@ -164,7 +164,7 @@ begin
   end;
 end;
 
-class procedure TUniFormStyler.AutoStylePanels(AForm: TUniForm);
+class procedure TUniAdminFormStyler.AutoStylePanels(AForm: TUniForm);
 var
   I: Integer;
   LPanel: TUniPanel;

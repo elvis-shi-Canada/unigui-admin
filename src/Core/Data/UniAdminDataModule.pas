@@ -1,4 +1,4 @@
-﻿unit UniDataModule;
+﻿unit UniAdminDataModule;
 
 interface
 
@@ -11,7 +11,7 @@ type
   /// <summary>
   /// 数据模块基类 - 支持上下文注入和审计字段
   /// </summary>
-  TUniDataModule = class(TDataModule, IContextAware)
+  TUniAdminDataModule = class(TDataModule, IContextAware)
   private
     FContext: IExecutionContext;
     FConnection: TFDConnection;
@@ -59,7 +59,7 @@ implementation
 
 {$R *.dfm}
 
-constructor TUniDataModule.Create(AOwner: TComponent);
+constructor TUniAdminDataModule.Create(AOwner: TComponent);
 begin
   inherited;
   // 创建连接组件（默认拥有所有权）
@@ -67,7 +67,7 @@ begin
   FConnection := TFDConnection.Create(nil);
 end;
 
-constructor TUniDataModule.CreateWithConnection(AOwner: TComponent; const AConnection: TFDConnection);
+constructor TUniAdminDataModule.CreateWithConnection(AOwner: TComponent; const AConnection: TFDConnection);
 begin
   inherited Create(AOwner);
   if Assigned(AConnection) then
@@ -84,7 +84,7 @@ begin
   end;
 end;
 
-destructor TUniDataModule.Destroy;
+destructor TUniAdminDataModule.Destroy;
 begin
   if FOwnsConnection and Assigned(FConnection) then
   begin
@@ -96,12 +96,12 @@ begin
   inherited;
 end;
 
-procedure TUniDataModule.SetContext(const Context: IExecutionContext);
+procedure TUniAdminDataModule.SetContext(const Context: IExecutionContext);
 begin
   FContext := Context;
 end;
 
-function TUniDataModule.GetCurrentUserID: Integer;
+function TUniAdminDataModule.GetCurrentUserID: Integer;
 begin
   if Assigned(FContext) then
     Result := FContext.GetCurrentUserID
@@ -109,7 +109,7 @@ begin
     Result := 0;
 end;
 
-function TUniDataModule.GetCurrentUserName: string;
+function TUniAdminDataModule.GetCurrentUserName: string;
 begin
   if Assigned(FContext) then
     Result := FContext.GetCurrentUserName
@@ -117,7 +117,7 @@ begin
     Result := '';
 end;
 
-function TUniDataModule.GetCurrentTime: TDateTime;
+function TUniAdminDataModule.GetCurrentTime: TDateTime;
 begin
   if Assigned(FContext) then
     Result := FContext.GetCurrentTime
@@ -125,7 +125,7 @@ begin
     Result := Now;
 end;
 
-procedure TUniDataModule.SetConnection(const Value: TFDConnection);
+procedure TUniAdminDataModule.SetConnection(const Value: TFDConnection);
 begin
   if Assigned(FConnection) and (FConnection <> Value) then
   begin
@@ -140,7 +140,7 @@ begin
     FConnection := TFDConnection.Create(nil);
 end;
 
-procedure TUniDataModule.SetAuditFields(const Query: TFDQuery; const IsInsert: Boolean);
+procedure TUniAdminDataModule.SetAuditFields(const Query: TFDQuery; const IsInsert: Boolean);
 begin
   if not Assigned(Query) then
     Exit;
@@ -162,7 +162,7 @@ begin
   end;
 end;
 
-procedure TUniDataModule.ApplyDataScope(const Query: TFDQuery; const Resource: string);
+procedure TUniAdminDataModule.ApplyDataScope(const Query: TFDQuery; const Resource: string);
 begin
   if not Assigned(Query) then
     Exit;
@@ -170,7 +170,7 @@ begin
   // TODO: 实现数据范围过滤逻辑
 end;
 
-procedure TUniDataModule.Open;
+procedure TUniAdminDataModule.Open;
 begin
   if not FConnection.Connected then
   try
@@ -181,7 +181,7 @@ begin
   end;
 end;
 
-procedure TUniDataModule.Close;
+procedure TUniAdminDataModule.Close;
 begin
   if Assigned(FConnection) and FConnection.Connected then
     FConnection.Connected := False;

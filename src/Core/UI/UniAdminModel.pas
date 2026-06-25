@@ -1,4 +1,4 @@
-﻿unit UniModelAdmin;
+﻿unit UniAdminModel;
 
 interface
 
@@ -18,7 +18,7 @@ type
   /// 数据模型管理员 - 提供标准 CRUD 操作
   /// 负责管理 DataSet 的 CRUD 状态，提供标准的数据操作接口
   /// </summary>
-  TUniModelAdmin = class(TComponent)
+  TUniAdminModel = class(TComponent)
   private
     FDataSet: TDataSet;
     FContext: IExecutionContext;
@@ -101,32 +101,32 @@ type
 
 implementation
 
-{ TUniModelAdmin }
+{ TUniAdminModel }
 
-constructor TUniModelAdmin.Create(AOwner: TComponent);
+constructor TUniAdminModel.Create(AOwner: TComponent);
 begin
   inherited;
   FState := csBrowse;
   FOriginalValues := TDictionary<string, Variant>.Create;
 end;
 
-destructor TUniModelAdmin.Destroy;
+destructor TUniAdminModel.Destroy;
 begin
   FOriginalValues.Free;
   inherited;
 end;
 
-procedure TUniModelAdmin.SetContext(const Context: IExecutionContext);
+procedure TUniAdminModel.SetContext(const Context: IExecutionContext);
 begin
   FContext := Context;
 end;
 
-procedure TUniModelAdmin.SetDataSet(const Value: TDataSet);
+procedure TUniAdminModel.SetDataSet(const Value: TDataSet);
 begin
   FDataSet := Value;
 end;
 
-procedure TUniModelAdmin.SetState(const Value: TCrudState);
+procedure TUniAdminModel.SetState(const Value: TCrudState);
 begin
   if FState <> Value then
   begin
@@ -136,7 +136,7 @@ begin
   end;
 end;
 
-procedure TUniModelAdmin.Insert;
+procedure TUniAdminModel.Insert;
 begin
   if not CanInsert then
     Exit;
@@ -149,7 +149,7 @@ begin
   FillAuditFields(True);
 end;
 
-procedure TUniModelAdmin.Edit;
+procedure TUniAdminModel.Edit;
 begin
   if not CanEdit then
     Exit;
@@ -159,7 +159,7 @@ begin
   SetState(csEdit);
 end;
 
-procedure TUniModelAdmin.Delete;
+procedure TUniAdminModel.Delete;
 begin
   if not CanDelete then
     Exit;
@@ -173,7 +173,7 @@ begin
     FOnAfterDelete(Self);
 end;
 
-procedure TUniModelAdmin.Save;
+procedure TUniAdminModel.Save;
 begin
   if not CanSave then
     Exit;
@@ -202,7 +202,7 @@ begin
   end;
 end;
 
-procedure TUniModelAdmin.Cancel;
+procedure TUniAdminModel.Cancel;
 begin
   if not CanCancel then
     Exit;
@@ -213,37 +213,37 @@ begin
   FOriginalValues.Clear;
 end;
 
-function TUniModelAdmin.CanEdit: Boolean;
+function TUniAdminModel.CanEdit: Boolean;
 begin
   Result := (FState = csBrowse) and Assigned(FDataSet) and not FDataSet.IsEmpty;
 end;
 
-function TUniModelAdmin.CanInsert: Boolean;
+function TUniAdminModel.CanInsert: Boolean;
 begin
   Result := (FState = csBrowse) and Assigned(FDataSet);
 end;
 
-function TUniModelAdmin.CanDelete: Boolean;
+function TUniAdminModel.CanDelete: Boolean;
 begin
   Result := (FState = csBrowse) and Assigned(FDataSet) and not FDataSet.IsEmpty;
 end;
 
-function TUniModelAdmin.CanSave: Boolean;
+function TUniAdminModel.CanSave: Boolean;
 begin
   Result := (FState in [csEdit, csInsert]) and Assigned(FDataSet);
 end;
 
-function TUniModelAdmin.CanCancel: Boolean;
+function TUniAdminModel.CanCancel: Boolean;
 begin
   Result := (FState in [csEdit, csInsert]) and Assigned(FDataSet);
 end;
 
-function TUniModelAdmin.IsModified: Boolean;
+function TUniAdminModel.IsModified: Boolean;
 begin
   Result := (FState in [csEdit, csInsert]);
 end;
 
-procedure TUniModelAdmin.SaveOriginalValues;
+procedure TUniAdminModel.SaveOriginalValues;
 var
   I: Integer;
 begin
@@ -258,7 +258,7 @@ begin
   end;
 end;
 
-procedure TUniModelAdmin.RestoreOriginalValues;
+procedure TUniAdminModel.RestoreOriginalValues;
 var
   LPair: TPair<string, Variant>;
 begin
@@ -272,7 +272,7 @@ begin
   end;
 end;
 
-procedure TUniModelAdmin.FillAuditFields(const IsInsert: Boolean);
+procedure TUniAdminModel.FillAuditFields(const IsInsert: Boolean);
 var
   LCurrentUserID: Integer;
   LCurrentTime: TDateTime;
@@ -299,7 +299,7 @@ begin
     FDataSet.FieldByName('ModifiedBy').AsInteger := LCurrentUserID;
 end;
 
-function TUniModelAdmin.GetConnection: TFDCustomConnection;
+function TUniAdminModel.GetConnection: TFDCustomConnection;
 begin
   Result := nil;
     

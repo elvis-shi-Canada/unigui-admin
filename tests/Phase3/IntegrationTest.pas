@@ -5,8 +5,8 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   DUnitX.TestFramework,
-  UniModuleRegistry, UniModuleRegistry.Intf, UniModuleRegistration,
-  UniContext, UniSession;
+  UniAdminModuleRegistry, UniAdminModuleRegistry.Intf, UniModuleRegistration,
+  UniContext;
 
 type
   /// <summary>
@@ -16,7 +16,7 @@ type
   [TestFixture]
   TPhase3IntegrationTest = class
   private
-    FRegistry: IUniModuleRegistry;
+    FRegistry: IUniAdminModuleRegistry;
     FUserContext: IUserContext;
     FExecutionContext: IExecutionContext;
 
@@ -75,7 +75,7 @@ implementation
 procedure TPhase3IntegrationTest.Setup;
 begin
   // 获取注册表实例
-  FRegistry := TUniModuleRegistry.GetInstance;
+  FRegistry := TUniAdminModuleRegistry.GetInstance;
   FRegistry.Clear;
 
   // 注册所有系统模块
@@ -288,6 +288,6 @@ initialization
   TDUnitX.RegisterTestFixture(TPhase3IntegrationTest);
 
 finalization
-  TUniModuleRegistry.CleanupInstance;
+  TUniAdminModuleRegistry.CleanupInstance;
 
 end.

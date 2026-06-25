@@ -38,10 +38,10 @@ graph TB
 
     subgraph Core依赖["Core 框架依赖"]
         BCF["Core.UI/BaseCrudFrame"]
-        Auth["Core.Auth/UniAuthService"]
-        Perm["Core.Permission/UniPermissionManager"]
-        Data["Core.Data/UniDataModule"]
-        Meta["Core.Metadata/UniMetadataCache"]
+        Auth["Core.Auth/UniAdminAuthService"]
+        Perm["Core.Permission/UniAdminPermissionManager"]
+        Data["Core.Data/UniAdminDataModule"]
+        Meta["Core.Metadata/UniAdminMetadataCache"]
     end
 
     User --> BCF
@@ -236,9 +236,9 @@ end;
 | 依赖 | 模块 | 用途 |
 |------|------|------|
 | Core.UI | BaseCrudFrame | CRUD 基类 |
-| Core.Auth | UniAuthService | 认证服务 |
-| Core.Permission | UniPermissionManager | 权限检查 |
-| Core.Data | UniDataModule | 数据访问基类 |
+| Core.Auth | UniAdminAuthService | 认证服务 |
+| Core.Permission | UniAdminPermissionManager | 权限检查 |
+| Core.Data | UniAdminDataModule | 数据访问基类 |
 
 ### 数据库依赖
 

@@ -7,7 +7,7 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel,
-  UniContext, UniPlugin.Types, BaseCrudFrame, UniScheduler;
+  UniContext, UniPlugin.Types, BaseCrudFrame, UniAdminScheduler;
 
 type
   /// <summary>
@@ -24,7 +24,7 @@ type
     UniDBGrid: TUniDBGrid;
     UniDataSource: TDataSource;
     qryTasks: TFDQuery;
-    FScheduler: TUniScheduler;
+    FScheduler: TUniAdminScheduler;
 
     procedure UniButtonSearchClick(Sender: TObject);
     procedure UniButtonRefreshClick(Sender: TObject);
@@ -89,7 +89,7 @@ begin
   if Assigned(Context) then
   begin
     try
-      FScheduler := TUniScheduler.Create(Context, nil);
+      FScheduler := TUniAdminScheduler.Create(Context, nil);
     except
       on E: Exception do
         FScheduler := nil;

@@ -1,4 +1,4 @@
-﻿unit UniAuthService;
+﻿unit UniAdminAuthService;
 
 interface
 
@@ -6,12 +6,12 @@ uses
   System.SysUtils, System.Classes, System.Hash, System.Generics.Collections,
   System.Character,
   Data.DB, FireDAC.Comp.Client,
-  UniAuthService.Intf;
+  UniAdminAuthService.Intf;
 
 type
-  TUniAuthService = class(TInterfacedObject, IUniAuthService)
+  TUniAdminAuthService = class(TInterfacedObject, IUniAdminAuthService)
   private
-    class var FInstance: IUniAuthService;
+    class var FInstance: IUniAdminAuthService;
     class var FLock: TObject;
     FConnection: TFDConnection;
     FActiveSessions: TDictionary<string, TLoginResult>;
@@ -29,21 +29,21 @@ type
     function ChangePassword(const UserID: Integer; const OldPassword, NewPassword: string): Boolean;
     function ValidatePassword(const Password: string): Boolean;
 
-    class function GetInstance(const Connection: TFDConnection): IUniAuthService; static;
+    class function GetInstance(const Connection: TFDConnection): IUniAdminAuthService; static;
   end;
 
 implementation
 
-{ TUniAuthService }
+{ TUniAdminAuthService }
 
-class function TUniAuthService.GetInstance(const Connection: TFDConnection): IUniAuthService;
+class function TUniAdminAuthService.GetInstance(const Connection: TFDConnection): IUniAdminAuthService;
 begin
   if FInstance = nil then
   begin
     TMonitor.Enter(FLock);
     try
       if FInstance = nil then
-        FInstance := TUniAuthService.Create(Connection);
+        FInstance := TUniAdminAuthService.Create(Connection);
     finally
       TMonitor.Exit(FLock);
     end;
@@ -51,7 +51,7 @@ begin
   Result := FInstance;
 end;
 
-constructor TUniAuthService.Create(const Connection: TFDConnection);
+constructor TUniAdminAuthService.Create(const Connection: TFDConnection);
 begin
   inherited Create;
   if not Assigned(Connection) then
@@ -60,24 +60,24 @@ begin
   FActiveSessions := TDictionary<string, TLoginResult>.Create;
 end;
 
-destructor TUniAuthService.Destroy;
+destructor TUniAdminAuthService.Destroy;
 begin
   FActiveSessions.Free;
   inherited;
 end;
 
-function TUniAuthService.HashPassword(const Password: string): string;
+function TUniAdminAuthService.HashPassword(const Password: string): string;
 begin
   // 使用 SHA256 哈希密码（实际应使用更安全的哈希算法如 bcrypt）
   Result := THashSHA2.GetHashString(Password);
 end;
 
-function TUniAuthService.VerifyPassword(const Password, Hash: string): Boolean;
+function TUniAdminAuthService.VerifyPassword(const Password, Hash: string): Boolean;
 begin
   Result := (HashPassword(Password) = Hash);
 end;
 
-function TUniAuthService.Login(const UserName, Password: string): TLoginResult;
+function TUniAdminAuthService.Login(const UserName, Password: string): TLoginResult;
 var
   LQuery: TFDQuery;
   LHashedPassword: string;
@@ -148,18 +148,18 @@ begin
   end;
 end;
 
-procedure TUniAuthService.Logout(const SessionID: string);
+procedure TUniAdminAuthService.Logout(const SessionID: string);
 begin
   if FActiveSessions.ContainsKey(SessionID) then
     FActiveSessions.Remove(SessionID);
 end;
 
-function TUniAuthService.ValidateToken(const Token: string): Boolean;
+function TUniAdminAuthService.ValidateToken(const Token: string): Boolean;
 begin
   Result := FActiveSessions.ContainsKey(Token);
 end;
 
-function TUniAuthService.ChangePassword(const UserID: Integer;
+function TUniAdminAuthService.ChangePassword(const UserID: Integer;
   const OldPassword, NewPassword: string): Boolean;
 var
   LQuery: TFDQuery;
@@ -212,7 +212,7 @@ begin
   end;
 end;
 
-function TUniAuthService.ValidatePassword(const Password: string): Boolean;
+function TUniAdminAuthService.ValidatePassword(const Password: string): Boolean;
 var
   LHasUpper, LHasLower, LHasDigit: Boolean;
   I: Integer;
@@ -241,7 +241,7 @@ begin
   Result := LHasUpper and LHasLower and LHasDigit;
 end;
 
-function TUniAuthService.GetUserPermissions(const UserID: Integer): TArray<string>;
+function TUniAdminAuthService.GetUserPermissions(const UserID: Integer): TArray<string>;
 var
   LQuery: TFDQuery;
   LList: TList<string>;
@@ -281,10 +281,10 @@ begin
 end;
 
 initialization
-  TUniAuthService.FLock := TObject.Create;
+  TUniAdminAuthService.FLock := TObject.Create;
 
 finalization
-  TUniAuthService.FInstance := nil;
-  FreeAndNil(TUniAuthService.FLock);
+  TUniAdminAuthService.FInstance := nil;
+  FreeAndNil(TUniAdminAuthService.FLock);
 
 end.

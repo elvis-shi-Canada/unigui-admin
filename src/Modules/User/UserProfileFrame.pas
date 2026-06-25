@@ -96,7 +96,7 @@ begin
   FUserID := UserID;
   
   try
-    var LService := TUniUserService.Create(FContext);
+    var LService := TUserService.Create(FContext);
     LInfo := LService.GetUserByID(UserID);
     
     edtUserName.Text := LInfo.UserName;
@@ -154,7 +154,7 @@ begin
     ValidateInputs;
     
     // 更新用户信息
-    var LService := TUniUserService.Create(FContext);
+    var LService := TUserService.Create(FContext);
     LService.UpdateUser(FUserID, 
       Trim(edtRealName.Text),
       Trim(edtEmail.Text),

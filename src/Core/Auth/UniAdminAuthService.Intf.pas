@@ -1,4 +1,4 @@
-﻿unit UniAuthService.Intf;
+﻿unit UniAdminAuthService.Intf;
 
 interface
 
@@ -21,7 +21,7 @@ type
   /// <summary>
   /// 认证服务接口
   /// </summary>
-  IUniAuthService = interface(IInterface)
+  IUniAdminAuthService = interface(IInterface)
     ['{F7A8D9E1-5B3C-4E7D-A2F9-9C8B1E4D6F3A}']
     function Login(const UserName, Password: string): TLoginResult;
     procedure Logout(const SessionID: string);

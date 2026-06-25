@@ -298,7 +298,7 @@ begin
   try
     LQuery.Connection := AConn;
 
-    // 密码哈希必须与 UniAuthService.HashPassword 一致（THashSHA2.GetHashString，SHA256）
+    // 密码哈希必须与 UniAdminAuthService.HashPassword 一致（THashSHA2.GetHashString，SHA256）
     LHash := THashSHA2.GetHashString('admin123');
 
     // 角色：超级管理员（DataScope=all 表示看全部数据）

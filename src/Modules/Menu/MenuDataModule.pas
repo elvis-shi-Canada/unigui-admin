@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniAdminDataModule;
 
 type
   /// <summary>
@@ -52,7 +52,7 @@ type
   /// <summary>
   /// 菜单数据模块 - 提供菜单表的 CRUD 操作和树形结构管理
   /// </summary>
-  TMenuDataModule = class(TUniDataModule)
+  TMenuDataModule = class(TUniAdminDataModule)
   private
     function MenuCodeExists(const MenuCode: string; ExcludeMenuID: Integer = 0): Boolean;
     function ValidateMenuType(const MenuType: string): Boolean;

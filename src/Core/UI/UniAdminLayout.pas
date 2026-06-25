@@ -1,4 +1,4 @@
-﻿unit UniLayout;
+﻿unit UniAdminLayout;
 
 interface
 
@@ -24,7 +24,7 @@ type
   /// 支持分割面板、可折叠侧边栏、响应式布局
   /// 主题感知设计
   /// </summary>
-  TUniLayout = class(TComponent)
+  TUniAdminLayout = class(TComponent)
   private
     FOwner: TComponent;
     FContainerPanel: TUniContainerPanel;
@@ -74,7 +74,7 @@ type
     procedure SetTopPanelCollapsed(const Value: Boolean);
     procedure SetBottomPanelCollapsed(const Value: Boolean);
 
-    procedure SetTheme(const Value: TObject);  // 避免 TUniTheme 前向声明问题
+    procedure SetTheme(const Value: TObject);  // 避免 TUniAdminTheme 前向声明问题
     procedure ApplyTheme;
 
     procedure ToggleLeftPanel(Sender: TObject = nil);
@@ -158,11 +158,11 @@ type
 implementation
 
 uses
-  UniTheme;
+  UniAdminTheme;
 
-{ TUniLayout }
+{ TUniAdminLayout }
 
-constructor TUniLayout.Create(AOwner: TComponent);
+constructor TUniAdminLayout.Create(AOwner: TComponent);
 begin
   inherited;
 
@@ -187,26 +187,26 @@ begin
   Initialize;
 end;
 
-destructor TUniLayout.Destroy;
+destructor TUniAdminLayout.Destroy;
 begin
   inherited;
 end;
 
-procedure TUniLayout.Notification(AComponent: TComponent; Operation: TOperation);
+procedure TUniAdminLayout.Notification(AComponent: TComponent; Operation: TOperation);
 begin
   inherited;
   if (Operation = opRemove) and (AComponent = FTheme) then
     FTheme := nil;
 end;
 
-procedure TUniLayout.Initialize;
+procedure TUniAdminLayout.Initialize;
 begin
   CreatePanels;
   CreateSplitters;
   UpdateLayout;
 end;
 
-procedure TUniLayout.CreatePanels;
+procedure TUniAdminLayout.CreatePanels;
 begin
   // 创建容器面板
   FContainerPanel := TUniContainerPanel.Create(FOwner);
@@ -253,7 +253,7 @@ begin
   // FCenterPanel.LayoutRegion := 'center';  // UniGUI 可能不支持此属性
 end;
 
-procedure TUniLayout.CreateSplitters;
+procedure TUniAdminLayout.CreateSplitters;
 begin
   // 创建左侧分割器
   FLeftSplitter := TUniSplitter.Create(FOwner);
@@ -280,7 +280,7 @@ begin
   FBottomSplitter.Visible := FBottomPanelVisible;
 end;
 
-procedure TUniLayout.UpdateLayout;
+procedure TUniAdminLayout.UpdateLayout;
 begin
   if FResponsive then
     DoResponsiveLayout;
@@ -289,7 +289,7 @@ begin
     FOnLayoutChange(Self);
 end;
 
-procedure TUniLayout.DoResponsiveLayout;
+procedure TUniAdminLayout.DoResponsiveLayout;
 var
   LClientWidth: Integer;
 begin
@@ -311,7 +311,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.AddControl(Area: TLayoutArea; AControl: TComponent);
+procedure TUniAdminLayout.AddControl(Area: TLayoutArea; AControl: TComponent);
 begin
   if not Assigned(AControl) then
     Exit;
@@ -346,7 +346,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.TogglePanel(Area: TLayoutArea);
+procedure TUniAdminLayout.TogglePanel(Area: TLayoutArea);
 begin
   case Area of
     laLeft: ToggleLeftPanel;
@@ -356,7 +356,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.CollapsePanel(Area: TLayoutArea; ACollapse: Boolean);
+procedure TUniAdminLayout.CollapsePanel(Area: TLayoutArea; ACollapse: Boolean);
 begin
   case Area of
     laLeft: SetLeftPanelCollapsed(ACollapse);
@@ -366,27 +366,27 @@ begin
   end;
 end;
 
-procedure TUniLayout.ToggleLeftPanel(Sender: TObject);
+procedure TUniAdminLayout.ToggleLeftPanel(Sender: TObject);
 begin
   SetLeftPanelVisible(not FLeftPanelVisible);
 end;
 
-procedure TUniLayout.ToggleRightPanel(Sender: TObject);
+procedure TUniAdminLayout.ToggleRightPanel(Sender: TObject);
 begin
   SetRightPanelVisible(not FRightPanelVisible);
 end;
 
-procedure TUniLayout.ToggleTopPanel(Sender: TObject);
+procedure TUniAdminLayout.ToggleTopPanel(Sender: TObject);
 begin
   SetTopPanelVisible(not FTopPanelVisible);
 end;
 
-procedure TUniLayout.ToggleBottomPanel(Sender: TObject);
+procedure TUniAdminLayout.ToggleBottomPanel(Sender: TObject);
 begin
   SetBottomPanelVisible(not FBottomPanelVisible);
 end;
 
-procedure TUniLayout.SetLeftPanelVisible(const Value: Boolean);
+procedure TUniAdminLayout.SetLeftPanelVisible(const Value: Boolean);
 begin
   if FLeftPanelVisible <> Value then
   begin
@@ -399,7 +399,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetRightPanelVisible(const Value: Boolean);
+procedure TUniAdminLayout.SetRightPanelVisible(const Value: Boolean);
 begin
   if FRightPanelVisible <> Value then
   begin
@@ -412,7 +412,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetTopPanelVisible(const Value: Boolean);
+procedure TUniAdminLayout.SetTopPanelVisible(const Value: Boolean);
 begin
   if FTopPanelVisible <> Value then
   begin
@@ -425,7 +425,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetBottomPanelVisible(const Value: Boolean);
+procedure TUniAdminLayout.SetBottomPanelVisible(const Value: Boolean);
 begin
   if FBottomPanelVisible <> Value then
   begin
@@ -438,7 +438,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetLeftPanelWidth(const Value: Integer);
+procedure TUniAdminLayout.SetLeftPanelWidth(const Value: Integer);
 begin
   if FLeftPanelWidth <> Value then
   begin
@@ -449,7 +449,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetRightPanelWidth(const Value: Integer);
+procedure TUniAdminLayout.SetRightPanelWidth(const Value: Integer);
 begin
   if FRightPanelWidth <> Value then
   begin
@@ -460,7 +460,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetTopPanelHeight(const Value: Integer);
+procedure TUniAdminLayout.SetTopPanelHeight(const Value: Integer);
 begin
   if FTopPanelHeight <> Value then
   begin
@@ -471,7 +471,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetBottomPanelHeight(const Value: Integer);
+procedure TUniAdminLayout.SetBottomPanelHeight(const Value: Integer);
 begin
   if FBottomPanelHeight <> Value then
   begin
@@ -482,7 +482,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetLeftPanelCollapsed(const Value: Boolean);
+procedure TUniAdminLayout.SetLeftPanelCollapsed(const Value: Boolean);
 begin
   if FLeftPanelCollapsed <> Value then
   begin
@@ -498,7 +498,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetRightPanelCollapsed(const Value: Boolean);
+procedure TUniAdminLayout.SetRightPanelCollapsed(const Value: Boolean);
 begin
   if FRightPanelCollapsed <> Value then
   begin
@@ -514,7 +514,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetTopPanelCollapsed(const Value: Boolean);
+procedure TUniAdminLayout.SetTopPanelCollapsed(const Value: Boolean);
 begin
   if FTopPanelCollapsed <> Value then
   begin
@@ -530,7 +530,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetBottomPanelCollapsed(const Value: Boolean);
+procedure TUniAdminLayout.SetBottomPanelCollapsed(const Value: Boolean);
 begin
   if FBottomPanelCollapsed <> Value then
   begin
@@ -546,7 +546,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SetTheme(const Value: TObject);
+procedure TUniAdminLayout.SetTheme(const Value: TObject);
 begin
   if FTheme <> Value then
   begin
@@ -555,14 +555,14 @@ begin
   end;
 end;
 
-procedure TUniLayout.ApplyTheme;
+procedure TUniAdminLayout.ApplyTheme;
 var
-  LTheme: TUniTheme;
+  LTheme: TUniAdminTheme;
 begin
   if not Assigned(FTheme) then
     Exit;
 
-  LTheme := FTheme as TUniTheme;
+  LTheme := FTheme as TUniAdminTheme;
   if not Assigned(LTheme) then
     Exit;
 
@@ -598,7 +598,7 @@ begin
   end;
 end;
 
-procedure TUniLayout.SaveLayoutState(const Stream: TStream);
+procedure TUniAdminLayout.SaveLayoutState(const Stream: TStream);
 begin
   // 保存布局状态到流
   if not Assigned(Stream) then
@@ -620,7 +620,7 @@ begin
   Stream.WriteBuffer(FBottomPanelCollapsed, SizeOf(Boolean));
 end;
 
-procedure TUniLayout.LoadLayoutState(const Stream: TStream);
+procedure TUniAdminLayout.LoadLayoutState(const Stream: TStream);
 begin
   // 从流加载布局状态
   if not Assigned(Stream) then
@@ -644,7 +644,7 @@ begin
   UpdateLayout;
 end;
 
-procedure TUniLayout.ResetLayout;
+procedure TUniAdminLayout.ResetLayout;
 begin
   FLeftPanelVisible := True;
   FRightPanelVisible := False;

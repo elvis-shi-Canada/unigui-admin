@@ -5,14 +5,14 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule,
+  UniContext, UniPlugin.Types, UniAdminDataModule,
   DictionaryService.Intf;
 
 type
   /// <summary>
   /// 数据字典数据模块 - 提供字典类型和字典项的 CRUD 操作
   /// </summary>
-  TDictionaryDataModule = class(TUniDataModule)
+  TDictionaryDataModule = class(TUniAdminDataModule)
   public
     // 字典类型操作
     function GetDictTypeByID(TypeID: Integer): TDataSet;

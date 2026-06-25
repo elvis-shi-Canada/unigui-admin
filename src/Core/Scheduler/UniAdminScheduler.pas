@@ -1,4 +1,4 @@
-﻿unit UniScheduler;
+﻿unit UniAdminScheduler;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   System.SyncObjs, System.DateUtils, System.Math, System.StrUtils,
   Data.DB, FireDAC.Comp.Client,
-  UniContext, UniPlugin.Types, UniDataModule, uniTimer;
+  UniContext, UniPlugin.Types, UniAdminDataModule, uniTimer;
 
 type
   /// <summary>
@@ -62,12 +62,11 @@ type
   /// <summary>
   /// 任务调度器类 - 负责定时任务的调度和执行
   /// </summary>
-  TUniScheduler = class(TObject)
+  TUniAdminScheduler = class(TObject)
   private
     FContext: IExecutionContext;
     FConnection: TFDConnection;
     FTasks: TList<TScheduledTaskInfo>;
-    FRunningTasks: TDictionary<Integer, TThread>;
     FTimer: TUniTimer;
     FIsRunning: Boolean;
     FCriticalSection: TCriticalSection;
@@ -105,35 +104,32 @@ implementation
 uses
   UniTaskProcessor;
 
-{ TUniScheduler }
+{ TUniAdminScheduler }
 
-constructor TUniScheduler.Create(const Context: IExecutionContext; const Connection: TFDConnection);
+constructor TUniAdminScheduler.Create(const Context: IExecutionContext; const Connection: TFDConnection);
 begin
   inherited Create;
   FContext := Context;
   FConnection := Connection;
   FTasks := TList<TScheduledTaskInfo>.Create;
-  FRunningTasks := TDictionary<Integer, TThread>.Create;
   FCriticalSection := TCriticalSection.Create;
   FIsRunning := False;
 
   LoadTasks;
 end;
 
-destructor TUniScheduler.Destroy;
+destructor TUniAdminScheduler.Destroy;
 begin
   Stop;
 
   FTasks.Clear;
   FTasks.Free;
-  FRunningTasks.Clear;
-  FRunningTasks.Free;
   FCriticalSection.Free;
 
   inherited;
 end;
 
-procedure TUniScheduler.LoadTasks;
+procedure TUniAdminScheduler.LoadTasks;
 var
   LQuery: TFDQuery;
   LTaskInfo: TScheduledTaskInfo;
@@ -181,14 +177,14 @@ begin
   end;
 end;
 
-procedure TUniScheduler.CalculateNextRunTime(var TaskInfo: TScheduledTaskInfo);
+procedure TUniAdminScheduler.CalculateNextRunTime(var TaskInfo: TScheduledTaskInfo);
 begin
   // 简化的 Cron 表达式解析
   // 支持格式: "0 * * * *" (分 时 日 月 周)
   TaskInfo.NextRunTime := ParseCronExpression(TaskInfo.CronExpression, Now);
 end;
 
-function TUniScheduler.ParseCronExpression(const Expression: string; DateTime: TDateTime): TDateTime;
+function TUniAdminScheduler.ParseCronExpression(const Expression: string; DateTime: TDateTime): TDateTime;
 var
   LParts: TArray<string>;
   LMinute, LHour: Integer;
@@ -215,7 +211,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.Start;
+procedure TUniAdminScheduler.Start;
 begin
   FCriticalSection.Acquire;
   try
@@ -234,7 +230,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.Stop;
+procedure TUniAdminScheduler.Stop;
 begin
   FCriticalSection.Acquire;
   try
@@ -254,7 +250,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.Pause;
+procedure TUniAdminScheduler.Pause;
 begin
   FCriticalSection.Acquire;
   try
@@ -265,7 +261,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.Resume;
+procedure TUniAdminScheduler.Resume;
 begin
   FCriticalSection.Acquire;
   try
@@ -276,7 +272,7 @@ begin
   end;
 end;
 
-function TUniScheduler.IsRunning: Boolean;
+function TUniAdminScheduler.IsRunning: Boolean;
 begin
   FCriticalSection.Acquire;
   try
@@ -286,7 +282,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.CheckAndExecuteTasks(Sender: TObject);
+procedure TUniAdminScheduler.CheckAndExecuteTasks(Sender: TObject);
 var
   LCurrentTime: TDateTime;
   I: Integer;
@@ -312,7 +308,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.ExecuteTask(TaskID: Integer);
+procedure TUniAdminScheduler.ExecuteTask(TaskID: Integer);
 var
   LTaskIndex: Integer;
   LTaskInfo: TScheduledTaskInfo;
@@ -413,7 +409,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.LogTaskExecution(TaskID: Integer; StartTime: TDateTime;
+procedure TUniAdminScheduler.LogTaskExecution(TaskID: Integer; StartTime: TDateTime;
   Status: Integer; const ErrorMessage, Result: string);
 var
   LQuery: TFDQuery;
@@ -445,17 +441,17 @@ begin
   end;
 end;
 
-function TUniScheduler.GetTaskProcessor(const HandlerClass: string): ITaskProcessor;
+function TUniAdminScheduler.GetTaskProcessor(const HandlerClass: string): ITaskProcessor;
 begin
   Result := TTaskProcessorFactory.CreateProcessor(HandlerClass);
 end;
 
-procedure TUniScheduler.ReloadTasks;
+procedure TUniAdminScheduler.ReloadTasks;
 begin
   LoadTasks;
 end;
 
-function TUniScheduler.GetTasks: TArray<TScheduledTaskInfo>;
+function TUniAdminScheduler.GetTasks: TArray<TScheduledTaskInfo>;
 begin
   FCriticalSection.Acquire;
   try
@@ -465,7 +461,7 @@ begin
   end;
 end;
 
-function TUniScheduler.GetTaskByID(TaskID: Integer): TScheduledTaskInfo;
+function TUniAdminScheduler.GetTaskByID(TaskID: Integer): TScheduledTaskInfo;
 var
   LTaskInfo: TScheduledTaskInfo;
 begin
@@ -486,7 +482,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.AddTask(const TaskInfo: TScheduledTaskInfo);
+procedure TUniAdminScheduler.AddTask(const TaskInfo: TScheduledTaskInfo);
 begin
   FCriticalSection.Acquire;
   try
@@ -496,7 +492,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.UpdateTask(const TaskInfo: TScheduledTaskInfo);
+procedure TUniAdminScheduler.UpdateTask(const TaskInfo: TScheduledTaskInfo);
 var
   I: Integer;
 begin
@@ -515,7 +511,7 @@ begin
   end;
 end;
 
-procedure TUniScheduler.RemoveTask(TaskID: Integer);
+procedure TUniAdminScheduler.RemoveTask(TaskID: Integer);
 var
   I: Integer;
 begin
@@ -534,7 +530,7 @@ begin
   end;
 end;
 
-function TUniScheduler.GetTaskExecutionLogs(TaskID: Integer; Count: Integer): TArray<TTaskExecutionLogInfo>;
+function TUniAdminScheduler.GetTaskExecutionLogs(TaskID: Integer; Count: Integer): TArray<TTaskExecutionLogInfo>;
 var
   LQuery: TFDQuery;
   LList: TList<TTaskExecutionLogInfo>;

@@ -6,12 +6,12 @@ uses
   System.SysUtils, System.Classes, System.Variants, System.UITypes,
   uniGUIApplication, uniGUIForm, uniLabel, uniEdit,
   uniButton, uniCheckBox, uniPanel, uniGUIBaseClasses, uniGUIClasses,
-  UniAuthService.Intf, Vcl.Controls, Vcl.Forms;
+  UniAdminAuthService.Intf, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
   /// 登录窗体 - 提供用户认证界面
-  /// 集成 IUniAuthService 实现登录功能
+  /// 集成 IUniAdminAuthService 实现登录功能
   /// </summary>
   TLoginForm = class(TUniLoginForm)
     UniContainerPanel: TUniContainerPanel;
@@ -32,16 +32,13 @@ type
     procedure FormCreate(Sender: TObject);
     procedure UniFormAfterShow(Sender: TObject);
   private
-    FAuthService: IUniAuthService;
+    FAuthService: IUniAdminAuthService;
     FLoginResult: TLoginResult;
-    class var FLastLoginResult: TLoginResult;
     procedure SetLoginResult(const Value: TLoginResult);
     function ValidateInput: Boolean;
     /// <summary>Apply modern CSS classes to components for custom styling</summary>
     procedure ApplyStyling;
   public
-    /// <summary>最近一次登录结果（供 MainFrame 创建执行上下文）</summary>
-    class property LastLoginResult: TLoginResult read FLastLoginResult;
     /// <summary>
     /// 静态方法 - 显示登录窗体并执行登录
     /// </summary>
@@ -57,7 +54,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniServices, uniGUIVars, MainModule;
+  UniAdminServices, uniGUIVars, MainModule;
 
 { TLoginForm }
 
@@ -149,8 +146,9 @@ begin
 
       if FLoginResult.Success then
       begin
-        // 保存登录结果供 MainFrame 创建执行上下文
-        FLastLoginResult := FLoginResult;
+        // 将登录结果交由 MainModule（每会话）构造执行上下文，
+        // 避免 class var 跨会话共享导致的并发覆盖
+        GetMainModule.SetLoginResult(FLoginResult);
         ModalResult := mrOk;
         // 登录成功，可以选择显示欢迎消息
         // ShowMessage('登录成功！欢迎, ' + FLoginResult.RealName);

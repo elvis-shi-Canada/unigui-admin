@@ -1,4 +1,4 @@
-﻿unit UniPropertyEditor;
+﻿unit UniAdminPropertyEditor;
 
 interface
 
@@ -42,7 +42,7 @@ type
   /// 属性编辑器 - 用于编辑对象属性
   /// 提供类似 Delphi IDE 的属性编辑器功能
   /// </summary>
-  TUniPropertyEditor = class(TComponent)
+  TUniAdminPropertyEditor = class(TComponent)
   private
     FProperties: TList<TPropertyItem>;
     FSelectedIndex: Integer;
@@ -127,22 +127,22 @@ begin
   Result.OnChange := nil;
 end;
 
-{ TUniPropertyEditor }
+{ TUniAdminPropertyEditor }
 
-constructor TUniPropertyEditor.Create(AOwner: TComponent);
+constructor TUniAdminPropertyEditor.Create(AOwner: TComponent);
 begin
   inherited;
   FProperties := TList<TPropertyItem>.Create;
   FSelectedIndex := -1;
 end;
 
-destructor TUniPropertyEditor.Destroy;
+destructor TUniAdminPropertyEditor.Destroy;
 begin
   FProperties.Free;
   inherited;
 end;
 
-procedure TUniPropertyEditor.SetGrid(const Value: TUniStringGrid);
+procedure TUniAdminPropertyEditor.SetGrid(const Value: TUniStringGrid);
 begin
   if FGrid <> Value then
   begin
@@ -157,7 +157,7 @@ begin
   end;
 end;
 
-function TUniPropertyEditor.Add(const AProperty: TPropertyItem): Integer;
+function TUniAdminPropertyEditor.Add(const AProperty: TPropertyItem): Integer;
 begin
   Result := FProperties.Add(AProperty);
   if Assigned(FGrid) then
@@ -167,13 +167,13 @@ begin
   end;
 end;
 
-function TUniPropertyEditor.Add(const AName, ADisplayName: string;
+function TUniAdminPropertyEditor.Add(const AName, ADisplayName: string;
   AValue: Variant; AEditorType: TPropertyEditorType): Integer;
 begin
   Result := Add(TPropertyItem.Create(AName, ADisplayName, AValue, AEditorType));
 end;
 
-procedure TUniPropertyEditor.Clear;
+procedure TUniAdminPropertyEditor.Clear;
 begin
   FProperties.Clear;
   FSelectedIndex := -1;
@@ -184,7 +184,7 @@ begin
   end;
 end;
 
-procedure TUniPropertyEditor.Delete(Index: Integer);
+procedure TUniAdminPropertyEditor.Delete(Index: Integer);
 begin
   if (Index >= 0) and (Index < FProperties.Count) then
   begin
@@ -200,7 +200,7 @@ begin
   end;
 end;
 
-function TUniPropertyEditor.GetProperty(Index: Integer): TPropertyItem;
+function TUniAdminPropertyEditor.GetProperty(Index: Integer): TPropertyItem;
 begin
   if (Index >= 0) and (Index < FProperties.Count) then
     Result := FProperties[Index]
@@ -214,12 +214,12 @@ begin
   end;
 end;
 
-function TUniPropertyEditor.GetPropertyCount: Integer;
+function TUniAdminPropertyEditor.GetPropertyCount: Integer;
 begin
   Result := FProperties.Count;
 end;
 
-function TUniPropertyEditor.GetPropertyValue(const Name: string): Variant;
+function TUniAdminPropertyEditor.GetPropertyValue(const Name: string): Variant;
 var
   I: Integer;
 begin
@@ -234,7 +234,7 @@ begin
   end;
 end;
 
-procedure TUniPropertyEditor.SetPropertyValue(const Name: string; const Value: Variant);
+procedure TUniAdminPropertyEditor.SetPropertyValue(const Name: string; const Value: Variant);
 var
   I: Integer;
   LOldValue: Variant;
@@ -267,7 +267,7 @@ begin
   end;
 end;
 
-function TUniPropertyEditor.IndexOf(const AName: string): Integer;
+function TUniAdminPropertyEditor.IndexOf(const AName: string): Integer;
 var
   I: Integer;
 begin
@@ -282,7 +282,7 @@ begin
   end;
 end;
 
-procedure TUniPropertyEditor.SetPropertyIndex(const Value: Integer);
+procedure TUniAdminPropertyEditor.SetPropertyIndex(const Value: Integer);
 begin
   if (Value >= -1) and (Value < FProperties.Count) and (FSelectedIndex <> Value) then
   begin
@@ -292,20 +292,20 @@ begin
   end;
 end;
 
-procedure TUniPropertyEditor.Refresh;
+procedure TUniAdminPropertyEditor.Refresh;
 begin
   if Assigned(FGrid) then
     FGrid.Refresh;
 end;
 
-procedure TUniPropertyEditor.DoGridSelectCell(Sender: TObject; ACol, ARow: Integer;
+procedure TUniAdminPropertyEditor.DoGridSelectCell(Sender: TObject; ACol, ARow: Integer;
   var CanSelect: Boolean);
 begin
   SelectedIndex := ARow - 1; // Adjust for header row
   CanSelect := True;
 end;
 
-procedure TUniPropertyEditor.DoGridSetEditText(Sender: TObject; ACol, ARow: Integer;
+procedure TUniAdminPropertyEditor.DoGridSetEditText(Sender: TObject; ACol, ARow: Integer;
   const Value: string);
 var
   LPropIndex: Integer;
@@ -361,7 +361,7 @@ begin
 end;
 
 // UniGUI 可能不支持 DrawCell 事件或使用不同的参数类型
-//procedure TUniPropertyEditor.DoGridDrawCell(Sender: TObject; ACol, ARow: Integer;
+//procedure TUniAdminPropertyEditor.DoGridDrawCell(Sender: TObject; ACol, ARow: Integer;
 //  Rect: TRect; State: TGridDrawState);
 //var
 //  LPropIndex: Integer;

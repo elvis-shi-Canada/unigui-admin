@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes,
-  UniModuleRegistry, UniModuleRegistry.Intf,
+  UniAdminModuleRegistry, UniAdminModuleRegistry.Intf,
   UniPlugin.Types,
   // User Module
   UserDataModule, UserService,
@@ -26,7 +26,7 @@ uses
   LogDataModule, LogService,
   LoginLogFrame, OperationLogFrame, DataChangeLogFrame,
   // Scheduler Module
-  UniScheduler, TaskManageFrame, TaskLogFrame;
+  UniAdminScheduler, TaskManageFrame, TaskLogFrame;
 
 type
   /// <summary>
@@ -82,9 +82,9 @@ end;
 class procedure TSystemModuleRegistrar.RegisterUserModule;
 var
   LInfo: TPluginClassInfo;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册用户管理数据模块
   LInfo.PluginID := 'user-data-module';
@@ -102,7 +102,7 @@ begin
 
   // 注册用户管理服务
   LInfo.PluginID := 'user-service';
-  LInfo.ClassName := 'TUniUserService';
+  LInfo.ClassName := 'TUserService';
   LInfo.DisplayName := '用户管理服务';
   LInfo.Version := '1.0.0';
   LInfo.Description := '提供用户业务逻辑封装和权限检查';
@@ -112,7 +112,7 @@ begin
   LInfo.ConfigFile := '';
   LInfo.Dependencies := TArray<string>.Create('user-data-module');
   LInfo.Priority := 101;
-  LRegistry.RegisterPluginClass(TUniUserService, LInfo.PluginID, LInfo);
+  LRegistry.RegisterPluginClass(TUserService, LInfo.PluginID, LInfo);
 
   // 注册用户列表窗体
   LInfo.PluginID := 'user-list-frame';
@@ -174,9 +174,9 @@ end;
 class procedure TSystemModuleRegistrar.RegisterRoleModule;
 var
   LInfo: TPluginClassInfo;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册角色管理数据模块
   LInfo.PluginID := 'role-data-module';
@@ -252,9 +252,9 @@ end;
 class procedure TSystemModuleRegistrar.RegisterMenuModule;
 var
   LInfo: TPluginClassInfo;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册菜单数据模块
   LInfo.PluginID := 'menu-data-module';
@@ -316,9 +316,9 @@ end;
 class procedure TSystemModuleRegistrar.RegisterDictionaryModule;
 var
   LInfo: TPluginClassInfo;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册数据字典数据模块
   LInfo.PluginID := 'dictionary-data-module';
@@ -380,9 +380,9 @@ end;
 class procedure TSystemModuleRegistrar.RegisterConfigModule;
 var
   LInfo: TPluginClassInfo;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册系统配置数据模块
   LInfo.PluginID := 'config-data-module';
@@ -444,9 +444,9 @@ end;
 class procedure TSystemModuleRegistrar.RegisterLogModule;
 var
   LInfo: TPluginClassInfo;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册日志数据模块
   LInfo.PluginID := 'log-data-module';
@@ -522,13 +522,13 @@ end;
 class procedure TSystemModuleRegistrar.RegisterSchedulerModule;
 var
   LInfo: TPluginClassInfo;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   // 注册任务调度器
   LInfo.PluginID := 'uni-scheduler';
-  LInfo.ClassName := 'TUniScheduler';
+  LInfo.ClassName := 'TUniAdminScheduler';
   LInfo.DisplayName := '任务调度器';
   LInfo.Version := '1.0.0';
   LInfo.Description := '基于Cron表达式的定时任务调度服务';
@@ -538,7 +538,7 @@ begin
   LInfo.ConfigFile := '';
   LInfo.Dependencies := nil;
   LInfo.Priority := 700;
-  LRegistry.RegisterPluginClass(TUniScheduler, LInfo.PluginID, LInfo);
+  LRegistry.RegisterPluginClass(TUniAdminScheduler, LInfo.PluginID, LInfo);
 
   // 注册任务管理窗体
   LInfo.PluginID := 'task-manage-frame';

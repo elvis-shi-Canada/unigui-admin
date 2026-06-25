@@ -1,20 +1,20 @@
-﻿unit UniPermissionManager;
+﻿unit UniAdminPermissionManager;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client,
-  UniPermissionManager.Intf;
+  UniAdminPermissionManager.Intf;
 
 type
   /// <summary>
   /// 权限管理器实现
   /// 提供线程安全的基于角色的访问控制（RBAC）功能
   /// </summary>
-  TUniPermissionManager = class(TInterfacedObject, IUniPermissionManager)
+  TUniAdminPermissionManager = class(TInterfacedObject, IUniAdminPermissionManager)
   private
-    class var FInstance: IUniPermissionManager;
+    class var FInstance: IUniAdminPermissionManager;
     class var FLock: TObject;
     FConnection: TFDConnection;
     FPermissionCache: TDictionary<Integer, TArray<TPermissionInfo>>;
@@ -62,21 +62,21 @@ type
     /// <summary>
     /// 获取权限管理器实例
     /// </summary>
-    class function GetInstance(const Connection: TFDConnection): IUniPermissionManager; static;
+    class function GetInstance(const Connection: TFDConnection): IUniAdminPermissionManager; static;
   end;
 
 implementation
 
-{ TUniPermissionManager }
+{ TUniAdminPermissionManager }
 
-class function TUniPermissionManager.GetInstance(const Connection: TFDConnection): IUniPermissionManager;
+class function TUniAdminPermissionManager.GetInstance(const Connection: TFDConnection): IUniAdminPermissionManager;
 begin
   if FInstance = nil then
   begin
     TMonitor.Enter(FLock);
     try
       if FInstance = nil then
-        FInstance := TUniPermissionManager.Create(Connection);
+        FInstance := TUniAdminPermissionManager.Create(Connection);
     finally
       TMonitor.Exit(FLock);
     end;
@@ -84,7 +84,7 @@ begin
   Result := FInstance;
 end;
 
-constructor TUniPermissionManager.Create(const Connection: TFDConnection);
+constructor TUniAdminPermissionManager.Create(const Connection: TFDConnection);
 begin
   inherited Create;
   if not Assigned(Connection) then
@@ -99,7 +99,7 @@ begin
   FCacheEnabled := True;
 end;
 
-destructor TUniPermissionManager.Destroy;
+destructor TUniAdminPermissionManager.Destroy;
 begin
   ClearAllCache;
   FPermissionCache.Free;
@@ -107,23 +107,23 @@ begin
   inherited;
 end;
 
-procedure TUniPermissionManager.ClearAllCache;
+procedure TUniAdminPermissionManager.ClearAllCache;
 begin
   ClearPermissionCache;
   ClearRoleCache;
 end;
 
-procedure TUniPermissionManager.ClearPermissionCache;
+procedure TUniAdminPermissionManager.ClearPermissionCache;
 begin
   FPermissionCache.Clear;
 end;
 
-procedure TUniPermissionManager.ClearRoleCache;
+procedure TUniAdminPermissionManager.ClearRoleCache;
 begin
   FRoleCache.Clear;
 end;
 
-function TUniPermissionManager.StringToDataScope(const Scope: string): TDataScopeType;
+function TUniAdminPermissionManager.StringToDataScope(const Scope: string): TDataScopeType;
 begin
   if SameText(Scope, 'ALL') then
     Result := dsAll
@@ -139,7 +139,7 @@ begin
     Result := dsNone;
 end;
 
-function TUniPermissionManager.HasPermission(const UserID: Integer;
+function TUniAdminPermissionManager.HasPermission(const UserID: Integer;
   const PermissionCode: string): Boolean;
 var
   LQuery: TFDQuery;
@@ -177,7 +177,7 @@ begin
   end;
 end;
 
-function TUniPermissionManager.GetUserPermissions(const UserID: Integer): TArray<TPermissionInfo>;
+function TUniAdminPermissionManager.GetUserPermissions(const UserID: Integer): TArray<TPermissionInfo>;
 var
   LQuery: TFDQuery;
   LList: TList<TPermissionInfo>;
@@ -249,7 +249,7 @@ begin
   end;
 end;
 
-function TUniPermissionManager.GetRoles(const UserID: Integer): TArray<TRoleInfo>;
+function TUniAdminPermissionManager.GetRoles(const UserID: Integer): TArray<TRoleInfo>;
 var
   LQuery: TFDQuery;
   LList: TList<TRoleInfo>;
@@ -317,7 +317,7 @@ begin
   end;
 end;
 
-function TUniPermissionManager.AssignRoleToUser(const UserID, RoleID: Integer): Boolean;
+function TUniAdminPermissionManager.AssignRoleToUser(const UserID, RoleID: Integer): Boolean;
 var
   LQuery: TFDQuery;
 begin
@@ -386,7 +386,7 @@ begin
   end;
 end;
 
-function TUniPermissionManager.RemoveRoleFromUser(const UserID, RoleID: Integer): Boolean;
+function TUniAdminPermissionManager.RemoveRoleFromUser(const UserID, RoleID: Integer): Boolean;
 var
   LQuery: TFDQuery;
 begin
@@ -434,13 +434,13 @@ begin
   end;
 end;
 
-function TUniPermissionManager.GetDataScope(const UserID: Integer;
+function TUniAdminPermissionManager.GetDataScope(const UserID: Integer;
   const Resource: string): TDataScopeType;
 begin
   Result := GetMaxDataScope(UserID, Resource);
 end;
 
-function TUniPermissionManager.GetMaxDataScope(const UserID: Integer;
+function TUniAdminPermissionManager.GetMaxDataScope(const UserID: Integer;
   const Resource: string): TDataScopeType;
 var
   LQuery: TFDQuery;
@@ -489,7 +489,7 @@ begin
   end;
 end;
 
-function TUniPermissionManager.HasRole(const UserID: Integer;
+function TUniAdminPermissionManager.HasRole(const UserID: Integer;
   const RoleCode: string): Boolean;
 var
   LQuery: TFDQuery;
@@ -527,10 +527,10 @@ begin
 end;
 
 initialization
-  TUniPermissionManager.FLock := TObject.Create;
+  TUniAdminPermissionManager.FLock := TObject.Create;
 
 finalization
-  TUniPermissionManager.FInstance := nil;
-  FreeAndNil(TUniPermissionManager.FLock);
+  TUniAdminPermissionManager.FInstance := nil;
+  FreeAndNil(TUniAdminPermissionManager.FLock);
 
 end.

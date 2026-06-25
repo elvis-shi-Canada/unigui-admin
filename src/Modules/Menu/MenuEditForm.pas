@@ -74,7 +74,7 @@ implementation
 
 uses
   Data.DB, FireDAC.Comp.Client,
-  MenuDataModule, UniFormStyler, MainModule;
+  MenuDataModule, UniAdminFormStyler, MainModule;
 
 var
   MenuDataModule: TMenuDataModule;
@@ -104,8 +104,8 @@ end;
 
 procedure TMenuEditForm.FormCreate(Sender: TObject);
 begin
-  TUniFormStyler.AutoStylePanels(Self);
-  TUniFormStyler.AutoStyleButtons(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStyleButtons(Self);
   InitForm;
 end;
 

@@ -72,7 +72,7 @@ Plugins/
 procedure RegisterPlugins;
 begin
   // 注册数据字典插件
-  TUniModuleRegistry.GetInstance.RegisterPluginClass(
+  TUniAdminModuleRegistry.GetInstance.RegisterPluginClass(
     TDictionaryPlugin,
     'dictionary-plugin',
     LPluginInfo
@@ -127,7 +127,7 @@ end;
 | 依赖 | 模块 | 用途 |
 |------|------|------|
 | Core.Plugin | UniPlugin | 插件基类和接口 |
-| Core.Metadata | UniMetadataCache | 元数据访问 |
+| Core.Metadata | UniAdminMetadataCache | 元数据访问 |
 | Core.UI | BaseCrudFrame | UI 基类 |
 
 ### 插件配置

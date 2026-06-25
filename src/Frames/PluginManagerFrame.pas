@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections, System.StrUtils,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.Grids,
-  UniModuleRegistry.Intf, UniConfigService.Intf;
+  UniAdminModuleRegistry.Intf, UniAdminConfigService.Intf;
 
 type
   /// <summary>
@@ -46,8 +46,8 @@ type
     procedure btnRefreshClick(Sender: TObject);
     procedure lbPluginsClick(Sender: TObject);
   private
-    FRegistry: IUniModuleRegistry;
-    FConfigService: IUniConfigService;
+    FRegistry: IUniAdminModuleRegistry;
+    FConfigService: IUniAdminConfigService;
     FPluginIDs: TArray<string>;
     FCurrentPluginID: string;
     FLoadedPlugins: TList<string>;
@@ -63,8 +63,8 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    procedure SetRegistry(const ARegistry: IUniModuleRegistry);
-    procedure SetConfigService(const AConfigService: IUniConfigService);
+    procedure SetRegistry(const ARegistry: IUniAdminModuleRegistry);
+    procedure SetConfigService(const AConfigService: IUniAdminConfigService);
     procedure RefreshUI;
   end;
 
@@ -87,13 +87,13 @@ begin
   inherited;
 end;
 
-procedure TPluginManagerFrame.SetRegistry(const ARegistry: IUniModuleRegistry);
+procedure TPluginManagerFrame.SetRegistry(const ARegistry: IUniAdminModuleRegistry);
 begin
   FRegistry := ARegistry;
   RefreshUI;
 end;
 
-procedure TPluginManagerFrame.SetConfigService(const AConfigService: IUniConfigService);
+procedure TPluginManagerFrame.SetConfigService(const AConfigService: IUniAdminConfigService);
 begin
   FConfigService := AConfigService;
 end;

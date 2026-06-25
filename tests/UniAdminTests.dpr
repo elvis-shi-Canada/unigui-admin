@@ -27,9 +27,8 @@ uses
   UniPlugin.Intf in '..\src\Core\Plugin\UniPlugin.Intf.pas',
   UniPlugin.Types in '..\src\Core\Plugin\UniPlugin.Types.pas',
   UniContext in '..\src\Core\Context\UniContext.pas',
-  UniModuleRegistry in '..\src\Core\Plugin\UniModuleRegistry.pas',
-  UniModuleRegistry.Intf in '..\src\Core\Plugin\UniModuleRegistry.Intf.pas',
-  UniSession in '..\src\Core\Session\UniSession.pas';
+  UniAdminModuleRegistry in '..\src\Core\Plugin\UniAdminModuleRegistry.pas',
+  UniAdminModuleRegistry.Intf in '..\src\Core\Plugin\UniAdminModuleRegistry.Intf.pas';
 
 var
   {$IFNDEF TESTINSIGHT}

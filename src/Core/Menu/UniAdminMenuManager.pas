@@ -1,20 +1,20 @@
-﻿unit UniMenuManager;
+﻿unit UniAdminMenuManager;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.StrUtils,
   Data.DB, FireDAC.Comp.Client,
-  UniMenuManager.Intf;
+  UniAdminMenuManager.Intf;
 
 type
   /// <summary>
   /// 菜单管理器实现
   /// 提供线程安全的菜单树管理和权限过滤功能
   /// </summary>
-  TUniMenuManager = class(TInterfacedObject, IUniMenuManager)
+  TUniAdminMenuManager = class(TInterfacedObject, IUniAdminMenuManager)
   private
-    class var FInstance: IUniMenuManager;
+    class var FInstance: IUniAdminMenuManager;
     class var FLock: TObject;
     FConnection: TFDConnection;
     FMenuCache: TDictionary<Integer, TMenuItem>;
@@ -88,21 +88,21 @@ type
     /// <summary>
     /// 获取菜单管理器实例
     /// </summary>
-    class function GetInstance(const Connection: TFDConnection): IUniMenuManager; static;
+    class function GetInstance(const Connection: TFDConnection): IUniAdminMenuManager; static;
   end;
 
 implementation
 
-{ TUniMenuManager }
+{ TUniAdminMenuManager }
 
-class function TUniMenuManager.GetInstance(const Connection: TFDConnection): IUniMenuManager;
+class function TUniAdminMenuManager.GetInstance(const Connection: TFDConnection): IUniAdminMenuManager;
 begin
   if FInstance = nil then
   begin
     TMonitor.Enter(FLock);
     try
       if FInstance = nil then
-        FInstance := TUniMenuManager.Create(Connection);
+        FInstance := TUniAdminMenuManager.Create(Connection);
     finally
       TMonitor.Exit(FLock);
     end;
@@ -110,7 +110,7 @@ begin
   Result := FInstance;
 end;
 
-constructor TUniMenuManager.Create(const Connection: TFDConnection);
+constructor TUniAdminMenuManager.Create(const Connection: TFDConnection);
 begin
   inherited Create;
   if not Assigned(Connection) then
@@ -125,7 +125,7 @@ begin
   FCacheEnabled := True;
 end;
 
-destructor TUniMenuManager.Destroy;
+destructor TUniAdminMenuManager.Destroy;
 begin
   TMonitor.Enter(FLock);
   try
@@ -138,7 +138,7 @@ begin
   inherited;
 end;
 
-procedure TUniMenuManager.ClearCache;
+procedure TUniAdminMenuManager.ClearCache;
 var
   LMenuItem: TMenuItem;
   LKeys: TArray<Integer>;
@@ -158,7 +158,7 @@ end;
 /// <summary>
 /// 清空缓存（线程安全版本）
 /// </summary>
-procedure TUniMenuManager.ClearCacheLocked;
+procedure TUniAdminMenuManager.ClearCacheLocked;
 begin
   TMonitor.Enter(FLock);
   try
@@ -168,7 +168,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.LoadAllMenus: TArray<TMenuItem>;
+function TUniAdminMenuManager.LoadAllMenus: TArray<TMenuItem>;
 var
   LQuery: TFDQuery;
   LList: TList<TMenuItem>;
@@ -220,7 +220,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.FindChildren(const ParentID: Integer;
+function TUniAdminMenuManager.FindChildren(const ParentID: Integer;
   const FlatMenus: TArray<TMenuItem>): TArray<TMenuItem>;
 var
   LList: TList<TMenuItem>;
@@ -239,7 +239,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.BuildMenuTree(const FlatMenus: TArray<TMenuItem>): TArray<TMenuItem>;
+function TUniAdminMenuManager.BuildMenuTree(const FlatMenus: TArray<TMenuItem>): TArray<TMenuItem>;
 var
   LRootMenus: TArray<TMenuItem>;
   LMenuQueue: TQueue<TMenuItem>;
@@ -278,7 +278,7 @@ begin
   Result := LRootMenus;
 end;
 
-function TUniMenuManager.GetUserPermissionCodes(const UserID: Integer): TArray<string>;
+function TUniAdminMenuManager.GetUserPermissionCodes(const UserID: Integer): TArray<string>;
 var
   LQuery: TFDQuery;
   LList: TList<string>;
@@ -323,7 +323,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.FilterMenuTree(const Menus: TArray<TMenuItem>;
+function TUniAdminMenuManager.FilterMenuTree(const Menus: TArray<TMenuItem>;
   const UserPermissions: TArray<string>): TArray<TMenuItem>;
 var
   I, J: Integer;
@@ -365,13 +365,13 @@ begin
   end;
 end;
 
-function TUniMenuManager.FilterMenusByPermission(const Menus: TArray<TMenuItem>;
+function TUniAdminMenuManager.FilterMenusByPermission(const Menus: TArray<TMenuItem>;
   const UserPermissions: TArray<string>): TArray<TMenuItem>;
 begin
   Result := FilterMenuTree(Menus, UserPermissions);
 end;
 
-function TUniMenuManager.GetMenuTree(const UserID: Integer): TArray<TMenuItem>;
+function TUniAdminMenuManager.GetMenuTree(const UserID: Integer): TArray<TMenuItem>;
 var
   LAllMenus: TArray<TMenuItem>;
   LUserPermissions: TArray<string>;
@@ -410,7 +410,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.GetMenuByID(const MenuID: Integer): TMenuItem;
+function TUniAdminMenuManager.GetMenuByID(const MenuID: Integer): TMenuItem;
 var
   LQuery: TFDQuery;
 begin
@@ -481,7 +481,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.AddMenu(const Menu: TMenuItem): Boolean;
+function TUniAdminMenuManager.AddMenu(const Menu: TMenuItem): Boolean;
 var
   LQuery: TFDQuery;
   LNewMenuID: Integer;
@@ -529,7 +529,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.UpdateMenu(const Menu: TMenuItem): Boolean;
+function TUniAdminMenuManager.UpdateMenu(const Menu: TMenuItem): Boolean;
 var
   LQuery: TFDQuery;
 begin
@@ -586,7 +586,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.DeleteMenuRecursive(const MenuID: Integer): Boolean;
+function TUniAdminMenuManager.DeleteMenuRecursive(const MenuID: Integer): Boolean;
 var
   LQuery: TFDQuery;
   LChildIDs: TList<Integer>;
@@ -641,7 +641,7 @@ begin
   end;
 end;
 
-function TUniMenuManager.DeleteMenu(const MenuID: Integer): Boolean;
+function TUniAdminMenuManager.DeleteMenu(const MenuID: Integer): Boolean;
 begin
   // 输入验证
   if MenuID <= 0 then
@@ -653,7 +653,7 @@ begin
     RefreshCache;
 end;
 
-function TUniMenuManager.GetUserMenus(const UserID: Integer): TArray<TMenuItem>;
+function TUniAdminMenuManager.GetUserMenus(const UserID: Integer): TArray<TMenuItem>;
 var
   LMenuTree: TArray<TMenuItem>;
   LFlatList: TList<TMenuItem>;
@@ -681,7 +681,7 @@ begin
   end;
 end;
 
-procedure TUniMenuManager.RefreshCache;
+procedure TUniAdminMenuManager.RefreshCache;
 begin
   TMonitor.Enter(FLock);
   try
@@ -692,10 +692,10 @@ begin
 end;
 
 initialization
-  TUniMenuManager.FLock := TObject.Create;
+  TUniAdminMenuManager.FLock := TObject.Create;
 
 finalization
-  TUniMenuManager.FInstance := nil;
-  FreeAndNil(TUniMenuManager.FLock);
+  TUniAdminMenuManager.FInstance := nil;
+  FreeAndNil(TUniAdminMenuManager.FLock);
 
 end.

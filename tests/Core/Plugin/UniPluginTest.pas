@@ -6,8 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   DUnitX.TestFramework,
   UniPlugin, UniPlugin.Intf, UniPlugin.Types, UniContext,
-  UniSession,
-  UniModuleRegistry, UniModuleRegistry.Intf;
+  UniAdminModuleRegistry, UniAdminModuleRegistry.Intf;
 
 type
   /// <summary>
@@ -27,7 +26,7 @@ type
   [TestFixture]
   TUniPluginTest = class
   private
-    FRegistry: IUniModuleRegistry;
+    FRegistry: IUniAdminModuleRegistry;
     FTestPlugin: IPlugin;
     FUserContext: IUserContext;
     FExecutionContext: IExecutionContext;
@@ -87,7 +86,7 @@ end;
 procedure TUniPluginTest.Setup;
 begin
   // 获取注册表实例
-  FRegistry := TUniModuleRegistry.GetInstance;
+  FRegistry := TUniAdminModuleRegistry.GetInstance;
   FRegistry.Clear;
 
   // 初始化测试上下文
@@ -366,6 +365,6 @@ initialization
 
 finalization
   // 清理注册表
-  TUniModuleRegistry.CleanupInstance;
+  TUniAdminModuleRegistry.CleanupInstance;
 
 end.

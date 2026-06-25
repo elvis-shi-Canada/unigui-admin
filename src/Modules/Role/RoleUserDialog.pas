@@ -7,7 +7,7 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniButton, uniLabel, uniListBox,
   uniPanel, uniEdit, uniGUIForm, Vcl.Dialogs,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniAdminDataModule;
 
 type
   /// <summary>
@@ -75,7 +75,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniFormStyler;
+  UniAdminFormStyler;
 
 constructor TRoleUserDialog.Create(AOwner: TComponent);
 begin
@@ -114,8 +114,8 @@ end;
 
 procedure TRoleUserDialog.FormCreate(Sender: TObject);
 begin
-  TUniFormStyler.AutoStylePanels(Self);
-  TUniFormStyler.AutoStyleButtons(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStyleButtons(Self);
   Caption := '用户分配';
   Width := 700;
   Height := 500;

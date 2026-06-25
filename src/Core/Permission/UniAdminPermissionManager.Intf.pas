@@ -1,4 +1,4 @@
-﻿unit UniPermissionManager.Intf;
+﻿unit UniAdminPermissionManager.Intf;
 
 interface
 
@@ -46,7 +46,7 @@ type
   /// 权限管理器接口
   /// 提供基于角色的访问控制（RBAC）功能
   /// </summary>
-  IUniPermissionManager = interface(IInterface)
+  IUniAdminPermissionManager = interface(IInterface)
     ['{C8E9D7A3-6F4C-5B3E-E2D7-7A9C1F3D6E8B}']
 
 

@@ -1,4 +1,4 @@
-﻿unit UniConnectionManager.Intf;
+﻿unit UniAdminConnectionManager.Intf;
 
 interface
 
@@ -26,7 +26,7 @@ type
   /// <summary>
   /// 数据库连接管理器接口
   /// </summary>
-  IUniConnectionManager = interface(IInterface)
+  IUniAdminConnectionManager = interface(IInterface)
     ['{B9C7E2D3-A8F5-6D4E-C1B7-7A9F2D3E8C5B}']
     function GetConnection(const Params: TConnectionParams): TFDConnection;
     function GetDefaultConnection: TFDConnection;

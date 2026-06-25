@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Diagnostics,
   DUnitX.TestFramework,
-  UniContext, UniSession,
+  UniContext,
   // User Module
   UserDataModule, UserService, UserService.Intf,
   // Role Module
@@ -104,12 +104,12 @@ end;
 
 procedure TPhase3E2ETest.TestUserLifecycle;
 var
-  LUserService: IUniUserService;
+  LUserService: IUserService;
   LUserID: Integer;
   LUser: TUserInfo;
 begin
   // 创建用户服务
-  LUserService := TUniUserService.Create(FExecutionContext);
+  LUserService := TUserService.Create(FExecutionContext);
 
   // 1. 创建用户
   LUserID := LUserService.CreateUser('testuser_e2e', 'Test123456', '测试用户', 'test@e2e.com', '13800138000');
@@ -139,10 +139,10 @@ end;
 
 procedure TPhase3E2ETest.TestUserPasswordChange;
 var
-  LUserService: IUniUserService;
+  LUserService: IUserService;
   LUserID: Integer;
 begin
-  LUserService := TUniUserService.Create(FExecutionContext);
+  LUserService := TUserService.Create(FExecutionContext);
 
   // 创建测试用户
   LUserID := LUserService.CreateUser('pwdtest', 'OldPassword123', '密码测试', 'pwd@test.com', '13800138000');
@@ -255,7 +255,7 @@ end;
 
 procedure TPhase3E2ETest.TestCompleteWorkflow;
 var
-  LUserService: IUniUserService;
+  LUserService: IUserService;
   LDictService: TDictionaryService;
   LUserID: Integer;
   LTypeID: Integer;
@@ -267,7 +267,7 @@ begin
   LTypeID := (LDictService as IInterface).GetTypeData.GetTypeData.Handle; // 占位
 
   // 2. 创建用户
-  LUserService := TUniUserService.Create(FExecutionContext);
+  LUserService := TUserService.Create(FExecutionContext);
   LUserID := LUserService.CreateUser('workflow_user', 'Pass123', '工作流用户', 'workflow@test.com', '13800138000');
 
   // 3. 修改用户信息

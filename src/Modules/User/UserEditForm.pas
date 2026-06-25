@@ -61,10 +61,10 @@ implementation
 {$R *.dfm}
 
 uses
-  UserService, UniFormStyler;
+  UserService, UniAdminFormStyler;
 
 var
-  UserService: IUniUserService;
+  UserService: IUserService;
 
 constructor TUserEditForm.Create(AOwner: TComponent);
 begin
@@ -81,13 +81,13 @@ end;
 procedure TUserEditForm.SetContext(const Context: IExecutionContext);
 begin
   FContext := Context;
-  UserService := TUniUserService.Create(Context);
+  UserService := TUserService.Create(Context);
 end;
 
 procedure TUserEditForm.FormCreate(Sender: TObject);
 begin
-  TUniFormStyler.AutoStylePanels(Self);
-  TUniFormStyler.AutoStyleButtons(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStyleButtons(Self);
   InitForm;
 end;
 

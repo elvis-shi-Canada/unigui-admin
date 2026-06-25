@@ -49,8 +49,8 @@ graph LR
 
     subgraph Core依赖["Core 依赖"]
         BCF["Core.UI/BaseCrudFrame"]
-        CS["Core.Config/UniConfigService"]
-        MR["Core.Plugin/UniModuleRegistry"]
+        CS["Core.Config/UniAdminConfigService"]
+        MR["Core.Plugin/UniAdminModuleRegistry"]
     end
 
     CMF --> BCF

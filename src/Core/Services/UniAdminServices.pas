@@ -1,40 +1,40 @@
-﻿unit UniServices;
+﻿unit UniAdminServices;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections,
   FireDAC.Comp.Client,
-  UniConnectionManager.Intf, UniAuthService.Intf, UniMetadataCache.Intf,
-  UniMenuManager.Intf, UniPermissionManager.Intf;
+  UniAdminConnectionManager.Intf, UniAdminAuthService.Intf, UniAdminMetadataCache.Intf,
+  UniAdminMenuManager.Intf, UniAdminPermissionManager.Intf;
 
 type
   /// <summary>
   /// 服务容器接口 - 提供对当前会话所有核心服务的统一访问
   /// </summary>
-  IUniServices = interface(IInterface)
+  IUniAdminServices = interface(IInterface)
     ['{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}']
     function Connection: TFDConnection;
-    function ConnectionManager: IUniConnectionManager;
-    function AuthService: IUniAuthService;
-    function MetadataCache: IUniMetadataCache;
-    function MenuManager: IUniMenuManager;
-    function PermissionManager: IUniPermissionManager;
+    function ConnectionManager: IUniAdminConnectionManager;
+    function AuthService: IUniAdminAuthService;
+    function MetadataCache: IUniAdminMetadataCache;
+    function MenuManager: IUniAdminMenuManager;
+    function PermissionManager: IUniAdminPermissionManager;
   end;
 
   /// <summary>
   /// 服务容器 - 每会话实例，持有该会话的数据库连接和所有核心服务
   /// 由 TMainModule 创建和管理生命周期
   /// </summary>
-  TUniServices = class(TInterfacedObject, IUniServices)
+  TUniAdminServices = class(TInterfacedObject, IUniAdminServices)
   private
     FConnection: TFDConnection;
     FOwnsConnection: Boolean;
-    FConnectionManager: IUniConnectionManager;
-    FAuthService: IUniAuthService;
-    FMetadataCache: IUniMetadataCache;
-    FMenuManager: IUniMenuManager;
-    FPermissionManager: IUniPermissionManager;
+    FConnectionManager: IUniAdminConnectionManager;
+    FAuthService: IUniAdminAuthService;
+    FMetadataCache: IUniAdminMetadataCache;
+    FMenuManager: IUniAdminMenuManager;
+    FPermissionManager: IUniAdminPermissionManager;
   public
     /// <summary>
     /// 创建服务容器实例
@@ -45,22 +45,22 @@ type
     destructor Destroy; override;
 
     function Connection: TFDConnection;
-    function ConnectionManager: IUniConnectionManager;
-    function AuthService: IUniAuthService;
-    function MetadataCache: IUniMetadataCache;
-    function MenuManager: IUniMenuManager;
-    function PermissionManager: IUniPermissionManager;
+    function ConnectionManager: IUniAdminConnectionManager;
+    function AuthService: IUniAdminAuthService;
+    function MetadataCache: IUniAdminMetadataCache;
+    function MenuManager: IUniAdminMenuManager;
+    function PermissionManager: IUniAdminPermissionManager;
   end;
 
 implementation
 
 uses
-  UniConnectionManager, UniAuthService, UniMetadataCache,
-  UniMenuManager, UniPermissionManager;
+  UniAdminConnectionManager, UniAdminAuthService, UniAdminMetadataCache,
+  UniAdminMenuManager, UniAdminPermissionManager;
 
-{ TUniServices }
+{ TUniAdminServices }
 
-constructor TUniServices.Create(const Connection: TFDConnection; const OwnsConnection: Boolean);
+constructor TUniAdminServices.Create(const Connection: TFDConnection; const OwnsConnection: Boolean);
 begin
   inherited Create;
   if not Assigned(Connection) then
@@ -72,14 +72,14 @@ begin
   FOwnsConnection := OwnsConnection;
 
   // 初始化所有核心服务（使用构造函数直接创建，而非 GetInstance 单例）
-  FConnectionManager := TUniConnectionManager.GetInstance;
-  FAuthService := TUniAuthService.Create(FConnection);
-  FMetadataCache := TUniMetadataCache.Create(FConnection);
-  FMenuManager := TUniMenuManager.Create(FConnection);
-  FPermissionManager := TUniPermissionManager.Create(FConnection);
+  FConnectionManager := TUniAdminConnectionManager.GetInstance;
+  FAuthService := TUniAdminAuthService.Create(FConnection);
+  FMetadataCache := TUniAdminMetadataCache.Create(FConnection);
+  FMenuManager := TUniAdminMenuManager.Create(FConnection);
+  FPermissionManager := TUniAdminPermissionManager.Create(FConnection);
 end;
 
-destructor TUniServices.Destroy;
+destructor TUniAdminServices.Destroy;
 begin
   // 按照依赖关系的逆序释放服务
   FPermissionManager := nil;
@@ -99,32 +99,32 @@ begin
   inherited;
 end;
 
-function TUniServices.Connection: TFDConnection;
+function TUniAdminServices.Connection: TFDConnection;
 begin
   Result := FConnection;
 end;
 
-function TUniServices.ConnectionManager: IUniConnectionManager;
+function TUniAdminServices.ConnectionManager: IUniAdminConnectionManager;
 begin
   Result := FConnectionManager;
 end;
 
-function TUniServices.AuthService: IUniAuthService;
+function TUniAdminServices.AuthService: IUniAdminAuthService;
 begin
   Result := FAuthService;
 end;
 
-function TUniServices.MetadataCache: IUniMetadataCache;
+function TUniAdminServices.MetadataCache: IUniAdminMetadataCache;
 begin
   Result := FMetadataCache;
 end;
 
-function TUniServices.MenuManager: IUniMenuManager;
+function TUniAdminServices.MenuManager: IUniAdminMenuManager;
 begin
   Result := FMenuManager;
 end;
 
-function TUniServices.PermissionManager: IUniPermissionManager;
+function TUniAdminServices.PermissionManager: IUniAdminPermissionManager;
 begin
   Result := FPermissionManager;
 end;

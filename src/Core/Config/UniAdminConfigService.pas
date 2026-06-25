@@ -1,11 +1,11 @@
-﻿unit UniConfigService;
+﻿unit UniAdminConfigService;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.IOUtils,
   System.JSON, System.SyncObjs, System.Variants,
-  UniConfigService.Intf, System.VarUtils;
+  UniAdminConfigService.Intf, System.VarUtils;
 
 type
   /// <summary>
@@ -60,9 +60,9 @@ type
   /// 统一配置服务实现类
   /// 全局单例，提供配置管理功能
   /// </summary>
-  TUniConfigService = class(TInterfacedObject, IUniConfigService)
+  TUniAdminConfigService = class(TInterfacedObject, IUniAdminConfigService)
   private
-    class var FInstance: IUniConfigService;
+    class var FInstance: IUniAdminConfigService;
     class var FCS: TCriticalSection;
 
     FConfigRoot: string;
@@ -80,11 +80,11 @@ type
     destructor Destroy; override;
 
     /// <summary>获取全局单例实例</summary>
-    class function GetInstance: IUniConfigService;
+    class function GetInstance: IUniAdminConfigService;
     /// <summary>释放全局单例实例</summary>
     class procedure ReleaseInstance;
 
-    // IUniConfigService 实现
+    // IUniAdminConfigService 实现
     function GetConfigRoot: string;
     procedure SetConfigRoot(const Path: string);
     function GetGlobalConfigFile: string;
@@ -720,14 +720,14 @@ begin
   end;
 end;
 
-{ TUniConfigService }
+{ TUniAdminConfigService }
 
-constructor TUniConfigService.Create;
+constructor TUniAdminConfigService.Create;
 begin
-  raise Exception.Create('Use GetInstance to get the global instance of TUniConfigService');
+  raise Exception.Create('Use GetInstance to get the global instance of TUniAdminConfigService');
 end;
 
-constructor TUniConfigService.CreateInstance;
+constructor TUniAdminConfigService.CreateInstance;
 begin
   inherited Create;
   FCriticalSection := TCriticalSection.Create;
@@ -736,7 +736,7 @@ begin
   Initialize;
 end;
 
-destructor TUniConfigService.Destroy;
+destructor TUniAdminConfigService.Destroy;
 begin
   FGlobalChangeHandlers.Free;
   FModuleConfigs.Free;
@@ -744,7 +744,7 @@ begin
   inherited;
 end;
 
-class function TUniConfigService.GetInstance: IUniConfigService;
+class function TUniAdminConfigService.GetInstance: IUniAdminConfigService;
 begin
   if FInstance = nil then
   begin
@@ -752,7 +752,7 @@ begin
     try
       if FInstance = nil then
       begin
-        FInstance := TUniConfigService.CreateInstance;
+        FInstance := TUniAdminConfigService.CreateInstance;
       end;
     finally
       FCS.Leave;
@@ -761,7 +761,7 @@ begin
   Result := FInstance;
 end;
 
-class procedure TUniConfigService.ReleaseInstance;
+class procedure TUniAdminConfigService.ReleaseInstance;
 begin
   FCS.Enter;
   try
@@ -771,7 +771,7 @@ begin
   end;
 end;
 
-procedure TUniConfigService.Initialize;
+procedure TUniAdminConfigService.Initialize;
 begin
   // 默认配置目录为程序目录下的 Config 文件夹
   FConfigRoot := TPath.Combine(ExtractFilePath(ParamStr(0)), 'Config');
@@ -785,12 +785,12 @@ begin
   FGlobalConfig := TModuleConfig.Create('_Global', FGlobalConfigFile);
 end;
 
-function TUniConfigService.GetModuleConfigFilePath(const ModuleName: string): string;
+function TUniAdminConfigService.GetModuleConfigFilePath(const ModuleName: string): string;
 begin
   Result := TPath.Combine(FConfigRoot, ModuleName + '.json');
 end;
 
-function TUniConfigService.GetConfigRoot: string;
+function TUniAdminConfigService.GetConfigRoot: string;
 begin
   FCriticalSection.Enter;
   try
@@ -800,7 +800,7 @@ begin
   end;
 end;
 
-procedure TUniConfigService.SetConfigRoot(const Path: string);
+procedure TUniAdminConfigService.SetConfigRoot(const Path: string);
 begin
   FCriticalSection.Enter;
   try
@@ -815,12 +815,12 @@ begin
   end;
 end;
 
-function TUniConfigService.GetGlobalConfigFile: string;
+function TUniAdminConfigService.GetGlobalConfigFile: string;
 begin
   Result := FGlobalConfigFile;
 end;
 
-function TUniConfigService.GetModuleConfig(const ModuleName: string): IModuleConfig;
+function TUniAdminConfigService.GetModuleConfig(const ModuleName: string): IModuleConfig;
 begin
   FCriticalSection.Enter;
   try
@@ -834,7 +834,7 @@ begin
   end;
 end;
 
-function TUniConfigService.HasModuleConfig(const ModuleName: string): Boolean;
+function TUniAdminConfigService.HasModuleConfig(const ModuleName: string): Boolean;
 begin
   FCriticalSection.Enter;
   try
@@ -844,7 +844,7 @@ begin
   end;
 end;
 
-procedure TUniConfigService.RemoveModuleConfig(const ModuleName: string);
+procedure TUniAdminConfigService.RemoveModuleConfig(const ModuleName: string);
 begin
   FCriticalSection.Enter;
   try
@@ -854,7 +854,7 @@ begin
   end;
 end;
 
-function TUniConfigService.GetAllModuleNames: TArray<string>;
+function TUniAdminConfigService.GetAllModuleNames: TArray<string>;
 begin
   FCriticalSection.Enter;
   try
@@ -864,17 +864,17 @@ begin
   end;
 end;
 
-function TUniConfigService.LoadGlobalConfig: Boolean;
+function TUniAdminConfigService.LoadGlobalConfig: Boolean;
 begin
   Result := (FGlobalConfig as TModuleConfig).LoadFromFile;
 end;
 
-function TUniConfigService.SaveGlobalConfig: Boolean;
+function TUniAdminConfigService.SaveGlobalConfig: Boolean;
 begin
   Result := (FGlobalConfig as TModuleConfig).SaveToFile;
 end;
 
-function TUniConfigService.LoadAllModuleConfigs: Boolean;
+function TUniAdminConfigService.LoadAllModuleConfigs: Boolean;
 var
   ModuleConfig: IModuleConfig;
   AllSuccess: Boolean;
@@ -900,7 +900,7 @@ begin
   Result := AllSuccess;
 end;
 
-function TUniConfigService.SaveAllModuleConfigs: Boolean;
+function TUniAdminConfigService.SaveAllModuleConfigs: Boolean;
 var
   ModuleConfig: IModuleConfig;
   AllSuccess: Boolean;
@@ -926,37 +926,37 @@ begin
   Result := AllSuccess;
 end;
 
-function TUniConfigService.GetGlobalString(const Key: string; const DefaultValue: string): string;
+function TUniAdminConfigService.GetGlobalString(const Key: string; const DefaultValue: string): string;
 begin
   Result := FGlobalConfig.GetString(Key, DefaultValue);
 end;
 
-function TUniConfigService.GetGlobalInteger(const Key: string; const DefaultValue: Integer): Integer;
+function TUniAdminConfigService.GetGlobalInteger(const Key: string; const DefaultValue: Integer): Integer;
 begin
   Result := FGlobalConfig.GetInteger(Key, DefaultValue);
 end;
 
-function TUniConfigService.GetGlobalBoolean(const Key: string; const DefaultValue: Boolean): Boolean;
+function TUniAdminConfigService.GetGlobalBoolean(const Key: string; const DefaultValue: Boolean): Boolean;
 begin
   Result := FGlobalConfig.GetBoolean(Key, DefaultValue);
 end;
 
-procedure TUniConfigService.SetGlobalString(const Key, Value: string);
+procedure TUniAdminConfigService.SetGlobalString(const Key, Value: string);
 begin
   FGlobalConfig.SetValue(Key, Value);
 end;
 
-procedure TUniConfigService.SetGlobalInteger(const Key: string; Value: Integer);
+procedure TUniAdminConfigService.SetGlobalInteger(const Key: string; Value: Integer);
 begin
   FGlobalConfig.SetValue(Key, Value);
 end;
 
-procedure TUniConfigService.SetGlobalBoolean(const Key: string; Value: Boolean);
+procedure TUniAdminConfigService.SetGlobalBoolean(const Key: string; Value: Boolean);
 begin
   FGlobalConfig.SetValue(Key, Value);
 end;
 
-procedure TUniConfigService.RegisterGlobalChangeHandler(const Event: TConfigChangeEvent);
+procedure TUniAdminConfigService.RegisterGlobalChangeHandler(const Event: TConfigChangeEvent);
 begin
   FCriticalSection.Enter;
   try
@@ -967,7 +967,7 @@ begin
   end;
 end;
 
-procedure TUniConfigService.UnregisterGlobalChangeHandler(const Event: TConfigChangeEvent);
+procedure TUniAdminConfigService.UnregisterGlobalChangeHandler(const Event: TConfigChangeEvent);
 begin
   FCriticalSection.Enter;
   try
@@ -977,16 +977,16 @@ begin
   end;
 end;
 
-function TUniConfigService.Refresh: Boolean;
+function TUniAdminConfigService.Refresh: Boolean;
 begin
   Result := LoadAllModuleConfigs;
 end;
 
 initialization
-  TUniConfigService.FCS := TCriticalSection.Create;
+  TUniAdminConfigService.FCS := TCriticalSection.Create;
 
 finalization
-  TUniConfigService.FCS.Free;
-  TUniConfigService.FInstance := nil;
+  TUniAdminConfigService.FCS.Free;
+  TUniAdminConfigService.FInstance := nil;
 
 end.

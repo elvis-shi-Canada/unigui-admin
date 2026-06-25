@@ -1,11 +1,11 @@
-﻿unit UniModuleRegistry;
+﻿unit UniAdminModuleRegistry;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Generics.Collections, System.SyncObjs,
   System.Math,
-  UniModuleRegistry.Intf, UniPlugin.Intf, UniPlugin, UniContext;
+  UniAdminModuleRegistry.Intf, UniPlugin.Intf, UniPlugin, UniContext;
 
 type
   /// <summary>
@@ -49,10 +49,10 @@ type
   /// 插件注册表实现类
   /// 全局单例模式，提供线程安全的插件注册和依赖管理
   /// </summary>
-  TUniModuleRegistry = class(TInterfacedObject, IUniModuleRegistry)
+  TUniAdminModuleRegistry = class(TInterfacedObject, IUniAdminModuleRegistry)
   private
     class var
-      FInstance: TUniModuleRegistry;
+      FInstance: TUniAdminModuleRegistry;
       FLock: TCriticalSection;
 
     FPluginRegistry: TDictionary<string, TPluginClassRegistry>;
@@ -75,10 +75,10 @@ type
     destructor Destroy; override;
 
     /// <summary>获取全局单例实例</summary>
-    class function GetInstance: IUniModuleRegistry;
+    class function GetInstance: IUniAdminModuleRegistry;
     class procedure CleanupInstance;
 
-    // IUniModuleRegistry 实现
+    // IUniAdminModuleRegistry 实现
     procedure RegisterPluginClass(const PluginClass: TClass; const PluginID: string;
       const Info: TPluginClassInfo);
     procedure UnregisterPluginClass(const PluginID: string);
@@ -118,9 +118,9 @@ begin
   inherited;
 end;
 
-{ TUniModuleRegistry }
+{ TUniAdminModuleRegistry }
 
-class function TUniModuleRegistry.GetInstance: IUniModuleRegistry;
+class function TUniAdminModuleRegistry.GetInstance: IUniAdminModuleRegistry;
 begin
   if FInstance = nil then
   begin
@@ -129,7 +129,7 @@ begin
     FLock.Enter;
     try
       if FInstance = nil then
-        FInstance := TUniModuleRegistry.Create;
+        FInstance := TUniAdminModuleRegistry.Create;
     finally
       FLock.Leave;
     end;
@@ -137,7 +137,7 @@ begin
   Result := FInstance;
 end;
 
-class procedure TUniModuleRegistry.CleanupInstance;
+class procedure TUniAdminModuleRegistry.CleanupInstance;
 begin
   if FLock <> nil then
   begin
@@ -151,7 +151,7 @@ begin
   end;
 end;
 
-constructor TUniModuleRegistry.Create;
+constructor TUniAdminModuleRegistry.Create;
 begin
   inherited Create;
   FPluginRegistry := TDictionary<string, TPluginClassRegistry>.Create;
@@ -160,7 +160,7 @@ begin
   FInstanceLock := TCriticalSection.Create;
 end;
 
-destructor TUniModuleRegistry.Destroy;
+destructor TUniAdminModuleRegistry.Destroy;
 begin
   Clear;
   FPluginRegistry.Free;
@@ -170,7 +170,7 @@ begin
   inherited;
 end;
 
-procedure TUniModuleRegistry.RegisterPluginClass(const PluginClass: TClass;
+procedure TUniAdminModuleRegistry.RegisterPluginClass(const PluginClass: TClass;
   const PluginID: string; const Info: TPluginClassInfo);
 var
   LRegistry: TPluginClassRegistry;
@@ -198,7 +198,7 @@ begin
   end;
 end;
 
-procedure TUniModuleRegistry.UnregisterPluginClass(const PluginID: string);
+procedure TUniAdminModuleRegistry.UnregisterPluginClass(const PluginID: string);
 var
   LRegistry: TPluginClassRegistry;
   LDepList, LRevDepList: TList<string>;
@@ -235,7 +235,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.IsPluginRegistered(const PluginID: string): Boolean;
+function TUniAdminModuleRegistry.IsPluginRegistered(const PluginID: string): Boolean;
 begin
   FInstanceLock.Enter;
   try
@@ -245,7 +245,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.GetPluginClassInfo(const PluginID: string): TPluginClassInfo;
+function TUniAdminModuleRegistry.GetPluginClassInfo(const PluginID: string): TPluginClassInfo;
 begin
   FInstanceLock.Enter;
   try
@@ -256,7 +256,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.GetAllPluginIDs: TArray<string>;
+function TUniAdminModuleRegistry.GetAllPluginIDs: TArray<string>;
 begin
   FInstanceLock.Enter;
   try
@@ -266,7 +266,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.GetPluginsByCategory(const Category: string): TArray<string>;
+function TUniAdminModuleRegistry.GetPluginsByCategory(const Category: string): TArray<string>;
 var
   LList: TList<string>;
   LPair: TPair<string, TPluginClassRegistry>;
@@ -287,7 +287,7 @@ begin
   end;
 end;
 
-procedure TUniModuleRegistry.AddDependency(const FromPluginID, ToPluginID, MinVersion: string);
+procedure TUniAdminModuleRegistry.AddDependency(const FromPluginID, ToPluginID, MinVersion: string);
 var
   LDepInfo: TDependencyInfo;
   LDepList: TList<string>;
@@ -318,7 +318,7 @@ begin
   end;
 end;
 
-procedure TUniModuleRegistry.RemoveDependency(const FromPluginID, ToPluginID: string);
+procedure TUniAdminModuleRegistry.RemoveDependency(const FromPluginID, ToPluginID: string);
 var
   LRegistry: TPluginClassRegistry;
   I: Integer;
@@ -348,7 +348,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.GetDependencies(const PluginID: string): TArray<string>;
+function TUniAdminModuleRegistry.GetDependencies(const PluginID: string): TArray<string>;
 var
   LDepList: TList<string>;
 begin
@@ -364,7 +364,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.GetDependents(const PluginID: string): TArray<string>;
+function TUniAdminModuleRegistry.GetDependents(const PluginID: string): TArray<string>;
 var
   LRevDepList: TList<string>;
 begin
@@ -379,7 +379,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.DetectCircularDependency(out CircularPath: string): Boolean;
+function TUniAdminModuleRegistry.DetectCircularDependency(out CircularPath: string): Boolean;
 var
   LVisited: TDictionary<string, Boolean>;
   LRecursionStack: TDictionary<string, Boolean>;
@@ -424,7 +424,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.DetectCircularDependencyInternal(
+function TUniAdminModuleRegistry.DetectCircularDependencyInternal(
   const LVisited: TDictionary<string, Boolean>;
   const LRecursionStack: TDictionary<string, Boolean>;
   LPath: TStringList;
@@ -437,7 +437,7 @@ begin
     Result := True;
 end;
 
-function TUniModuleRegistry.DepthFirstSearch(const PluginID: string;
+function TUniAdminModuleRegistry.DepthFirstSearch(const PluginID: string;
   const Visited: TDictionary<string, Boolean>;
   const RecursionStack: TDictionary<string, Boolean>;
   out Path: TStringList): Boolean;
@@ -482,7 +482,7 @@ begin
   RecursionStack[PluginID] := False;
 end;
 
-function TUniModuleRegistry.CalculateLoadOrder: TArray<TLoadOrderInfo>;
+function TUniAdminModuleRegistry.CalculateLoadOrder: TArray<TLoadOrderInfo>;
 var
   LSortedIDs: TArray<string>;
   LLoadOrderList: TList<TLoadOrderInfo>;
@@ -573,7 +573,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.TopologicalSort: TArray<string>;
+function TUniAdminModuleRegistry.TopologicalSort: TArray<string>;
 var
   LInDegree: TDictionary<string, Integer>;
   LQueue: TQueue<string>;
@@ -648,7 +648,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.ValidateDependencies(
+function TUniAdminModuleRegistry.ValidateDependencies(
   out MissingPlugins: TArray<string>): Boolean;
 var
   LMList: TList<string>;
@@ -689,7 +689,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.GetPluginCount: Integer;
+function TUniAdminModuleRegistry.GetPluginCount: Integer;
 begin
   FInstanceLock.Enter;
   try
@@ -699,7 +699,7 @@ begin
   end;
 end;
 
-procedure TUniModuleRegistry.Clear;
+procedure TUniAdminModuleRegistry.Clear;
 var
   LPair: TPair<string, TPluginClassRegistry>;
   LList: TList<string>;
@@ -725,7 +725,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.GetLoadOrder: TArray<string>;
+function TUniAdminModuleRegistry.GetLoadOrder: TArray<string>;
 var
   LLoadOrderInfo: TArray<TLoadOrderInfo>;
   I: Integer;
@@ -741,7 +741,7 @@ begin
   end;
 end;
 
-function TUniModuleRegistry.CreatePlugin(const PluginID: string;
+function TUniAdminModuleRegistry.CreatePlugin(const PluginID: string;
   const UserContext: IUserContext; const ExecutionContext: IExecutionContext): IPlugin;
 var
   LClassInfo: TPluginClassInfo;
@@ -779,7 +779,7 @@ begin
   end;
 end;
 
-procedure TUniModuleRegistry.CheckPluginExists(const PluginID: string);
+procedure TUniAdminModuleRegistry.CheckPluginExists(const PluginID: string);
 begin
   if not FPluginRegistry.ContainsKey(PluginID) then
     raise ERegistryException.CreateFmt('Plugin %s is not registered', [PluginID]);
@@ -809,8 +809,8 @@ initialization
 
 finalization
   // 清理全局单例
-  TUniModuleRegistry.CleanupInstance;
-  if TUniModuleRegistry.FLock <> nil then
-    TUniModuleRegistry.FLock.Free;
+  TUniAdminModuleRegistry.CleanupInstance;
+  if TUniAdminModuleRegistry.FLock <> nil then
+    TUniAdminModuleRegistry.FLock.Free;
 
 end.

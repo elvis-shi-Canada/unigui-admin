@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniAdminDataModule;
 
 type
   /// <summary>
@@ -64,7 +64,7 @@ type
   /// <summary>
   /// 日志审计数据模块 - 提供日志的记录和查询操作
   /// </summary>
-  TLogDataModule = class(TUniDataModule)
+  TLogDataModule = class(TUniAdminDataModule)
   public
     // 登录日志操作
     function GetLoginLogs(const UserName, IP: string; StartTime, EndTime: TDateTime;

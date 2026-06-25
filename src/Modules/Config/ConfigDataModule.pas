@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types, System.Generics.Collections,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule,
+  UniContext, UniPlugin.Types, UniAdminDataModule,
   ConfigService.Intf;
 
 type
@@ -13,7 +13,7 @@ type
   /// <summary>
   /// 系统配置数据模块 - 提供系统配置的 CRUD 操作
   /// </summary>
-  TConfigDataModule = class(TUniDataModule)
+  TConfigDataModule = class(TUniAdminDataModule)
   public
     // 配置操作
     function GetConfigByID(ConfigID: Integer): TDataSet;

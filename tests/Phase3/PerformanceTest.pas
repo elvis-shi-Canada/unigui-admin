@@ -5,8 +5,8 @@ interface
 uses
   System.SysUtils, System.Classes, System.Diagnostics, System.Generics.Collections,
   DUnitX.TestFramework,
-  UniModuleRegistry, UniModuleRegistry.Intf, UniModuleRegistration,
-  UniContext, UniSession,
+  UniAdminModuleRegistry, UniAdminModuleRegistry.Intf, UniModuleRegistration,
+  UniContext,
   UserDataModule, UserService, UserService.Intf;
 
 type
@@ -101,10 +101,10 @@ end;
 
 procedure TPhase3PerformanceTest.TestModuleRegistrationPerformance;
 var
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
   LStopwatch: TStopwatch;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
   LRegistry.Clear;
 
   LStopwatch := TStopwatch.StartNew;
@@ -124,12 +124,12 @@ end;
 
 procedure TPhase3PerformanceTest.TestLoadOrderCalculationPerformance;
 var
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
   LStopwatch: TStopwatch;
   LLoadOrder: TArray<TLoadOrderInfo>;
   I: Integer;
 begin
-  LRegistry := TUniModuleRegistry.GetInstance;
+  LRegistry := TUniAdminModuleRegistry.GetInstance;
 
   LStopwatch := TStopwatch.StartNew;
 
@@ -148,12 +148,12 @@ end;
 
 procedure TPhase3PerformanceTest.TestUserQueryPerformance;
 var
-  LUserService: IUniUserService;
+  LUserService: IUserService;
   LStopwatch: TStopwatch;
   LUsers: TArray<TUserInfo>;
   I: Integer;
 begin
-  LUserService := TUniUserService.Create(FExecutionContext);
+  LUserService := TUserService.Create(FExecutionContext);
 
   LStopwatch := TStopwatch.StartNew;
 
@@ -281,7 +281,7 @@ end;
 procedure TPhase3PerformanceTest.TestMemoryUsage;
 var
   LBeforeMemory, LAfterMemory: Int64;
-  LUserService: IUniUserService;
+  LUserService: IUserService;
   I: Integer;
   LUsers: TArray<TUserInfo>;
 begin
@@ -289,7 +289,7 @@ begin
   LBeforeMemory := GetHeapStatus.TotalAllocated;
 
   // 执行多次操作
-  LUserService := TUniUserService.Create(FExecutionContext);
+  LUserService := TUserService.Create(FExecutionContext);
   for I := 1 to 1000 do
   begin
     LUsers := LUserService.GetUsers('', -1, 1, 10);
@@ -310,7 +310,7 @@ var
   LStopwatch: TStopwatch;
   LResults: TList<Integer>;
   I: Integer;
-  LRegistry: IUniModuleRegistry;
+  LRegistry: IUniAdminModuleRegistry;
 begin
   LResults := TList<Integer>.Create;
   SetLength(LThreads, 10);
@@ -326,7 +326,7 @@ begin
         J: Integer;
         LAllIDs: TArray<string>;
       begin
-        LRegistry := TUniModuleRegistry.GetInstance;
+        LRegistry := TUniAdminModuleRegistry.GetInstance;
         for J := 1 to 100 do
         begin
           LAllIDs := LRegistry.GetAllPluginIDs;
@@ -353,6 +353,6 @@ initialization
   TDUnitX.RegisterTestFixture(TPhase3PerformanceTest);
 
 finalization
-  TUniModuleRegistry.CleanupInstance;
+  TUniAdminModuleRegistry.CleanupInstance;
 
 end.

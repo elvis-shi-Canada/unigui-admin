@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, System.Types,
   Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, FireDAC.Stan.Param,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniAdminDataModule;
 
 type
   /// <summary>
@@ -26,7 +26,7 @@ type
   /// <summary>
   /// 角色数据模块 - 提供角色表的 CRUD 操作和关联管理
   /// </summary>
-  TRoleDataModule = class(TUniDataModule)
+  TRoleDataModule = class(TUniAdminDataModule)
   private
     function RoleCodeExists(const RoleCode: string; ExcludeRoleID: Integer = 0): Boolean;
     function ValidateDataScope(const DataScope: string): Boolean;

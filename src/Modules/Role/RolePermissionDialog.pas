@@ -7,7 +7,7 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniButton, uniLabel, uniListBox,
   uniPanel, uniGUIForm, Vcl.Dialogs,
-  UniContext, UniPlugin.Types, UniDataModule;
+  UniContext, UniPlugin.Types, UniAdminDataModule;
 
 type
   /// <summary>
@@ -69,7 +69,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniFormStyler;
+  UniAdminFormStyler;
 
 constructor TRolePermissionDialog.Create(AOwner: TComponent);
 begin
@@ -107,8 +107,8 @@ end;
 
 procedure TRolePermissionDialog.FormCreate(Sender: TObject);
 begin
-  TUniFormStyler.AutoStylePanels(Self);
-  TUniFormStyler.AutoStyleButtons(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStyleButtons(Self);
   Caption := '权限分配';
   Width := 700;
   Height := 500;

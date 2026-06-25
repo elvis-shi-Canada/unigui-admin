@@ -7,7 +7,7 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniPanel, uniMemo, uniComboBox,
-  UniContext, UniPlugin.Types, BaseCrudFrame, UniScheduler;
+  UniContext, UniPlugin.Types, BaseCrudFrame, UniAdminScheduler;
 
 type
   /// <summary>

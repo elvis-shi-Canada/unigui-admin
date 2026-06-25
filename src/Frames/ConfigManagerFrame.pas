@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.Grids,
-  UniConfigService.Intf;
+  UniAdminConfigService.Intf;
 
 type
   /// <summary>
@@ -44,7 +44,7 @@ type
     procedure grdConfigSelectCell(Sender: TObject; ACol, ARow: Integer;
       var CanSelect: Boolean);
   private
-    FConfigService: IUniConfigService;
+    FConfigService: IUniAdminConfigService;
     FCurrentModuleConfig: IModuleConfig;
     FCurrentModuleName: string;
     FConfigKeys: TArray<string>;
@@ -63,7 +63,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    procedure SetConfigService(const AConfigService: IUniConfigService);
+    procedure SetConfigService(const AConfigService: IUniAdminConfigService);
     procedure RefreshUI;
   end;
 
@@ -86,7 +86,7 @@ begin
   inherited;
 end;
 
-procedure TConfigManagerFrame.SetConfigService(const AConfigService: IUniConfigService);
+procedure TConfigManagerFrame.SetConfigService(const AConfigService: IUniAdminConfigService);
 begin
   FConfigService := AConfigService;
   LoadModules;

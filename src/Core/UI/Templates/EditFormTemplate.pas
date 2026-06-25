@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes,
   Vcl.Controls, Vcl.Forms,
-  UniGUIBaseClasses, UniGUIClasses, UniGUIForm, UniSession, uniGUIApplication,
+  UniGUIBaseClasses, UniGUIClasses, UniGUIForm, uniGUIApplication,
   UniLabel, uniPanel, UniButton, UniEdit, UniMemo, UniCheckBox, UniComboBox, UniGroupBox,
   uniMultiItem;
 
@@ -49,13 +49,13 @@ implementation
 {$R *.dfm}
 
 uses
-  UniFormStyler;
+  UniAdminFormStyler;
 
 procedure TEditFormTemplate.FormCreate(Sender: TObject);
 begin
   // 应用统一设计系统样式
-  TUniFormStyler.AutoStylePanels(Self);
-  TUniFormStyler.AutoStyleButtons(Self);
+  TUniAdminFormStyler.AutoStylePanels(Self);
+  TUniAdminFormStyler.AutoStyleButtons(Self);
 
   FEditMode := (Tag <> 0);
   if FEditMode then
