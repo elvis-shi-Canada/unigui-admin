@@ -203,6 +203,36 @@ end;
 
 - Use ADO components (TADOConnection, TADOQuery, TADOCommand)
 - Centralize connection in a DataModule
+
+### Connection Management (uniGUI Per-Session)
+
+**CRITICAL**: Every session MUST have its own TFDConnection. TFDConnection is NOT thread-safe.
+
+```
+┌─────────────────────────────────────────────────────┐
+│  TUniAdminConnectionManager (singleton, config only)      │
+│  - GetDefaultConnection() = factory, NOT cache       │
+│  - GetConnection(Params) = create new connection     │
+│  - ReleaseConnection(var) = disconnect + free        │
+├─────────────────────────────────────────────────────┤
+│  TMainModule (per-session)                           │
+│  - FConnection: TFDConnection (created in OnCreate)  │
+│  - FServices: IUniAdminServices (holds all core services) │
+│  - Connection property → shared by all DataModules   │
+├─────────────────────────────────────────────────────┤
+│  TUniAdminDataModule subclasses                           │
+│  - Use CreateWithConnection(nil, GetMainModule.Conn) │
+│  - Do NOT own the connection (FOwnsConnection=False) │
+│  - Create(nil) only for standalone/test usage        │
+└─────────────────────────────────────────────────────┘
+```
+
+Rules:
+1. **TUniAdminConnectionManager is a factory, not a cache.** `GetDefaultConnection` creates a new connection each call. The caller owns lifecycle.
+2. **TUniAdminServices is per-session.** Create via `TUniAdminServices.Create(connection, True)` in `TMainModule.OnCreate`. Destroy in `OnDestroy`.
+3. **TUniAdminDataModule shares session connection.** Use `CreateWithConnection(nil, GetMainModule.Connection)` instead of `Create(nil)`.
+4. **ServerModule connections are temporary.** Release after migration. Session connections belong in MainModule.
+5. **Never store TFDConnection in class var.** All service classes that depend on DB connections must be per-session instances.
 - Use parameterized queries to prevent SQL injection
 
 ```pascal
@@ -307,7 +337,7 @@ Query.SQL.Text := 'SELECT * FROM Users WHERE Status = ' + IntToStr(Status);
 [dcc32 Error] UniPluginTest.pas(108): E2003 Undeclared identifier: 'TSessionInfo'
 [dcc32 Error] UniPluginTest.pas(125): E2003 Undeclared identifier: 'TUserContextImpl'
 ```
-根本原因是测试单元 uses 部分缺少 `UniSession` 引用。
+根本原因是测试单元 uses 部分缺少 `UniContext` 引用（TSessionInfo/TUserContextImpl/TExecutionContextImpl 等会话类型已从已删除的 UniAdminSession 单元迁移至 UniContext）。
 
 **正确行为**
 1. 遇到 E2003 错误时，首先使用 search_content 查找类型的定义位置
@@ -583,7 +613,7 @@ TServerModule = class(TUniGUIServerModule)
   procedure OnCreate(Sender: TObject);    // 默认 = published
   procedure OnDestroy(Sender: TObject);
 private
-  FConfigService: IUniConfigService;
+  FConfigService: IUniAdminConfigService;
   ...
 protected
   // 仅放非事件处理方法
@@ -754,14 +784,14 @@ var LFound: Boolean := False;  // 必须显式初始化
 
 **错误模式**
 ```pascal
-class var FCurrentTheme: TUniTheme;
+class var FCurrentTheme: TUniAdminTheme;
 
 initialization
-  FCurrentTheme := TUniTheme.Create(nil);  // 创建
+  FCurrentTheme := TUniAdminTheme.Create(nil);  // 创建
 
 finalization
   // 只释放了其他资源，忘记释放 FCurrentTheme！
-  // → 内存泄漏：TUniTheme x 1 (205-220 bytes)
+  // → 内存泄漏：TUniAdminTheme x 1 (205-220 bytes)
 ```
 
 **正确行为**

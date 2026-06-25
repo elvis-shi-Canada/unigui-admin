@@ -10,7 +10,7 @@
 **UniAdmin** 是基于 Delphi 12 Athens + UniGUI 的零代码后台管理框架，借鉴 Django Admin 设计理念。
 
 - **插件化核心** — 动态加载、注册、依赖解析的业务模块扩展
-- **零代码 CRUD** — 通过 TUniModelAdmin 组件声明式配置，运行时自动生成列表和表单
+- **零代码 CRUD** — 通过 TUniAdminModel 组件声明式配置，运行时自动生成列表和表单
 - **元数据驱动** — 自动发现数据库 Schema，配置驱动 UI 生成
 - **RBAC 权限** — 用户-角色-权限三级模型，支持数据范围控制
 - **任务调度** — Cron 表达式驱动的定时任务
@@ -33,7 +33,7 @@
 ```mermaid
 graph TB
     subgraph 配置声明层["配置声明层（设计时）"]
-        MA["TUniModelAdmin 组件<br/>ListDisplay / ListFilter / FieldSets"]
+        MA["TUniAdminModel 组件<br/>ListDisplay / ListFilter / FieldSets"]
     end
 
     subgraph 运行时引擎["运行时引擎层"]
@@ -92,8 +92,8 @@ graph TB
 
 ```mermaid
 flowchart LR
-    A["1. 设计时配置<br/>TUniModelAdmin"] --> B["2. 运行时驱动<br/>TBaseCrudFrame"]
-    B --> C["3. 元数据读取<br/>UniMetadataCache"]
+    A["1. 设计时配置<br/>TUniAdminModel"] --> B["2. 运行时驱动<br/>TBaseCrudFrame"]
+    B --> C["3. 元数据读取<br/>UniAdminMetadataCache"]
     C --> D["4. 数据库操作<br/>FireDAC + SQL Server"]
     D --> E["5. UI 渲染<br/>UniGUI Web"]
 ```
@@ -170,7 +170,7 @@ type
   end;
 
 // 注册插件
-TUniModuleRegistry.GetInstance.RegisterPluginClass(TMyPlugin, 'my-plugin', LPluginInfo);
+TUniAdminModuleRegistry.GetInstance.RegisterPluginClass(TMyPlugin, 'my-plugin', LPluginInfo);
 ```
 
 ### 服务层模式
@@ -183,7 +183,7 @@ IMyService = interface(IInterface)
 end;
 
 // 注册到服务定位器
-TUniServices.RegisterService<IMyService>(TMyService);
+TUniAdminServices.RegisterService<IMyService>(TMyService);
 ```
 
 ---

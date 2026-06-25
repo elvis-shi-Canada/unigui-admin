@@ -16,11 +16,11 @@
 | 插件基类 | `src/Core/Plugin/UniPlugin.pas` | 待测试 |
 | 插件接口 | `src/Core/Plugin/UniPlugin.Intf.pas` | 待测试 |
 | 插件类型定义 | `src/Core/Plugin/UniPlugin.Types.pas` | 待测试 |
-| 插件注册表 | `src/Core/Plugin/UniModuleRegistry.pas` | 待测试 |
-| 注册表接口 | `src/Core/Plugin/UniModuleRegistry.Intf.pas` | 待测试 |
-| 配置服务 | `src/Core/Config/UniConfigService.pas` | 待测试 |
-| 配置服务接口 | `src/Core/Config/UniConfigService.Intf.pas` | 待测试 |
-| 会话管理 | `src/Core/Session/UniSession.pas` | 待测试 |
+| 插件注册表 | `src/Core/Plugin/UniAdminModuleRegistry.pas` | 待测试 |
+| 注册表接口 | `src/Core/Plugin/UniAdminModuleRegistry.Intf.pas` | 待测试 |
+| 配置服务 | `src/Core/Config/UniAdminConfigService.pas` | 待测试 |
+| 配置服务接口 | `src/Core/Config/UniAdminConfigService.Intf.pas` | 待测试 |
+| 会话管理 | `src/Core/Session/UniAdminSession.pas` | 待测试 |
 | 上下文定义 | `src/Core/Context/UniContext.pas` | 待测试 |
 
 ### 1.2 UI 组件

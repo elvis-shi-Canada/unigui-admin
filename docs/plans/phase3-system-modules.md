@@ -10,7 +10,7 @@
 
 ## 阶段概述
 
-Phase 3 将基于 Phase 2 的核心框架（TBaseCrudFrame、IUniAuthService、IUniPermissionManager 等）实现 7 个系统管理模块。这些模块是所有后台管理系统的基础功能。
+Phase 3 将基于 Phase 2 的核心框架（TBaseCrudFrame、IUniAdminAuthService、IUniAdminPermissionManager 等）实现 7 个系统管理模块。这些模块是所有后台管理系统的基础功能。
 
 ### Phase 2 基础设施回顾
 
@@ -19,11 +19,11 @@ Phase 3 将基于 Phase 2 的核心框架（TBaseCrudFrame、IUniAuthService、I
 | 组件 | 文件 | 功能 |
 |------|------|------|
 | CRUD 基类 | `BaseCrudFrame.pas` | 提供标准增删改查操作界面 |
-| 认证服务 | `UniAuthService.pas` | 用户登录、密码管理 |
-| 权限管理 | `UniPermissionManager.pas` | RBAC 权限检查 |
-| 菜单管理 | `UniMenuManager.pas` | 菜单树管理 |
-| 数据访问 | `UniDataModule.pas` | 数据库操作基类 |
-| 元数据缓存 | `UniMetadataCache.pas` | 表结构元数据 |
+| 认证服务 | `UniAdminAuthService.pas` | 用户登录、密码管理 |
+| 权限管理 | `UniAdminPermissionManager.pas` | RBAC 权限检查 |
+| 菜单管理 | `UniAdminMenuManager.pas` | 菜单树管理 |
+| 数据访问 | `UniAdminDataModule.pas` | 数据库操作基类 |
+| 元数据缓存 | `UniAdminMetadataCache.pas` | 表结构元数据 |
 
 ### Phase 3 模块清单
 
@@ -285,7 +285,7 @@ type
 **接口定义**:
 ```pascal
 type
-  IUniUserService = interface(IInterface)
+  IUserService = interface(IInterface)
     ['{UNI-USER-SERVICE-001}']
     // 用户查询
     function GetUserByID(UserID: Integer): TUser_info;
@@ -935,7 +935,7 @@ UniAdmin_TaskExecutionLogs (
 ## Phase 3 集成 (Tasks 93-100)
 
 ### Task 93: 注册所有模块到插件系统
-**文件**: `src/Core/Plugin/UniModuleRegistry.pas` 更新
+**文件**: `src/Core/Plugin/UniAdminModuleRegistry.pas` 更新
 
 ---
 

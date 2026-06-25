@@ -101,7 +101,7 @@
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        核心层 (Core)                                 │
 │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌────────────┐  │
-│  │BaseCrudFrame │ │UniModelAdmin │ │ AuthService  │ │ MenuManager│  │
+│  │BaseCrudFrame │ │UniAdminModel │ │ AuthService  │ │ MenuManager│  │
 │  │  CRUD基类    │ │  配置组件    │ │  认证服务    │ │  菜单管理  │  │
 │  └──────────────┘ └──────────────┘ └──────────────┘ └────────────┘  │
 └─────────────────────────────────────────────────────────────────────┘
@@ -153,7 +153,7 @@ UniAdmin/
 │   ├── AuthService                # 认证服务
 │   ├── MenuManager                # 菜单管理器
 │   ├── BaseCrudFrame              # CRUD 基类
-│   ├── UniModelAdmin              # 配置组件
+│   ├── UniAdminModel              # 配置组件
 │   └── MetadataCache              # 元数据缓存
 │
 ├── Modules/                       # 官方模块
@@ -189,7 +189,7 @@ UniAdmin/
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    配置声明层 (设计时)                        │
-│                     TUniModelAdmin 组件                       │
+│                     TUniAdminModel 组件                       │
 │   ListDisplay | ListFilter | FieldSets | FieldControls       │
 └─────────────────────────────────────────────────────────────┘
                               ↓
@@ -869,7 +869,7 @@ UniAdmin/
 
 ## 组件设计规范
 
-### TUniModelAdmin 组件属性
+### TUniAdminModel 组件属性
 
 | 属性分组 | 属性 | 说明 |
 |---------|------|------|
@@ -946,7 +946,7 @@ UniAdmin/
 
 1. **创建 Frame** - 继承 TBaseCrudFrame
 2. **设计布局** - 放置面板（分组容器）和输入控件
-3. **配置 TUniModelAdmin**
+3. **配置 TUniAdminModel**
    - 设置 TableName、PrimaryKey、SoftDelete
    - 配置 ListDisplay（列表显示列）
    - 配置 ListFilter（过滤器）
@@ -962,7 +962,7 @@ UniAdmin/
 ```
 Initialize
     ↓
-读取 TUniModelAdmin 配置
+读取 TUniAdminModel 配置
     ↓
 加载元数据（如有）→ 合并配置
     ↓
@@ -1079,7 +1079,7 @@ UniAdmin/
 │   ├── AuthService                # 认证服务
 │   ├── MenuManager                # 菜单管理器
 │   ├── BaseCrudFrame              # CRUD 基类
-│   ├── UniModelAdmin              # 配置组件
+│   ├── UniAdminModel              # 配置组件
 │   ├── MetadataCache              # 元数据缓存
 │   └── PermissionManager          # 权限管理
 │

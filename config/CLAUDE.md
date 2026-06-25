@@ -40,8 +40,8 @@ config/
 ```mermaid
 flowchart TB
     App["UniAdmin.dpr 启动"] --> SM["ServerModule 初始化"]
-    SM --> CS["UniConfigService 读取 config/app.json"]
-    CS --> CM["UniConnectionManager 建立数据库连接"]
+    SM --> CS["UniAdminConfigService 读取 config/app.json"]
+    CS --> CM["UniAdminConnectionManager 建立数据库连接"]
     CM --> Ready["系统就绪，监听端口 8077"]
 ```
 

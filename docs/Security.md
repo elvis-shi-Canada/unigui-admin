@@ -20,7 +20,7 @@
 - FireDAC 参数绑定自动转义
 
 **实现位置**：
-- `src/Core/Data/UniConnectionManager.pas` - 连接管理
+- `src/Core/Data/UniAdminConnectionManager.pas` - 连接管理
 - `src/Core/Metadata/UniMetadataManager.pas` - 元数据查询
 - `src/Core/Services/*.pas` - 所有服务层查询
 
@@ -30,7 +30,7 @@
 - 连接池线程安全
 
 **实现位置**：
-- `src/Core/Data/UniConnectionManager.pas`
+- `src/Core/Data/UniAdminConnectionManager.pas`
 - `src/Core/Metadata/UniMetadataManager.pas`
 - `src/Core/Services/UniServiceLocator.pas`
 
@@ -40,7 +40,7 @@
 - **类型安全**：强类型 Pascal 语言
 
 **实现位置**：
-- `src/Core/Services/UniAuthService.pas` - `ValidatePassword`
+- `src/Core/Services/UniAdminAuthService.pas` - `ValidatePassword`
 - `src/UI/Framework/UniBaseCrudFrame.pas` - 表单验证
 
 #### 4. 审计日志
@@ -55,7 +55,7 @@
 
 ### 1. 密码哈希算法 🔴 高优先级
 **当前实现**：SHA256  
-**位置**：`src/Core/Services/UniAuthService.pas`  
+**位置**：`src/Core/Services/UniAdminAuthService.pas`  
 **风险等级**：中等  
 **说明**：SHA256 可被 GPU 加速破解，不适合密码存储
 
@@ -88,7 +88,7 @@ end;
 
 ### 2. Token 永久有效 🟡 中优先级
 **当前实现**：Token 无过期时间  
-**位置**：`src/Core/Services/UniAuthService.pas`  
+**位置**：`src/Core/Services/UniAdminAuthService.pas`  
 **风险等级**：中低  
 **说明**：会话劫持后 Token 永久有效
 
@@ -148,7 +148,7 @@ end;
 
 ### 5. 无防暴力破解机制 🟡 中优先级
 **当前实现**：无登录尝试限制  
-**位置**：`src/Core/Services/UniAuthService.pas`  
+**位置**：`src/Core/Services/UniAdminAuthService.pas`  
 **风险等级**：中  
 **说明**：可能被暴力破解
 

@@ -63,7 +63,7 @@
 │  └─────────────────────────────────────────────────────────────────────┘    │
 │                                                                             │
 │  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │  TUniModelAdmin (模型管理组件)                                       │    │
+│  │  TUniAdminModel (模型管理组件)                                       │    │
 │  │  职责：管理 CRUD 状态，协调数据操作，自动填充审计字段                     │    │
 │  │  ├─ 状态管理：csBrowse, csEdit, csInsert                             │    │
 │  │  ├─ 操作方法：Insert, Edit, Delete, Save, Cancel                     │    │
@@ -87,7 +87,7 @@
 /// </summary>
 TBaseCrudFrame = class(TUniFrame)
 private
-  FModelAdmin: TUniModelAdmin;      // ← 核心组件：管理 CRUD 状态
+  FModelAdmin: TUniAdminModel;      // ← 核心组件：管理 CRUD 状态
   FContext: IExecutionContext;      // ← 执行上下文：权限、用户信息
   FPermissionPrefix: string;        // ← 权限前缀：如 'user', 'role'
 
@@ -140,21 +140,21 @@ public
   procedure Finalize; virtual;          // 清理窗体
   procedure Refresh; virtual;           // 刷新数据
 
-  property ModelAdmin: TUniModelAdmin read FModelAdmin;
+  property ModelAdmin: TUniAdminModel read FModelAdmin;
   property Context: IExecutionContext read FContext;
 end;
 ```
 
 ---
 
-### 2.2 TUniModelAdmin 组件核心代码
+### 2.2 TUniAdminModel 组件核心代码
 
 ```pascal
 /// <summary>
 /// 数据模型管理员 - 提供标准 CRUD 操作
 /// 负责管理 DataSet 的 CRUD 状态，提供标准的数据操作接口
 /// </summary>
-TUniModelAdmin = class(TComponent)
+TUniAdminModel = class(TComponent)
 private
   FDataSet: TDataSet;                  // ← 关联的数据集
   FContext: IExecutionContext;         // ← 执行上下文（审计字段用）
@@ -356,7 +356,7 @@ end;
 
 | 设计原则 | 体现 | 代码示例 |
 |---------|------|----------|
-| **单一职责** | 每个组件职责明确 | `TBaseCrudFrame` 负责 UI 协调，`TUniModelAdmin` 负责数据状态 |
+| **单一职责** | 每个组件职责明确 | `TBaseCrudFrame` 负责 UI 协调，`TUniAdminModel` 负责数据状态 |
 | **开闭原则** | 通过钩子方法扩展 | 子类重写 `DoInitialize`、`DoRefresh` 等方法 |
 | **依赖倒置** | 依赖抽象接口 | `IExecutionContext` 接口解耦具体实现 |
 | **模板方法** | 定义算法骨架 | `BtnAddClick` → `DoBindControls` → `UpdateButtonStates` |
@@ -399,7 +399,7 @@ end;
 type TCrudState = (csBrowse, csEdit, csInsert);
 
 // 状态决定操作可用性
-function TUniModelAdmin.CanSave: Boolean;
+function TUniAdminModel.CanSave: Boolean;
 begin
   Result := (FState in [csEdit, csInsert]);  // 只有编辑/新增状态可保存
 end;
@@ -415,7 +415,7 @@ end;
 
 ```pascal
 // ModelAdmin 作为被观察者
-type TUniModelAdmin = class(TComponent)
+type TUniAdminModel = class(TComponent)
   FOnStateChange: TNotifyEvent;  // ← 状态变化事件
 end;
 
@@ -423,7 +423,7 @@ end;
 constructor TBaseCrudFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  FModelAdmin := TUniModelAdmin.Create(Self);
+  FModelAdmin := TUniAdminModel.Create(Self);
   FModelAdmin.OnStateChange := DoStateChange;  // ← 订阅状态变化
 end;
 
@@ -469,7 +469,7 @@ qryUsers.FieldByName('ModifiedBy').AsInteger := CurrentUserID;
 qryUsers.Post;
 
 // 使用框架：自动填充
-procedure TUniModelAdmin.FillAuditFields(const IsInsert: Boolean);
+procedure TUniAdminModel.FillAuditFields(const IsInsert: Boolean);
 begin
   // ModelAdmin.Save 时自动调用
   if FDataSet.FindField('ModifiedDate') <> nil then
@@ -530,7 +530,7 @@ end;
 | 组件 | 职责 | 核心能力 | 子类需要做什么 |
 |-----|------|----------|---------------|
 | **TBaseCrudFrame** | UI 框架协调器 | • 按钮事件处理<br>• 状态同步<br>• 权限检查 | • 重写钩子方法<br>• 提供数据集<br>• 声明筛选控件 |
-| **TUniModelAdmin** | 数据状态管理器 | • CRUD 状态管理<br>• 审计字段填充<br>• 原始值备份 | • 设置 DataSet<br>• 设置 Context |
+| **TUniAdminModel** | 数据状态管理器 | • CRUD 状态管理<br>• 审计字段填充<br>• 原始值备份 | • 设置 DataSet<br>• 设置 Context |
 | **pnlFilter** | 筛选条件容器 | • 放置查询控件<br>• 触发查询操作 | • 添加编辑框/下拉框<br>• 编写查询逻辑 |
 | **pnlToolBar** | 工具栏容器 | • 放置操作按钮<br>• 自动禁用/启用 | 无需操作，基类管理 |
 | **grdList** | 数据展示网格 | • 显示数据列表<br>• 选择记录 | • 配置列定义 |
@@ -541,7 +541,7 @@ end;
 
 ## 五、设计决策背后的原因
 
-### Q1: 为什么将 CRUD 状态管理从 UI 层分离到 `TUniModelAdmin`？
+### Q1: 为什么将 CRUD 状态管理从 UI 层分离到 `TUniAdminModel`？
 
 **A: 职责分离 + 可测试性**
 
@@ -627,7 +627,7 @@ end;
 | 文件 | 路径 | 说明 |
 |-----|------|------|
 | `BaseCrudFrame.pas` | `src/Core/UI/` | CRUD 基类实现 |
-| `UniModelAdmin.pas` | `src/Core/UI/` | 模型管理组件 |
+| `UniAdminModel.pas` | `src/Core/UI/` | 模型管理组件 |
 | `UserListFrame.pas` | `src/Modules/User/` | 用户列表示例 |
 | `2025-02-23-uniadmin-implementation-design.md` | `docs/plans/` | 设计文档 |
 

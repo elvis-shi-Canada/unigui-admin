@@ -33,7 +33,7 @@ Phase 3 成功实现了 7 个系统管理模块，包括用户管理、角色管
 
 **组件**:
 - `TUserDataModule` - 用户数据访问层
-- `TUniUserService` - 用户业务逻辑服务
+- `TUserService` - 用户业务逻辑服务
 - `TUserListFrame` - 用户列表界面
 - `TUserEditForm` - 用户编辑表单
 - `TUserPasswordDialog` - 密码管理对话框
@@ -161,7 +161,7 @@ Phase 3 成功实现了 7 个系统管理模块，包括用户管理、角色管
 **状态**: ✅ 完成
 
 **组件**:
-- `TUniScheduler` - 任务调度器
+- `TUniAdminScheduler` - 任务调度器
 - `TUniTaskProcessor` - 任务处理器基类
 - `TTaskManageFrame` - 任务管理界面
 - `TTaskEditForm` - 任务编辑表单

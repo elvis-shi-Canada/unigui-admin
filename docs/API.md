@@ -12,13 +12,13 @@
 
 ## 核心服务
 
-### IUniConnectionManager
+### IUniAdminConnectionManager
 数据库连接管理服务，提供线程安全的连接池功能。
 
-**单元位置**：`src/Core/Data/UniConnectionManager.pas`
+**单元位置**：`src/Core/Data/UniAdminConnectionManager.pas`
 
 ```pascal
-IUniConnectionManager = interface
+IUniAdminConnectionManager = interface
   ['{YOUR-GUID-HERE}']
   
   /// <summary>
@@ -56,10 +56,10 @@ end;
 **使用示例**：
 ```pascal
 var
-  ConnMgr: IUniConnectionManager;
+  ConnMgr: IUniAdminConnectionManager;
   Conn: TFDConnection;
 begin
-  ConnMgr := TUniServices.ConnectionManager;
+  ConnMgr := TUniAdminServices.ConnectionManager;
   Conn := ConnMgr.GetDefaultConnection;
   try
     // 使用连接执行查询
@@ -125,7 +125,7 @@ var
   Fields: TArray<TFieldInfo>;
   Field: TFieldInfo;
 begin
-  MetaMgr := TUniServices.MetadataManager;
+  MetaMgr := TUniAdminServices.MetadataManager;
   
   // 获取表字段信息
   Fields := MetaMgr.GetTableFields('Users');
@@ -142,13 +142,13 @@ end;
 
 ---
 
-### IUniAuthService
+### IUniAdminAuthService
 用户认证服务，提供登录、登出、密码管理等功能。
 
-**单元位置**：`src/Core/Services/UniAuthService.pas`
+**单元位置**：`src/Core/Services/UniAdminAuthService.pas`
 
 ```pascal
-IUniAuthService = interface
+IUniAdminAuthService = interface
   ['{YOUR-GUID-HERE}']
   
   /// <summary>
@@ -204,10 +204,10 @@ end;
 **使用示例**：
 ```pascal
 var
-  AuthService: IUniAuthService;
+  AuthService: IUniAdminAuthService;
   LoginResult: TLoginResult;
 begin
-  AuthService := TUniServices.AuthService;
+  AuthService := TUniAdminServices.AuthService;
   
   // 登录
   LoginResult := AuthService.Login('admin', 'password123');
@@ -229,13 +229,13 @@ end;
 
 ---
 
-### IUniPermissionManager
+### IUniAdminPermissionManager
 权限管理服务，提供 RBAC 权限检查和管理功能。
 
-**单元位置**：`src/Core/Services/UniPermissionManager.pas`
+**单元位置**：`src/Core/Services/UniAdminPermissionManager.pas`
 
 ```pascal
-IUniPermissionManager = interface
+IUniAdminPermissionManager = interface
   ['{YOUR-GUID-HERE}']
   
   /// <summary>
@@ -293,10 +293,10 @@ end;
 **使用示例**：
 ```pascal
 var
-  PermMgr: IUniPermissionManager;
+  PermMgr: IUniAdminPermissionManager;
   Roles: TArray<TRoleInfo>;
 begin
-  PermMgr := TUniServices.PermissionManager;
+  PermMgr := TUniAdminServices.PermissionManager;
   
   // 检查权限
   if not PermMgr.HasPermission(CurrentUserID, 'user:delete') then
@@ -319,13 +319,13 @@ end;
 
 ---
 
-### IUniMenuManager
+### IUniAdminMenuManager
 菜单管理服务，提供菜单树的获取和管理功能。
 
-**单元位置**：`src/Core/Services/UniMenuManager.pas`
+**单元位置**：`src/Core/Services/UniAdminMenuManager.pas`
 
 ```pascal
-IUniMenuManager = interface
+IUniAdminMenuManager = interface
   ['{YOUR-GUID-HERE}']
   
   /// <summary>
@@ -373,10 +373,10 @@ end;
 **使用示例**：
 ```pascal
 var
-  MenuMgr: IUniMenuManager;
+  MenuMgr: IUniAdminMenuManager;
   Menus: TArray<TMenuItem>;
 begin
-  MenuMgr := TUniServices.MenuManager;
+  MenuMgr := TUniAdminServices.MenuManager;
   
   // 获取当前用户的菜单
   Menus := MenuMgr.GetUserMenus(CurrentUserID);
@@ -599,15 +599,15 @@ type
   end;
 ```
 
-### TUniPropertyEditor
+### TUniAdminPropertyEditor
 属性编辑器基类，用于创建属性编辑界面。
 
-**单元位置**：`src/UI/Components/UniPropertyEditor.pas`
+**单元位置**：`src/UI/Components/UniAdminPropertyEditor.pas`
 
 **主要方法**：
 ```pascal
 type
-  TUniPropertyEditor = class(TFrame)
+  TUniAdminPropertyEditor = class(TFrame)
   protected
     procedure InitializeControls; virtual;
     procedure LoadData; virtual;
@@ -680,23 +680,23 @@ type
 ### 服务定位器
 
 ```pascal
-uses UniServices;
+uses UniAdminServices;
 
 procedure InitializeServices;
 begin
   // 初始化服务
-  TUniServices.Initialize(Connection);
+  TUniAdminServices.Initialize(Connection);
   
   // 访问服务
-  var LAuthService := TUniServices.AuthService;
-  var LPermMgr := TUniServices.PermissionManager;
-  var LMenuMgr := TUniServices.MenuManager;
+  var LAuthService := TUniAdminServices.AuthService;
+  var LPermMgr := TUniAdminServices.PermissionManager;
+  var LMenuMgr := TUniAdminServices.MenuManager;
 end;
 
 procedure UseServices;
 begin
   // 获取服务实例
-  var AuthService := TUniServices.AuthService;
+  var AuthService := TUniAdminServices.AuthService;
   
   // 调用服务方法
   var Result := AuthService.Login('admin', 'password');
@@ -754,7 +754,7 @@ end;
 procedure DeleteUser(UserID: Integer);
 begin
   // 检查权限
-  if not TUniServices.PermissionManager.HasPermission(
+  if not TUniAdminServices.PermissionManager.HasPermission(
          CurrentUserID, 'user:delete') then
   begin
     ShowMessage('您没有删除用户的权限');
@@ -762,7 +762,7 @@ begin
   end;
   
   // 检查数据范围
-  var DataScope := TUniServices.PermissionManager
+  var DataScope := TUniAdminServices.PermissionManager
                     .GetDataScope(CurrentUserID, 'user:delete');
   
   if DataScope = 'self' then
@@ -786,7 +786,7 @@ end;
 ```pascal
 procedure LoadUserMenus;
 begin
-  var MenuMgr := TUniServices.MenuManager;
+  var MenuMgr := TUniAdminServices.MenuManager;
   var Menus := MenuMgr.GetUserMenus(CurrentUserID);
   
   for var Menu in Menus do
@@ -807,7 +807,7 @@ end;
 ```pascal
 procedure CreatePropertyEditors(const TableName: string);
 begin
-  var MetaMgr := TUniServices.MetadataManager;
+  var MetaMgr := TUniAdminServices.MetadataManager;
   var Fields := MetaMgr.GetTableFields(TableName);
   
   for var Field in Fields do
@@ -835,23 +835,23 @@ end;
 
 ✅ **推荐**：通过服务定位器访问服务
 ```pascal
-var AuthService := TUniServices.AuthService;
+var AuthService := TUniAdminServices.AuthService;
 ```
 
 ❌ **不推荐**：直接创建服务实例
 ```pascal
-var AuthService := TUniAuthService.Create; // 错误！
+var AuthService := TUniAdminAuthService.Create; // 错误！
 ```
 
 ### 2. 数据库连接
 
 ✅ **推荐**：使用连接管理器
 ```pascal
-var Conn := TUniServices.ConnectionManager.GetDefaultConnection;
+var Conn := TUniAdminServices.ConnectionManager.GetDefaultConnection;
 try
   // 使用连接
 finally
-  TUniServices.ConnectionManager.ReleaseConnection(Conn);
+  TUniAdminServices.ConnectionManager.ReleaseConnection(Conn);
 end;
 ```
 
@@ -926,22 +926,22 @@ Query.Post;
 ## 依赖关系图
 
 ```
-TUniServices (服务定位器)
+TUniAdminServices (服务定位器)
     |
-    +-- IUniConnectionManager (连接管理)
+    +-- IUniAdminConnectionManager (连接管理)
     +-- IUniMetadataManager (元数据管理)
-    +-- IUniAuthService (认证服务)
-    +-- IUniPermissionManager (权限管理)
-    +-- IUniMenuManager (菜单管理)
+    +-- IUniAdminAuthService (认证服务)
+    +-- IUniAdminPermissionManager (权限管理)
+    +-- IUniAdminMenuManager (菜单管理)
     +-- IUniThemeManager (主题管理)
     +-- IUniLayoutManager (布局管理)
 
 UI 层依赖
     |
-    +-- TUniLoginForm (登录窗体) → IUniAuthService
-    +-- TUniMainForm (主窗体) → IUniMenuManager
+    +-- TUniLoginForm (登录窗体) → IUniAdminAuthService
+    +-- TUniMainForm (主窗体) → IUniAdminMenuManager
     +-- TUniBaseCrudFrame (CRUD基类) → IUniMetadataManager
-    +-- TUniPropertyEditor (属性编辑器) → IUniMetadataManager
+    +-- TUniAdminPropertyEditor (属性编辑器) → IUniMetadataManager
 ```
 
 ---
@@ -950,13 +950,13 @@ UI 层依赖
 
 ## Phase 3 系统模块 API
 
-### IUniUserService
+### IUserService
 用户管理服务接口，提供用户业务的完整功能。
 
 **单元位置**：`src/Modules/User/UserService.Intf.pas`
 
 ```pascal
-IUniUserService = interface(IInterface)
+IUserService = interface(IInterface)
   ['{UNI-USER-SERVICE-001}']
 
   /// <summary>获取用户列表（分页）</summary>
@@ -1009,10 +1009,10 @@ end;
 **使用示例**：
 ```pascal
 var
-  UserService: IUniUserService;
+  UserService: IUserService;
   Users: TArray<TUserInfo>;
 begin
-  UserService := TUniUserService.Create(ExecutionContext);
+  UserService := TUserService.Create(ExecutionContext);
 
   // 获取用户列表
   Users := UserService.GetUsers('admin', -1, 1, 20);
@@ -1190,13 +1190,13 @@ end;
 
 ---
 
-### TUniScheduler
+### TUniAdminScheduler
 定时任务调度器类，提供基于 Cron 表达式的任务调度功能。
 
-**单元位置**：`src/Modules/Scheduler/UniScheduler.pas`
+**单元位置**：`src/Modules/Scheduler/UniAdminScheduler.pas`
 
 ```pascal
-TUniScheduler = class(TInterfacedObject, ISchedulerService)
+TUniAdminScheduler = class(TInterfacedObject, ISchedulerService)
 public
   /// <summary>启动调度器</summary>
   procedure Start;
@@ -1240,9 +1240,9 @@ end;
 **使用示例**：
 ```pascal
 var
-  Scheduler: TUniScheduler;
+  Scheduler: TUniAdminScheduler;
 begin
-  Scheduler := TUniScheduler.Create;
+  Scheduler := TUniAdminScheduler.Create;
   Scheduler.Start;
 
   // 添加每天凌晨 2 点执行的任务

@@ -246,10 +246,10 @@ TPlugin = class(TInterfacedObject, IPlugin)
 end;
 ```
 
-**UniModuleRegistry.pas** - 插件注册表
+**UniAdminModuleRegistry.pas** - 插件注册表
 ```pascal
 // 注册插件
-TUniModuleRegistry.GetInstance.RegisterPluginClass(
+TUniAdminModuleRegistry.GetInstance.RegisterPluginClass(
   TMyPlugin,
   'my-plugin',
   LPluginInfo
@@ -258,7 +258,7 @@ TUniModuleRegistry.GetInstance.RegisterPluginClass(
 
 #### 数据访问层
 
-**UniDataModule.pas** - 数据模块基类
+**UniAdminDataModule.pas** - 数据模块基类
 ```pascal
 TUniBaseModule = class(TDataModule)
   // 审计字段自动填充
@@ -268,11 +268,11 @@ end;
 
 #### 服务层
 
-**UniServices.pas** - 服务定位器
+**UniAdminServices.pas** - 服务定位器
 ```pascal
 // 访问服务
-var AuthService := TUniServices.AuthService;
-var MenuManager := TUniServices.MenuManager;
+var AuthService := TUniAdminServices.AuthService;
+var MenuManager := TUniAdminServices.MenuManager;
 ```
 
 ### 创建新模块
@@ -294,7 +294,7 @@ interface
 uses
   System.SysUtils, System.Classes,
   Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Definitions,
-  UniDataModule;
+  UniAdminDataModule;
 
 type
   TProductDataModule = class(TUniBaseModule)
@@ -405,7 +405,7 @@ end.
 | 类型 | 命名规则 | 示例 |
 |------|----------|------|
 | 类 | T + PascalCase | TUserDataModule |
-| 接口 | I + PascalCase | IUniUserService |
+| 接口 | I + PascalCase | IUserService |
 | 记录 | PascalCase | TUserInfo |
 | 函数/过程 | PascalCase | GetUserByID |
 | 变量 | PascalCase (局部), F + PascalCase (私有) | FUserName |
@@ -453,7 +453,7 @@ end;
 /// 用户管理服务类
 /// 提供用户查询、创建、更新和删除功能
 /// </summary>
-TUniUserService = class(TInterfacedObject, IUniUserService)
+TUserService = class(TInterfacedObject, IUserService)
 public
   /// <summary>
   /// 根据用户 ID 获取用户信息

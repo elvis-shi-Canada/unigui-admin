@@ -60,12 +60,12 @@
 │  │                  TUniGUIServerModule (全局唯一)                       │ │
 │  │  ─────────────────────────────────────────────────────────────────  │ │
 │  │  全局共享服务:                                                       │ │
-│  │  • IUniConfigService    - 配置服务（读写 config/app.json）            │ │
-│  │  • IUniMetadataCache    - 元数据缓存（表结构、字段信息）               │ │
-│  │  • IUniModuleRegistry   - 业务插件注册表                             │ │
+│  │  • IUniAdminConfigService    - 配置服务（读写 config/app.json）            │ │
+│  │  • IUniAdminMetadataCache    - 元数据缓存（表结构、字段信息）               │ │
+│  │  • IUniAdminModuleRegistry   - 业务插件注册表                             │ │
 │  │                                                                      │ │
 │  │  会话管理:                                                            │ │
-│  │  • FSessions: TDictionary<string, TUniSession>                       │ │
+│  │  • FSessions: TDictionary<string, TUniAdminSession>                       │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 │                                    │ 共享服务引用                         │
 │                                    ▼                                     │
@@ -73,7 +73,7 @@
 │  │                  TUniGUIMainModule (每个会话一个)                     │ │
 │  │  ─────────────────────────────────────────────────────────────────  │ │
 │  │  核心属性:                                                           │ │
-│  │  • Session: TUniSession                                             │ │
+│  │  • Session: TUniAdminSession                                             │ │
 │  │  • Plugins: TPluginCollection  ✅ 插件集合                           │ │
 │  │                                                                      │ │
 │  │  便捷访问:                                                           │ │
@@ -82,7 +82,7 @@
 │                                    │ 包含                                │
 │                                    ▼                                     │
 │  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │                       TUniSession (会话对象)                          │ │
+│  │                       TUniAdminSession (会话对象)                          │ │
 │  │  ─────────────────────────────────────────────────────────────────  │ │
 │  │  会话信息:                                                           │ │
 │  │  • Info: TSessionInfo (SessionID, UserID, UserName, ...)            │ │
@@ -90,9 +90,9 @@
 │  │  • Data: TDictionary<string, Variant> (会话数据)                     │ │
 │  │                                                                      │ │
 │  │  服务实例（会话级别）:                                                │ │
-│  │  • AuthService: IUniAuthService                                      │ │
-│  │  • MenuManager: IUniMenuManager                                      │ │
-│  │  • PermissionManager: IUniPermissionManager                          │ │
+│  │  • AuthService: IUniAdminAuthService                                      │ │
+│  │  • MenuManager: IUniAdminMenuManager                                      │ │
+│  │  • PermissionManager: IUniAdminPermissionManager                          │ │
 │  │                                                                      │ │
 │  │  插件字典:                                                           │ │
 │  │  • Plugins: TDictionary<string, TPlugin>                             │ │
@@ -128,48 +128,48 @@ unigui-admin/
 │   │   │   ├── UniPlugin.pas               # TPlugin 基类
 │   │   │   ├── UniPlugin.Intf.pas          # 插件接口定义
 │   │   │   ├── UniPluginRegistry.pas       # 业务插件注册表
-│   │   │   ├── UniPluginLoader.pas         # 插件加载器
+│   │   │   ├── UniAdminPluginLoader.pas         # 插件加载器
 │   │   │   └── UniPluginManager.pas        # 轻量级插件管理器
 │   │   │
 │   │   ├── Session/               # 会话管理
-│   │   │   └── UniSession.pas              # TUniSession 类
+│   │   │   └── UniAdminSession.pas              # TUniAdminSession 类
 │   │   │
 │   │   ├── Context/               # 上下文接口
 │   │   │   ├── UniContext.pas               # 上下文接口定义
 │   │   │   └── UniAppConfig.pas             # 应用配置（JSON 文件）
 │   │   │
 │   │   ├── Config/                # 配置管理
-│   │   │   ├── UniConfigService.pas         # 配置服务（全局）
-│   │   │   └── UniConfigService.Intf.pas    # 配置服务接口
+│   │   │   ├── UniAdminConfigService.pas         # 配置服务（全局）
+│   │   │   └── UniAdminConfigService.Intf.pas    # 配置服务接口
 │   │   │
 │   │   ├── Metadata/              # 元数据管理
-│   │   │   ├── UniMetadataCache.pas         # 元数据缓存（全局）
+│   │   │   ├── UniAdminMetadataCache.pas         # 元数据缓存（全局）
 │   │   │   ├── UniTableMetadata.pas
 │   │   │   └── UniFieldMetadata.pas
 │   │   │
 │   │   ├── Auth/                  # 认证服务
-│   │   │   ├── UniAuthService.pas           # 认证服务（会话级别）
-│   │   │   └── UniAuthService.Intf.pas
+│   │   │   ├── UniAdminAuthService.pas           # 认证服务（会话级别）
+│   │   │   └── UniAdminAuthService.Intf.pas
 │   │   │
 │   │   ├── Menu/                  # 菜单管理
-│   │   │   ├── UniMenuManager.pas           # 菜单服务（会话级别）
-│   │   │   └── UniMenuManager.Intf.pas
+│   │   │   ├── UniAdminMenuManager.pas           # 菜单服务（会话级别）
+│   │   │   └── UniAdminMenuManager.Intf.pas
 │   │   │
 │   │   ├── Permission/            # 权限管理（RBAC）
-│   │   │   ├── UniPermissionManager.pas     # 权限服务（会话级别）
-│   │   │   └── UniPermissionManager.Intf.pas
+│   │   │   ├── UniAdminPermissionManager.pas     # 权限服务（会话级别）
+│   │   │   └── UniAdminPermissionManager.Intf.pas
 │   │   │
 │   │   ├── Data/                  # 数据访问层
-│   │   │   ├── UniDataModule.pas            # 数据模块基类
-│   │   │   ├── UniDataModule.dfm
+│   │   │   ├── UniAdminDataModule.pas            # 数据模块基类
+│   │   │   ├── UniAdminDataModule.dfm
 │   │   │   ├── UniConnection.pas
 │   │   │   └── UniQuery.pas
 │   │   │
 │   │   └── CRUD/                  # CRUD 框架
 │   │       ├── UniBaseCrudFrame.pas         # CRUD 基类代码
 │   │       ├── UniBaseCrudFrame.dfm         # CRUD 基类界面
-│   │       ├── UniModelAdmin.pas            # 配置组件
-│   │       └── UniModelAdmin.Editor.pas      # 属性编辑器
+│   │       ├── UniAdminModel.pas            # 配置组件
+│   │       └── UniAdminModel.Editor.pas      # 属性编辑器
 │   │
 │   ├── Frames/                # 通用框架
 │   │   ├── MainFrame.pas                   # 主框架
@@ -244,7 +244,7 @@ unigui-admin/
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                          │
 │  ┌────────────────────────────────────────────────────────────────────┐ │
-│  │                      IUniModuleRegistry                              │ │
+│  │                      IUniAdminModuleRegistry                              │ │
 │  │              插件类型注册表（全局共享）                                │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 │                                    │                                     │
@@ -297,7 +297,7 @@ type
   private
     FInfo: TPluginInfo;
     FState: TPluginState;
-    FSession: TUniSession;
+    FSession: TUniAdminSession;
 
     FUserContext: IUserContext;
     FExecutionContext: IExecutionContext;
@@ -316,7 +316,7 @@ type
     procedure RegisterPermissions; virtual;
     procedure RegisterMenus; virtual;
   public
-    constructor Create(const Session: TUniSession; const Info: TPluginInfo); virtual;
+    constructor Create(const Session: TUniAdminSession; const Info: TPluginInfo); virtual;
     destructor Destroy; override;
 
     procedure Initialize;
@@ -433,7 +433,7 @@ CREATE TABLE UniAdmin_ModuleDependencies (
 | 交付物 | 说明 |
 |-------|------|
 | **TPlugin 基类** | 插件基类实现 |
-| **IUniModuleRegistry** | 插件注册表 |
+| **IUniAdminModuleRegistry** | 插件注册表 |
 | **插件配置管理** | 配置持久化和可视化 |
 | **示例业务插件** | 数据字典模块示例 |
 | **数据库脚本** | 模块和配置表 |
@@ -461,7 +461,7 @@ CREATE TABLE UniAdmin_ModuleDependencies (
 │  │  └────────────────────────────────────────────────────────────────┘ │ │
 │  │                              ↑ 使用                                 │ │
 │  │  ┌────────────────────────────────────────────────────────────────┐ │ │
-│  │  │                    TUniModelAdmin                              │ │ │
+│  │  │                    TUniAdminModel                              │ │ │
 │  │  │  设计时配置组件：ListDisplay | ListFilter | FieldSets           │ │ │
 │  │  └────────────────────────────────────────────────────────────────┘ │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
@@ -475,7 +475,7 @@ CREATE TABLE UniAdmin_ModuleDependencies (
 │                                   ▼                                     │
 │  ┌────────────────────────────────────────────────────────────────────┐ │
 │  │                       数据访问层                                     │ │
-│  │  UniDataModule (每个插件管理自己的 DataModule)                     │ │
+│  │  UniAdminDataModule (每个插件管理自己的 DataModule)                     │ │
 │  └────────────────────────────────────────────────────────────────────┘ │
 │                                                                          │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -485,12 +485,12 @@ CREATE TABLE UniAdmin_ModuleDependencies (
 
 | 服务 | 位置 | 共享类型 | 说明 |
 |-----|------|---------|------|
-| **IUniConfigService** | ServerModule | 全局共享 | 配置服务（读写 config/app.json） |
-| **IUniMetadataCache** | ServerModule | 全局共享 | 元数据缓存（表结构、字段信息） |
-| **IUniModuleRegistry** | ServerModule | 全局共享 | 业务插件注册表 |
-| **IUniAuthService** | Session | 会话级别 | 认证服务 |
-| **IUniMenuManager** | Session | 会话级别 | 菜单管理 |
-| **IUniPermissionManager** | Session | 会话级别 | 权限管理（RBAC） |
+| **IUniAdminConfigService** | ServerModule | 全局共享 | 配置服务（读写 config/app.json） |
+| **IUniAdminMetadataCache** | ServerModule | 全局共享 | 元数据缓存（表结构、字段信息） |
+| **IUniAdminModuleRegistry** | ServerModule | 全局共享 | 业务插件注册表 |
+| **IUniAdminAuthService** | Session | 会话级别 | 认证服务 |
+| **IUniAdminMenuManager** | Session | 会话级别 | 菜单管理 |
+| **IUniAdminPermissionManager** | Session | 会话级别 | 权限管理（RBAC） |
 | **TPlugin** | Session.Plugins | 会话级别 | 插件实例 |
 | **TDataModule** | Plugin.DataModuleInstances | 插件级别 | 每个插件管理自己的 DataModule |
 
@@ -585,7 +585,7 @@ CREATE TABLE UniAdmin_RolePermissions (
 );
 ```
 
-### TUniModelAdmin 配置组件
+### TUniAdminModel 配置组件
 
 ```pascal
 type
@@ -612,7 +612,7 @@ type
     property Columns: Integer read FColumns write FColumns default 1;
   end;
 
-  TUniModelAdmin = class(TComponent)
+  TUniAdminModel = class(TComponent)
   published
     // 基本配置
     property TableName: string read FTableName write FTableName;
@@ -643,7 +643,7 @@ type
 type
   TUniBaseCrudFrame = class(TUniFrame)
   private
-    FModelAdmin: TUniModelAdmin;
+    FModelAdmin: TUniAdminModel;
     FPlugin: TPlugin;
 
     // UI 组件
@@ -670,12 +670,12 @@ type
 
 | 交付物 | 说明 |
 |-------|------|
-| **UniDataModule** | 支持多数据库的数据模块基类 |
+| **UniAdminDataModule** | 支持多数据库的数据模块基类 |
 | **元数据管理系统** | 元数据缓存、解析、管理 |
 | **认证服务** | 登录、登出、会话管理 |
 | **菜单管理服务** | 菜单树加载、权限过滤 |
 | **权限管理服务** | RBAC 权限检查、角色管理 |
-| **TUniModelAdmin** | 设计时配置组件 |
+| **TUniAdminModel** | 设计时配置组件 |
 | **TBaseCrudFrame** | CRUD 基类 Frame |
 | **示例 CRUD** | 1-2 个示例模块 |
 
@@ -753,7 +753,7 @@ type
 
 | Week | 任务 | 交付物 |
 |------|------|-------|
-| 1 | • TPlugin 基类<br>• IUniModuleRegistry<br>• 插件配置管理 | 插件基类和注册表 |
+| 1 | • TPlugin 基类<br>• IUniAdminModuleRegistry<br>• 插件配置管理 | 插件基类和注册表 |
 | 2 | • 配置持久化<br>• 配置管理UI<br>• 配置历史 | 配置管理系统 |
 | 3 | • 示例业务插件<br>• 单元测试 | 数据字典模块示例 |
 
@@ -761,10 +761,10 @@ type
 
 | Week | 任务 | 交付物 |
 |------|------|-------|
-| 1 | • UniDataModule（多数据库支持）<br>• 配置文件加载 | 数据访问层 |
-| 2 | • UniMetadataCache<br>• 元数据解析 | 元数据管理 |
+| 1 | • UniAdminDataModule（多数据库支持）<br>• 配置文件加载 | 数据访问层 |
+| 2 | • UniAdminMetadataCache<br>• 元数据解析 | 元数据管理 |
 | 3 | • AuthService<br>• MenuManager<br>• PermissionManager | 核心服务 |
-| 4 | • TUniModelAdmin<br>• 属性编辑器 | 配置组件 |
+| 4 | • TUniAdminModel<br>• 属性编辑器 | 配置组件 |
 | 5 | • TBaseCrudFrame<br>• CRUD 引擎 | CRUD 基类 |
 | 6 | • 集成测试<br>• 示例模块 | 验证框架 |
 

@@ -245,7 +245,7 @@ end.
 type
   /// <summary>
   /// 登录窗体 - 提供用户认证界面
-  /// 集成 IUniAuthService 实现登录功能
+  /// 集成 IUniAdminAuthService 实现登录功能
   /// </summary>
   TLoginForm = class(TUniForm)
     // 组件声明
@@ -264,7 +264,7 @@ type
     procedure FormCreate(Sender: TObject);
   private
     // 私有成员
-    FAuthService: IUniAuthService;
+    FAuthService: IUniAdminAuthService;
     FLoginResult: TLoginResult;
     procedure SetLoginResult(const Value: TLoginResult);
     function ValidateInput: Boolean;
@@ -290,7 +290,7 @@ implementation
 {$R *.dfm}
 
 uses
-  UniServices;
+  UniAdminServices;
 
 { TLoginForm }
 
@@ -357,13 +357,13 @@ uses
   // 框架单元
   uniGUIApplication, uniGUIForm, uniLabel, uniEdit, uniButton,
   // 项目单元
-  UniAuthService.Intf, UniServices;
+  UniAdminAuthService.Intf, UniAdminServices;
 ```
 
 **错误示例**：
 ```pascal
 uses
-  UniServices, uniGUIForm, System.SysUtils, UniAuthService.Intf, uniLabel;
+  UniAdminServices, uniGUIForm, System.SysUtils, UniAdminAuthService.Intf, uniLabel;
 ```
 
 ### 依赖管理原则
@@ -377,12 +377,12 @@ uses
 **正确示例**：
 ```pascal
 // 接口单元
-unit UniAuthService.Intf;
+unit UniAdminAuthService.Intf;
 
 interface
 
 type
-  IUniAuthService = interface(IInterface)
+  IUniAdminAuthService = interface(IInterface)
     ['{GUID}']
     function Login(const UserName, Password: string): TLoginResult;
   end;
@@ -392,15 +392,15 @@ implementation
 end.
 
 // 实现单元
-unit UniAuthService;
+unit UniAdminAuthService;
 
 interface
 
 uses
-  UniAuthService.Intf;  // 只引用接口
+  UniAdminAuthService.Intf;  // 只引用接口
 
 type
-  TUniAuthService = class(TInterfacedObject, IUniAuthService)
+  TUniAdminAuthService = class(TInterfacedObject, IUniAdminAuthService)
   public
     function Login(const UserName, Password: string): TLoginResult;
   end;
@@ -424,8 +424,8 @@ uses
   // 核心模块
   ServerModule in 'Core\Main\ServerModule.pas',
   MainModule in 'Core\Main\MainModule.pas',
-  UniConfigService.Intf in 'Core\Config\UniConfigService.Intf.pas',
-  UniConfigService in 'Core\Config\UniConfigService.pas',
+  UniAdminConfigService.Intf in 'Core\Config\UniAdminConfigService.Intf.pas',
+  UniAdminConfigService in 'Core\Config\UniAdminConfigService.pas',
   // 业务模块
   UserListFrame in 'Modules\User\UserListFrame.pas',
   UserEditForm in 'Modules\User\UserEditForm.pas',
@@ -603,7 +603,7 @@ type
   end;
   
   // 主题管理器
-  TUniTheme = class(TComponent)
+  TUniAdminTheme = class(TComponent)
   private
     FThemeName: string;
     FMode: TThemeMode;
@@ -629,9 +629,9 @@ type
 ```pascal
 procedure TMyForm.ApplyTheme;
 var
-  LTheme: TUniTheme;
+  LTheme: TUniAdminTheme;
 begin
-  LTheme := TUniTheme.Current;
+  LTheme := TUniAdminTheme.Current;
   
   // 应用主题颜色
   Color := LTheme.BackgroundColor;
@@ -663,10 +663,10 @@ end;
 ```pascal
 procedure TMyForm.ValidateThemeConsistency;
 var
-  LTheme: TUniTheme;
+  LTheme: TUniAdminTheme;
   LIssues: TStringList;
 begin
-  LTheme := TUniTheme.Current;
+  LTheme := TUniAdminTheme.Current;
   LIssues := TStringList.Create;
   try
     // 检查组件颜色
@@ -727,10 +727,10 @@ type
 var
   UserName: string;
   LoginResult: TLoginResult;
-  ThemeManager: TUniTheme;
+  ThemeManager: TUniAdminTheme;
 
 private
-  FAuthService: IUniAuthService;
+  FAuthService: IUniAdminAuthService;
   FLoginResult: TLoginResult;
 ```
 
@@ -741,7 +741,7 @@ var
   loginresult: TLoginResult;  // 应使用CamelCase
 
 private
-  AuthService: IUniAuthService;  // 成员变量应以F开头
+  AuthService: IUniAdminAuthService;  // 成员变量应以F开头
   LoginResult: TLoginResult;  // 成员变量应以F开头
 ```
 
@@ -793,7 +793,7 @@ Label1: TUniLabel;  // 应使用类型前缀+描述性名称
 ```pascal
 /// <summary>
 /// 登录窗体 - 提供用户认证界面
-/// 集成 IUniAuthService 实现登录功能
+/// 集成 IUniAdminAuthService 实现登录功能
 /// </summary>
 /// <remarks>
 /// 此窗体支持记住密码功能，并提供友好的错误提示
