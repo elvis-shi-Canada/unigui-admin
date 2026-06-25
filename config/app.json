@@ -1,20 +1,6 @@
-{
+﻿{
   "version": "1.0.0",
-  "application": {
-    "name": "UniAdmin 管理系统",
-    "title": "UniAdmin",
-    "copyright": "© 2025 UniAdmin Team"
-  },
-  "server": {
-    "port": 9000,
-    "host": "0.0.0.0",
-    "sessionTimeout": 1800,
-    "maxSessions": 1000
-  },
-  "database": {
-    "type": "SQLite",
-    "connectionString": "Database=UniAdmin.db",
-    "connectionTimeout": 30,
-    "note": "开发环境使用 SQLite，文件位于 exe 同目录（bin/）。生产环境改用 MSSQL/MySQL 等"
-  }
+  "application": { "name": "UniAdmin", "title": "UniAdmin", "copyright": "2025" },
+  "server": { "port": 18077, "host": "0.0.0.0", "sessionTimeout": 1800, "maxSessions": 1000 },
+  "database": { "type": "SQLite", "connectionString": "Database=UniAdmin.db", "connectionTimeout": 30 }
 }

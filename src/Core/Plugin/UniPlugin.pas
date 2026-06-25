@@ -278,7 +278,7 @@ begin
   try
     // 查找表单信息
     var LInfo: TFormInfo;
-    var LFound: Boolean;
+    var LFound: Boolean := False;
     for var LFormInfo in FForms do
     begin
       if LFormInfo.FormName = FormName then

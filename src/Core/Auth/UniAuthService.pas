@@ -4,6 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Hash, System.Generics.Collections,
+  System.Character,
   Data.DB, FireDAC.Comp.Client,
   UniAuthService.Intf;
 
@@ -229,11 +230,11 @@ begin
   for I := 1 to Length(Password) do
   begin
     LChar := Password[I];
-    if LChar in ['A'..'Z'] then
+    if CharInSet(LChar, ['A'..'Z']) then
       LHasUpper := True
-    else if LChar in ['a'..'z'] then
+    else if CharInSet(LChar, ['a'..'z']) then
       LHasLower := True
-    else if LChar in ['0'..'9'] then
+    else if CharInSet(LChar, ['0'..'9']) then
       LHasDigit := True;
   end;
 

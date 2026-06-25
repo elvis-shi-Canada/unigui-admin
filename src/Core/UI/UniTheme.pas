@@ -204,7 +204,7 @@ begin
     FColorScheme.FontColor := $001A1A1A;
     FColorScheme.SecondaryFontColor := $00666666;
     FColorScheme.DisabledColor := $00CCCCCC;
-    FColorScheme.ShadowColor := $80000000;
+    FColorScheme.ShadowColor := $00808080;
   end;
 
   FFontScheme.DefaultFont := 'Segoe UI';
@@ -508,5 +508,7 @@ finalization
     TUniTheme.FThemes.Clear;
     TUniTheme.FThemes.Free;
   end;
+  if Assigned(TUniTheme.FCurrentTheme) then
+    FreeAndNil(TUniTheme.FCurrentTheme);
 
 end.
