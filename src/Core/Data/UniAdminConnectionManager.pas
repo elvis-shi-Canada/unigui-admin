@@ -190,7 +190,13 @@ begin
   begin
     if Connection.Connected then
       Connection.Connected := False;
-    FConnections.Remove(Connection);  // TObjectList(OwnsObjects=True) 自动释放
+    // GetDefaultConnection transfers ownership to the caller: the returned
+    // connection is NOT in the pool (connectionString branch never adds it;
+    // else branch already Extract-ed it). Remove returns -1 when the item is
+    // not found, so caller-owned connections must be freed here directly.
+    // Connections returned by GetConnection stay pooled and are freed by Remove.
+    if FConnections.Remove(Connection) < 0 then
+      Connection.Free;
     Connection := nil;
   end;
 end;

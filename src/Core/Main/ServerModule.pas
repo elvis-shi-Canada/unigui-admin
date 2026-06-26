@@ -39,6 +39,8 @@ type
     procedure LoadApplicationConfig;
     /// <summary>初始化数据库连接与核心服务（Auth/Metadata/Menu/Permission）</summary>
     procedure InitializeDatabaseServices;
+    /// <summary>Application pre-shutdown hook: clears active sessions so MainModule.OnDestroy runs</summary>
+    procedure DoBeforeShutdown(Sender: TObject);
   public
     /// <summary>获取配置服务实例</summary>
     function GetConfigService: IUniAdminConfigService;
@@ -102,6 +104,9 @@ begin
   LoadApplicationConfig;
   InitializeDatabaseServices;
 
+  // Register pre-shutdown hook: uniGUI does not destroy active sessions on exit (see DoBeforeShutdown)
+  OnBeforeShutdown := DoBeforeShutdown;
+
   // 记录启动日志
   LogInfo('UniGUI Server Module initialized successfully.');
   LogInfo('Config Root: ' + FConfigRoot);
@@ -117,6 +122,28 @@ begin
 
 
   LogInfo('UniGUI Server Module destroyed.');
+end;
+
+procedure TServerModule.DoBeforeShutdown(Sender: TObject);
+begin
+  // uniGUI does NOT destroy active sessions on process exit:
+  //   TUniGUISessionManager.Destroy only terminates the manager thread;
+  //   TUniGUISessions.Destroy only frees the list container.
+  // Neither calls Clear, so active sessions' MainModule.OnDestroy never runs,
+  // leaking TUniAdminServices and its Manager/connection graph.
+  // OnBeforeShutdown fires before SessionManager.Free (SessionManager still alive),
+  // so we Clear here to force-destroy active sessions and trigger MainModule.OnDestroy.
+  // RemoveSession wraps each session free in try-except, so a single failing session
+  // does not block the rest.
+  if (SessionManager = nil) or (SessionManager.Sessions = nil) then
+    Exit;
+  try
+    SessionManager.Sessions.Clear;
+    LogInfo('Shutdown: cleared active sessions, MainModule resources released.');
+  except
+    on E: Exception do
+      LogError('Shutdown session cleanup failed: ' + E.Message);
+  end;
 end;
 
 procedure TServerModule.InitializeConfigService;
