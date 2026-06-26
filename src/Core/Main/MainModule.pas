@@ -1,4 +1,4 @@
-unit MainModule;
+﻿unit MainModule;
 
 interface
 
@@ -61,20 +61,16 @@ uses
   UniAdminConfigService, UniAdminModuleRegistry, UniAdminLogger, uniGUIVars,
   UniAdminConnectionManager, UniAdminPermissionManager.Intf;
 
-var
-  GMainModule: TMainModule;
 
 function GetMainModule: TMainModule;
 begin
-  Result := GMainModule;
+  Result := TMainModule(UniApplication.UniMainModule)
 end;
 
 { TMainModule }
 
 procedure TMainModule.OnCreate(Sender: TObject);
 begin
-  // 设置全局实例引用
-  GMainModule := Self;
 
   // 从服务器模块获取配置服务和插件注册表
   // 注意：这些是全局单例，在整个应用中共享
@@ -102,9 +98,6 @@ begin
   // 清理接口引用（不释放单例，只是减少引用计数）
   FConfigService := nil;
   FModuleRegistry := nil;
-
-  // 清理全局实例引用
-  GMainModule := nil;
 
   LogInfo('UniGUI Main Module destroyed.');
 end;
