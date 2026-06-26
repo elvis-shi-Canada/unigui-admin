@@ -7,7 +7,8 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniButton, uniLabel, uniListBox,
   uniPanel, uniEdit, uniGUIForm, Vcl.Dialogs,
-  UniContext, UniPlugin.Types, UniAdminDataModule;
+  UniContext, UniPlugin.Types, UniAdminDataModule, uniMultiItem, Vcl.Controls,
+  Vcl.Forms;
 
 type
   /// <summary>

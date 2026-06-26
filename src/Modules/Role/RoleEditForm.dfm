@@ -23,7 +23,6 @@ object RoleEditForm: TRoleEditForm
       Height = 13
       Hint = ''
       Caption = #35282#33394#32534#30721'*'
-      TabOrder = 2
     end
     object edtRoleCode: TUniEdit
       Left = 90
@@ -40,7 +39,6 @@ object RoleEditForm: TRoleEditForm
       Height = 13
       Hint = ''
       Caption = #35282#33394#21517#31216'*'
-      TabOrder = 4
     end
     object edtRoleName: TUniEdit
       Left = 90
@@ -57,7 +55,6 @@ object RoleEditForm: TRoleEditForm
       Height = 13
       Hint = ''
       Caption = #25551#36848
-      TabOrder = 6
     end
     object memDescription: TUniMemo
       Left = 90
@@ -76,7 +73,6 @@ object RoleEditForm: TRoleEditForm
       Height = 13
       Hint = ''
       Caption = #25968#25454#33539#22260
-      TabOrder = 8
     end
     object cmbDataScope: TUniComboBox
       Left = 90
@@ -100,7 +96,6 @@ object RoleEditForm: TRoleEditForm
       Height = 13
       Hint = ''
       Caption = #25490#24207
-      TabOrder = 10
     end
     object spnSortOrder: TUniSpinEdit
       Left = 90
@@ -116,7 +111,6 @@ object RoleEditForm: TRoleEditForm
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 11
     end
     object chkStatus: TUniCheckBox
       Left = 90

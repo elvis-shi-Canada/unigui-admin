@@ -9,7 +9,8 @@ uses
   uniMultiItem, uniComboBox, uniLabel, uniGUIApplication,
   UniContext, UniPlugin.Types, UniAdminModel,
   BaseCrudFrame, RoleDataModule,
-  RolePermissionDialog, RoleUserDialog, Vcl.Dialogs, MainModule;
+  RolePermissionDialog, RoleUserDialog, Vcl.Dialogs, MainModule, Vcl.Controls,
+  Vcl.Forms;
 
 type
   /// <summary>
@@ -63,7 +64,7 @@ begin
   inherited;
   FPermissionPrefix := 'role';
 
-  FQuery := TFDQuery.Create(nil);
+  FQuery := TFDQuery.Create(Self);
   FQuery.Connection := ModelAdmin.Connection;
 
   // 创建额外的按钮引用
@@ -73,6 +74,9 @@ end;
 
 destructor TRoleListFrame.Destroy;
 begin
+  // Disconnect first: FQuery.Connection references MainModule.Connection.
+  // Avoids EInvalidPointer on shutdown if MainModule is destroyed first.
+  FQuery.Connection := nil;
   FQuery.Free;
   inherited;
 end;

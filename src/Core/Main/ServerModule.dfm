@@ -5,6 +5,7 @@ object ServerModule: TServerModule
   Title = #26032#24212#29992#31243#24207
   SuppressErrors = []
   Bindings = <>
+  MainFormDisplayMode = mfPage
   CustomCSS.Strings = (
     '/* ===== UniAdmin Unified Design System ===== */'
     

@@ -1,4 +1,4 @@
-unit MainFrame;
+﻿unit MainFrame;
 
 interface
 
@@ -6,28 +6,37 @@ uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections, System.UITypes,
   System.StrUtils,
   uniGUIApplication, uniGUIForm, uniLabel, uniButton,
-  uniPanel, uniGUIBaseClasses, uniGUIFrame, uniGUIClasses, uniPageControl, Vcl.Menus,
-  uniMainMenu, uniStatusBar,
+  uniPanel, uniGUIBaseClasses, uniGUIAbstractClasses, uniGUIFrame, uniGUIClasses, uniPageControl,
+  uniTreeMenu, uniTreeView, Vcl.Menus, uniMainMenu, uniStatusBar,
   UniContext, UniAdminMenuManager.Intf, UniAdminMdiRouter.Intf, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
-  /// 主窗体框架 - 应用程序主窗口外壳
-  /// 提供菜单栏、多标签内容区域（TUniPageControl）和状态栏
-  /// 集成会话管理和数据驱动的 MDI 路由
+  /// 主窗体框架 - FSThemeCrystal 风格主界面（纯 uniGUI 原生控件，无 UniFalcon）
+  /// 布局：顶部工具栏 + 侧边树形菜单(TUniTreeMenu) + 多标签内容区 + 状态栏
+  /// 菜单数据驱动：trmMenu 树节点由 UniAdmin_Menus 动态构建，Node.Data 存 MenuID，
+  /// 点击节点走 MdiRouter 数据驱动路由。
   /// </summary>
   TMainFrame = class(TUniForm)
-    UniMainMenu: TUniMainMenu;
-    UniContainerPanel: TUniContainerPanel;
+    pnlTopBar: TUniPanel;
+    btnToggleMenu: TUniButton;
+    lblAppTitle: TUniLabel;
+    lblCurrentUser: TUniLabel;
+    btnLogout: TUniButton;
+    pnlSidebar: TUniPanel;
+    trmMenu: TUniTreeMenu;
     pgcContent: TUniPageControl;
     UniStatusBar: TUniStatusBar;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
+    procedure btnToggleMenuClick(Sender: TObject);
+    procedure btnLogoutClick(Sender: TObject);
+    procedure trmMenuClick(Sender: TObject);
   private
     FContext: IExecutionContext;
     FMenuManager: IUniAdminMenuManager;
-    FMenuItems: TDictionary<string, TUniMenuItem>;
+    FMenuItems: TDictionary<string, TUniTreeNode>;
     FContentFrame: TComponent;
     FMdiRouter: IMdiRouter;
 
@@ -36,36 +45,24 @@ type
     procedure LoadUserMenus;
     procedure CreateDefaultMenus;
     procedure UpdateStatusBar(const AStatusText: string = '');
-    procedure OnMenuClick(Sender: TObject);
-    function CreateMenuItem(const MenuData: TMenuItem): TUniMenuItem;
     procedure SetContext(const Value: IExecutionContext);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
-    /// <summary>
-    /// 设置执行上下文
-    /// </summary>
+    /// <summary>设置执行上下文</summary>
     procedure SetExecutionContext(const Context: IExecutionContext);
 
-    /// <summary>
-    /// 在内容区域显示指定窗体
-    /// </summary>
+    /// <summary>在内容区域显示指定窗体</summary>
     procedure ShowContent(AForm: TUniForm); overload;
 
-    /// <summary>
-    /// 在内容区域显示指定框架
-    /// </summary>
+    /// <summary>在内容区域显示指定框架</summary>
     procedure ShowContent(AFrame: TUniFrame); overload;
 
-    /// <summary>
-    /// 刷新菜单
-    /// </summary>
+    /// <summary>刷新菜单</summary>
     procedure RefreshMenus;
 
-    /// <summary>
-    /// 刷新状态栏
-    /// </summary>
+    /// <summary>刷新状态栏</summary>
     procedure RefreshStatusBar;
 
     /// <summary>MDI 路由器（数据驱动菜单路由 + 多标签缓存）</summary>
@@ -87,13 +84,12 @@ uses
 constructor TMainFrame.Create(AOwner: TComponent);
 begin
   inherited;
-  FMenuItems := TDictionary<string, TUniMenuItem>.Create;
+  FMenuItems := TDictionary<string, TUniTreeNode>.Create;
 end;
 
 destructor TMainFrame.Destroy;
 begin
-  // Release router first: it clears the cached tabs while the host page
-  // control (pgcContent) is still alive, avoiding dangling references.
+  // Release router first: clears cached tabs while the host page control is alive.
   FMdiRouter := nil;
   FMenuItems.Free;
   inherited;
@@ -101,7 +97,6 @@ end;
 
 procedure TMainFrame.FormCreate(Sender: TObject);
 begin
-  // 设置窗体属性
   Caption := 'UniAdmin 管理系统';
 
   // 应用统一设计系统样式
@@ -111,14 +106,12 @@ begin
 
   // MDI router: binds to the content page control. Each routed frame opens
   // as a closable tab; reopening a class activates its existing tab.
-  // New modules are routed purely by UniAdmin_Menus.RoutePath (class name).
   FMdiRouter := TUniAdminMdiRouter.Create(pgcContent);
 end;
 
 procedure TMainFrame.FormShow(Sender: TObject);
 begin
   // 从 MainModule（每会话）取登录时构造好的执行上下文（含真实权限）。
-  // 登录态不再经 LoginForm 的 class var 传递，避免多会话并发覆盖。
   if GetMainModule.Context <> nil then
     SetExecutionContext(GetMainModule.Context);
 
@@ -128,7 +121,6 @@ end;
 
 procedure TMainFrame.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  // 清理资源
   if Assigned(FContentFrame) then
     FContentFrame.Free;
 end;
@@ -136,7 +128,6 @@ end;
 procedure TMainFrame.InitializeComponents;
 begin
   // 组件已在 DFM 中创建，无需运行时创建
-  // UniGUI 组件通过 DFM 自动初始化
 end;
 
 procedure TMainFrame.InitializeMenus;
@@ -146,10 +137,7 @@ begin
     LoadUserMenus;
   except
     on E: Exception do
-    begin
-      // 如果菜单管理器不可用，创建默认菜单
       CreateDefaultMenus;
-    end;
   end;
 end;
 
@@ -157,76 +145,73 @@ procedure TMainFrame.LoadUserMenus;
 var
   LMenus: TArray<UniAdminMenuManager.Intf.TMenuItem>;
   LMenu: UniAdminMenuManager.Intf.TMenuItem;
-  LMenuItem: TUniMenuItem;
-  LParentItem: TUniMenuItem;
+  LNode, LParentNode: TUniTreeNode;
+  LAdded: Boolean;
+  LPasses: Integer;
 begin
   if not Assigned(FMenuManager) or not Assigned(Context) then
     Exit;
 
-  // 清除现有菜单项
-  UniMainMenu.Items.Clear;
+  // TUniTreeMenu 用 TUniTreeNodes 构建（非 TUniMenuItems），Node.Data 存 MenuID
+  trmMenu.Items.Clear;
   FMenuItems.Clear;
 
-  // 获取用户菜单
   LMenus := FMenuManager.GetUserMenus(Context.GetUserContext.GetUserID);
 
-  // 构建菜单树
-  for LMenu in LMenus do
-  begin
-    if LMenu.ParentID = 0 then
+  // 多遍构建：确保父节点先于子节点创建（支持任意层级）
+  // Node.Data 存 MenuID（NativeInt → Pointer）。注意：MenuID=0 时 Data=nil，
+  // trmMenuClick 的 nil 守卫会跳过该节点——根菜单不应有 MenuID=0 的叶子节点。
+  LPasses := 0;
+  repeat
+    LAdded := False;
+    for LMenu in LMenus do
     begin
-      // 顶级菜单
-      LMenuItem := CreateMenuItem(LMenu);
-      UniMainMenu.Items.Add(LMenuItem);
-      FMenuItems.Add(IntToStr(LMenu.MenuID), LMenuItem);
-    end;
-  end;
+      if FMenuItems.ContainsKey(IntToStr(LMenu.MenuID)) then
+        Continue;  // 已添加
 
-  // 添加子菜单
-  for LMenu in LMenus do
-  begin
-    if (LMenu.ParentID > 0) and FMenuItems.TryGetValue(IntToStr(LMenu.ParentID), LParentItem) then
-    begin
-      LMenuItem := CreateMenuItem(LMenu);
-      LParentItem.Add(LMenuItem);
-      FMenuItems.Add(IntToStr(LMenu.MenuID), LMenuItem);
+      if LMenu.ParentID = 0 then
+      begin
+        LNode := trmMenu.Items.AddChild(nil, LMenu.MenuName);
+        LNode.Data := Pointer(NativeInt(LMenu.MenuID));
+        FMenuItems.Add(IntToStr(LMenu.MenuID), LNode);
+        LAdded := True;
+      end
+      else if FMenuItems.TryGetValue(IntToStr(LMenu.ParentID), LParentNode) then
+      begin
+        LNode := trmMenu.Items.AddChild(LParentNode, LMenu.MenuName);
+        LNode.Data := Pointer(NativeInt(LMenu.MenuID));
+        FMenuItems.Add(IntToStr(LMenu.MenuID), LNode);
+        LAdded := True;
+      end;
     end;
-  end;
+    Inc(LPasses);
+  until (not LAdded) or (LPasses > 16);  // 防死循环，16 层足够
+
+  // 检测孤立菜单（ParentID 指向不存在的父节点）
+  for LMenu in LMenus do
+    if not FMenuItems.ContainsKey(IntToStr(LMenu.MenuID)) then
+      UniSession.Log('WARN: 孤立菜单 [' + LMenu.MenuCode + '] ' + LMenu.MenuName +
+        ' (ParentID=' + IntToStr(LMenu.ParentID) + ') 未找到父节点，已跳过');
+
+  // 默认展开顶级节点
+  if trmMenu.Items.Count > 0 then
+    trmMenu.Items[0].Expand(True);
 end;
 
-function TMainFrame.CreateMenuItem(const MenuData: UniAdminMenuManager.Intf.TMenuItem): TUniMenuItem;
-begin
-  Result := TUniMenuItem.Create(Self);
-  Result.Caption := MenuData.MenuName;
-  Result.Hint := MenuData.MenuCode;  // 使用 MenuCode 作为提示
-  Result.Tag := MenuData.MenuID;
-  Result.Visible := MenuData.IsVisible;
-  Result.Enabled := True;  // 默认启用
-
-  // Leaf nodes with a routable target (RoutePath = class name) handle clicks;
-  // pure category nodes (RoutePath empty) have no OnClick.
-  if MenuData.RoutePath <> '' then
-    Result.OnClick := OnMenuClick;
-end;
-
-procedure TMainFrame.OnMenuClick(Sender: TObject);
+procedure TMainFrame.trmMenuClick(Sender: TObject);
 var
-  LMenuItem: TUniMenuItem;
+  LNode: TUniTreeNode;
   LMenuID: Integer;
   LMenuData: UniAdminMenuManager.Intf.TMenuItem;
 begin
-  if not (Sender is TUniMenuItem) then
+  LNode := trmMenu.Selected;
+  if (LNode = nil) or (LNode.Data = nil) then
     Exit;
 
-  LMenuItem := TUniMenuItem(Sender);
-  LMenuID := LMenuItem.Tag;
-
-  UpdateStatusBar('正在加载: ' + LMenuItem.Caption);
+  LMenuID := Integer(NativeInt(LNode.Data));
+  UpdateStatusBar('正在加载: ' + LNode.Text);
 
   // Data-driven routing: RoutePath stores the target Frame/Form class name.
-  // Adding a new module needs ZERO changes here — just RegisterClass the frame
-  // unit and set its RoutePath in UniAdmin_Menus.
-  // (See docs/plans/2026-06-26-mdi-architecture-design.md)
   if not Assigned(FMenuManager) then
     Exit;
 
@@ -237,31 +222,34 @@ begin
 
   if FMdiRouter.CanRoute(LMenuData.RoutePath) then
   begin
-    // Open mode is derived from the class-name suffix: *Form -> modal, else embed.
-    // Embedded frames become closable tabs; the menu caption is the tab title.
+    // *Form -> modal; otherwise embedded as a closable tab.
     if AnsiEndsText('Form', LMenuData.RoutePath) then
       FMdiRouter.Open(LMenuData.RoutePath, '', omModal)
     else
-      FMdiRouter.Open(LMenuData.RoutePath, LMenuItem.Caption, omEmbed);
-    UpdateStatusBar(LMenuItem.Caption);
+      FMdiRouter.Open(LMenuData.RoutePath, LNode.Text, omEmbed);
+    UpdateStatusBar(LNode.Text);
   end
   else
     UpdateStatusBar('无法路由: ' + LMenuData.RoutePath + '（Frame 类未注册 RegisterClass）');
 end;
 
 procedure TMainFrame.CreateDefaultMenus;
-var
-  LFileMenu, LHelpMenu: TUniMenuItem;
 begin
-  // 文件菜单
-  LFileMenu := TUniMenuItem.Create(Self);
-  LFileMenu.Caption := '文件(&F)';
-  UniMainMenu.Items.Add(LFileMenu);
+  // 菜单管理器不可用时的兜底菜单
+  trmMenu.Items.AddChild(nil, '系统');
+  trmMenu.Items.AddChild(nil, '帮助');
+end;
 
-  // 帮助菜单
-  LHelpMenu := TUniMenuItem.Create(Self);
-  LHelpMenu.Caption := '帮助(&H)';
-  UniMainMenu.Items.Add(LHelpMenu);
+procedure TMainFrame.btnToggleMenuClick(Sender: TObject);
+begin
+  // 折叠/展开侧边菜单（FSThemeCrystal 的 btnMenu 同款交互）
+  pnlSidebar.Visible := not pnlSidebar.Visible;
+end;
+
+procedure TMainFrame.btnLogoutClick(Sender: TObject);
+begin
+  // 退出并重启会话（回到登录窗体）
+  UniApplication.Restart;
 end;
 
 procedure TMainFrame.ShowContent(AForm: TUniForm);
@@ -278,8 +266,7 @@ begin
   if Assigned(FContentFrame) then
     FContentFrame.Free;
 
-  AFrame.Parent := UniContainerPanel;
-  // AFrame.Align := alClient;  // UniGUI 使用 CSS 布局
+  AFrame.Parent := pgcContent;
   AFrame.Show;
 
   FContentFrame := AFrame;
@@ -313,6 +300,9 @@ begin
 
   if Assigned(Context) then
   begin
+    // 顶部栏显示当前用户名（FSThemeCrystal 的 lblUsuarioConectado 同款）
+    lblCurrentUser.Caption := Context.GetUserContext.GetRealName;
+
     LStatusText := Format('用户: %s | 会话: %s | %s',
       [Context.GetUserContext.GetRealName,
        Context.GetUserContext.GetSessionID,

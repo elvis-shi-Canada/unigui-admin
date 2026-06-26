@@ -23,7 +23,6 @@ object ConfigEditForm: TConfigEditForm
       Height = 13
       Hint = ''
       Caption = #37197#32622#38190'*'
-      TabOrder = 2
     end
     object UniEditKey: TUniEdit
       Left = 90
@@ -40,7 +39,6 @@ object ConfigEditForm: TConfigEditForm
       Height = 13
       Hint = ''
       Caption = #37197#32622#20540'*'
-      TabOrder = 4
     end
     object UniMemoValue: TUniMemo
       Left = 90
@@ -59,7 +57,6 @@ object ConfigEditForm: TConfigEditForm
       Height = 13
       Hint = ''
       Caption = #20998#31867
-      TabOrder = 6
     end
     object UniComboBoxCategory: TUniComboBox
       Left = 90
@@ -84,7 +81,6 @@ object ConfigEditForm: TConfigEditForm
       Height = 13
       Hint = ''
       Caption = #25551#36848
-      TabOrder = 8
     end
     object UniMemoDescription: TUniMemo
       Left = 90
@@ -103,7 +99,6 @@ object ConfigEditForm: TConfigEditForm
       Height = 13
       Hint = ''
       Caption = #20540#31867#22411
-      TabOrder = 10
     end
     object UniComboBoxValueType: TUniComboBox
       Left = 90
@@ -129,7 +124,6 @@ object ConfigEditForm: TConfigEditForm
       Height = 13
       Hint = ''
       Caption = #25490#24207
-      TabOrder = 12
     end
     object UniEditSortOrder: TUniEdit
       Left = 90
@@ -146,7 +140,6 @@ object ConfigEditForm: TConfigEditForm
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 13
     end
     object UniCheckBoxStatus: TUniCheckBox
       Left = 90

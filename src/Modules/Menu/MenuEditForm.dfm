@@ -23,7 +23,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #33756#21333#32534#30721'*'
-      TabOrder = 4
     end
     object edtMenuCode: TUniEdit
       Left = 90
@@ -40,7 +39,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #33756#21333#21517#31216'*'
-      TabOrder = 8
     end
     object edtMenuName: TUniEdit
       Left = 90
@@ -57,7 +55,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #29238#33756#21333
-      TabOrder = 12
     end
     object cmbParent: TUniComboBox
       Left = 90
@@ -76,7 +73,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #33756#21333#31867#22411'*'
-      TabOrder = 16
     end
     object cmbMenuType: TUniComboBox
       Left = 90
@@ -100,7 +96,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #22270#26631
-      TabOrder = 5
     end
     object edtIcon: TUniEdit
       Left = 380
@@ -127,7 +122,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #36335#24452
-      TabOrder = 9
     end
     object edtPath: TUniEdit
       Left = 380
@@ -144,7 +138,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #32452#20214
-      TabOrder = 13
     end
     object edtComponent: TUniEdit
       Left = 380
@@ -161,7 +154,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #26435#38480#26631#35782
-      TabOrder = 17
     end
     object edtPermission: TUniEdit
       Left = 380
@@ -178,7 +170,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #25490#24207
-      TabOrder = 19
     end
     object lblDescription: TUniLabel
       Left = 16
@@ -187,7 +178,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #25551#36848#36848#36844
-      TabOrder = 19
     end
     object memDescription: TUniMemo
       Left = 90
@@ -206,7 +196,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #21487#31034
-      TabOrder = 21
     end
     object chkVisible: TUniCheckBox
       Left = 380
@@ -224,7 +213,6 @@ object MenuEditForm: TMenuEditForm
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 21
     end
     object chkStatus: TUniCheckBox
       Left = 380

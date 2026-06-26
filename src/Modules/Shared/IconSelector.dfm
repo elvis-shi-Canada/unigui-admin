@@ -32,7 +32,6 @@ object IconSelector: TIconSelector
         Height = 13
         Hint = ''
         Caption = #25628#32034#22270#26631':'
-        TabOrder = 4
       end
       object edtSearch: TUniEdit
         Left = 70
@@ -68,7 +67,6 @@ object IconSelector: TIconSelector
           Height = 13
           Hint = ''
           Caption = #31867#21035':'
-          TabOrder = 2
         end
         object cmbCategories: TUniComboBox
           Left = 70
@@ -147,7 +145,6 @@ object IconSelector: TIconSelector
         Height = 13
         Hint = ''
         Caption = #24050#36873#25321':'
-        TabOrder = 1
       end
       object lblIconName: TUniLabel
         Left = 70
@@ -156,7 +153,6 @@ object IconSelector: TIconSelector
         Height = 13
         Hint = ''
         Caption = #26410#36873#25321
-        TabOrder = 2
       end
     end
     object pnlBottom: TUniPanel

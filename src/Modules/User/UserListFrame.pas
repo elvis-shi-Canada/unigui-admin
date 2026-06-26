@@ -44,12 +44,16 @@ begin
   inherited;
   FPermissionPrefix := 'user';
   
-  FQuery := TFDQuery.Create(nil);
+  FQuery := TFDQuery.Create(Self);
   FQuery.Connection := ModelAdmin.Connection;
 end;
 
 destructor TUserListFrame.Destroy;
 begin
+  // Disconnect first: FQuery.Connection references MainModule.Connection.
+  // If MainModule is destroyed before this frame, FQuery.Free would touch
+  // a dangling pointer and raise EInvalidPointer on shutdown.
+  FQuery.Connection := nil;
   FQuery.Free;
   inherited;
 end;

@@ -1,22 +1,20 @@
 inherited TaskLogFrame: TTaskLogFrame
-  PixelsPerInch = 96
-  TextHeight = 13
   object UniPanelTop: TUniPanel
     Left = 0
     Top = 40
-    Width = 800
+    Width = 640
     Height = 40
     Hint = ''
     Align = alTop
-    TabOrder = 0
+    TabOrder = 1
+    Caption = ''
     object UniLabelTask: TUniLabel
       Left = 8
       Top = 12
-      Width = 60
+      Width = 26
       Height = 13
       Hint = ''
       Caption = #20219#21153
-      TabOrder = 1
     end
     object UniComboBoxTask: TUniComboBox
       Left = 80
@@ -24,9 +22,9 @@ inherited TaskLogFrame: TTaskLogFrame
       Width = 200
       Height = 21
       Hint = ''
-      Style = csDropDown
-      ItemIndex = -1
-      TabOrder = 2
+      Text = ''
+      TabOrder = 1
+      IconItems = <>
     end
     object UniButtonSearch: TUniButton
       Left = 290
@@ -35,37 +33,37 @@ inherited TaskLogFrame: TTaskLogFrame
       Height = 25
       Hint = ''
       Caption = #26597#35810
-      TabOrder = 3
+      TabOrder = 2
       OnClick = UniButtonSearchClick
     end
   end
   object UniDBGrid: TUniDBGrid
     Left = 0
     Top = 80
-    Width = 800
-    Height = 300
+    Width = 640
+    Height = 180
     Hint = ''
-    Align = alClient
-    TabOrder = 1
     DataSource = UniDataSource
-    OnAfterScroll = UniDBGridAfterScroll
+    LoadMask.Message = #21152#36733#25968#25454'...'
+    Align = alClient
+    TabOrder = 2
   end
   object UniPanelDetail: TUniPanel
     Left = 0
-    Top = 380
-    Width = 800
+    Top = 260
+    Width = 640
     Height = 220
     Hint = ''
     Align = alBottom
-    TabOrder = 2
+    TabOrder = 3
+    Caption = ''
     object UniLabelDetail: TUniLabel
       Left = 8
       Top = 8
-      Width = 60
+      Width = 52
       Height = 13
       Hint = ''
       Caption = #25191#34892#35814#24773
-      TabOrder = 1
     end
     object UniMemoDetail: TUniMemo
       Left = 8
@@ -75,7 +73,7 @@ inherited TaskLogFrame: TTaskLogFrame
       Hint = ''
       Lines.Strings = (
         '')
-      TabOrder = 0
+      TabOrder = 2
     end
   end
   object UniDataSource: TDataSource

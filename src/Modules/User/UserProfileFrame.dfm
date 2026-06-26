@@ -55,7 +55,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = #29992#25143#21517
-        TabOrder = 1
       end
       object edtUserName: TUniEdit
         Left = 80
@@ -72,7 +71,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = #30495#23454#22995#21517
-        TabOrder = 3
       end
       object edtRealName: TUniEdit
         Left = 80
@@ -89,7 +87,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = #37038#31665
-        TabOrder = 5
       end
       object edtEmail: TUniEdit
         Left = 80
@@ -106,7 +103,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = #25163#26426
-        TabOrder = 7
       end
       object edtPhone: TUniEdit
         Left = 80
@@ -123,7 +119,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = #26368#21518#30331#24405
-        TabOrder = 9
       end
       object edtLastLogin: TUniLabel
         Left = 80
@@ -132,7 +127,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = #20174#26410#30331#24405
-        TabOrder = 10
       end
       object lblLastLoginIP: TUniLabel
         Left = 8
@@ -141,7 +135,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = #30331#24405'IP'
-        TabOrder = 11
       end
       object edtLastLoginIP: TUniLabel
         Left = 80
@@ -150,7 +143,6 @@ object UserProfileFrame: TUserProfileFrame
         Height = 13
         Hint = ''
         Caption = '-'
-        TabOrder = 12
       end
     end
     object pnlBottom: TUniPanel

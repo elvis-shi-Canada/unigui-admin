@@ -1,40 +1,36 @@
 inherited ConfigCategoryFrame: TConfigCategoryFrame
-  PixelsPerInch = 96
-  TextHeight = 13
   object UniPanelTop: TUniPanel
     Left = 0
     Top = 40
-    Width = 800
+    Width = 640
     Height = 40
     Hint = ''
     Align = alTop
-    TabOrder = 0
+    TabOrder = 1
+    Caption = ''
     object UniLabelFilter: TUniLabel
       Left = 8
       Top = 12
-      Width = 60
+      Width = 39
       Height = 13
       Hint = ''
       Caption = #37197#32622#38190
-      TabOrder = 1
     end
     object UniEditFilter: TUniEdit
       Left = 80
       Top = 8
       Width = 150
-      Height = 22
       Hint = ''
-      TextHint = #36755#20837#37197#32622#38190
-      TabOrder = 2
+      Text = ''
+      TabOrder = 1
     end
     object UniLabelStatus: TUniLabel
       Left = 240
       Top = 12
-      Width = 60
+      Width = 26
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 3
     end
     object UniComboBoxStatus: TUniComboBox
       Left = 310
@@ -42,13 +38,13 @@ inherited ConfigCategoryFrame: TConfigCategoryFrame
       Width = 100
       Height = 21
       Hint = ''
-      Style = csDropDown
-      ItemIndex = 0
-      TabOrder = 4
+      Text = ''
       Items.Strings = (
         #20840#37096
         #21551#29992
         #31105#29992)
+      TabOrder = 2
+      IconItems = <>
       OnChange = UniComboBoxStatusChange
     end
     object UniButtonSearch: TUniButton
@@ -58,43 +54,46 @@ inherited ConfigCategoryFrame: TConfigCategoryFrame
       Height = 25
       Hint = ''
       Caption = #26597#35810
-      TabOrder = 5
+      TabOrder = 3
       OnClick = UniButtonSearchClick
     end
   end
   object UniPageControl: TUniPageControl
     Left = 0
     Top = 80
-    Width = 800
-    Height = 520
+    Width = 640
+    Height = 400
     Hint = ''
     ActivePage = UniTabSheetCategories
     Align = alClient
-    TabOrder = 1
+    TabOrder = 2
     object UniTabSheetCategories: TUniTabSheet
+      Hint = ''
       Caption = #20998#31867
       object UniGridCategories: TUniStringGrid
         Left = 0
         Top = 0
-        Width = 798
-        Height = 498
+        Width = 632
+        Height = 372
         Hint = ''
+        Columns = <>
         Align = alClient
         TabOrder = 0
-        OnCellClick = UniGridCategoriesCellClick
       end
     end
     object UniTabSheetConfigs: TUniTabSheet
+      Hint = ''
       Caption = #37197#32622
       object UniDBGridConfigs: TUniDBGrid
         Left = 0
         Top = 0
-        Width = 798
-        Height = 498
+        Width = 632
+        Height = 372
         Hint = ''
+        DataSource = UniDataSourceConfigs
+        LoadMask.Message = #21152#36733#25968#25454'...'
         Align = alClient
         TabOrder = 0
-        DataSource = UniDataSourceConfigs
         OnDblClick = UniDBGridConfigsDblClick
       end
     end

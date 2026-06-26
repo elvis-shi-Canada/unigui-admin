@@ -55,10 +55,13 @@ GO
 -- 插入系统菜单
 INSERT INTO UniAdmin_Menus (ParentID, MenuName, MenuCode, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate)
 VALUES
-    (NULL, '系统管理', 'system', 'settings', '/system', NULL, 1, 1, GETDATE()),
-    (1, '用户管理', 'system.users', 'user', '/system/users', 'user:view', 1, 1, GETDATE()),
-    (1, '角色管理', 'system.roles', 'users', '/system/roles', 'role:view', 2, 1, GETDATE()),
-    (1, '菜单管理', 'system.menus', 'menu', '/system/menus', 'menu:view', 3, 1, GETDATE()),
-    (1, '数据字典', 'system.dictionary', 'book', '/system/dictionary', NULL, 4, 1, GETDATE()),
-    (1, '系统配置', 'system.config', 'cog', '/system/config', 'config:view', 5, 1, GETDATE());
+    (NULL, '系统管理', 'system', 'settings', '', NULL, 1, 1, GETDATE()),
+    (1, '用户管理', 'system.users', 'user', 'TUserListFrame', 'user:view', 1, 1, GETDATE()),
+    (1, '角色管理', 'system.roles', 'users', 'TRoleListFrame', 'role:view', 2, 1, GETDATE()),
+    (1, '菜单管理', 'system.menus', 'menu', 'TMenuTreeFrame', 'menu:view', 3, 1, GETDATE()),
+    (1, '数据字典', 'system.dictionary', 'book', '', NULL, 4, 1, GETDATE()),
+    (1, '系统配置', 'system.config', 'cog', 'TConfigCategoryFrame', 'config:view', 5, 1, GETDATE()),
+    (1, '日志审计', 'system.log', 'file-text', '', NULL, 6, 1, GETDATE()),
+    (1, '定时任务', 'system.scheduler', 'clock', '', NULL, 7, 1, GETDATE()),
+    (1, '共享组件', 'system.shared', 'share', '', NULL, 8, 1, GETDATE());
 GO

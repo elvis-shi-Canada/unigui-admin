@@ -9,7 +9,7 @@ uses
   uniPanel, uniTreeMenu, uniLabel, uniComboBox, uniSplitter, uniGUIAbstractClasses,
   UniContext, UniPlugin.Types, UniAdminModel,
   BaseCrudFrame, MenuDataModule, uniDBGrid, uniBasicGrid,
-  Vcl.Controls;
+  Vcl.Controls, uniMultiItem, uniTreeView, Vcl.Forms;
 
 type
   /// <summary>
@@ -32,7 +32,6 @@ type
     cmbStatus: TUniComboBox;
     btnSearch: TUniButton;
     UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
     splitter: TUniSplitter;
 
     procedure DoInitialize; override;
@@ -84,7 +83,7 @@ begin
   inherited;
   FPermissionPrefix := 'menu';
 
-  FQuery := TFDQuery.Create(nil);
+  FQuery := TFDQuery.Create(Self);
   FQuery.Connection := ModelAdmin.Connection;
 
   FSelectedMenuID := 0;
@@ -94,6 +93,9 @@ end;
 destructor TMenuTreeFrame.Destroy;
 begin
   FNodeMap.Free;
+  // Disconnect first: FQuery.Connection references MainModule.Connection.
+  // Avoids EInvalidPointer on shutdown if MainModule is destroyed first.
+  FQuery.Connection := nil;
   FQuery.Free;
   inherited;
 end;

@@ -15,7 +15,6 @@ inherited LoginLogFrame: TLoginLogFrame
       Height = 13
       Hint = ''
       Caption = #29992#25143#21517
-      TabOrder = 5
     end
     object UniEditUserName: TUniEdit
       Left = 80
@@ -32,7 +31,6 @@ inherited LoginLogFrame: TLoginLogFrame
       Height = 13
       Hint = ''
       Caption = 'IP'#22320#22336
-      TabOrder = 6
     end
     object UniEditIP: TUniEdit
       Left = 280
@@ -49,7 +47,6 @@ inherited LoginLogFrame: TLoginLogFrame
       Height = 13
       Hint = ''
       Caption = #24320#22987#26102#38388
-      TabOrder = 11
     end
     object UniDateTimePickerStart: TUniDateTimePicker
       Left = 80
@@ -69,7 +66,6 @@ inherited LoginLogFrame: TLoginLogFrame
       Height = 13
       Hint = ''
       Caption = #32467#26463#26102#38388
-      TabOrder = 12
     end
     object UniDateTimePickerEnd: TUniDateTimePicker
       Left = 280
@@ -89,7 +85,6 @@ inherited LoginLogFrame: TLoginLogFrame
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 7
     end
     object UniComboBoxStatus: TUniComboBox
       Left = 480

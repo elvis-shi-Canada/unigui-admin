@@ -23,7 +23,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #29992#25143#21517'*'
-      TabOrder = 2
     end
     object edtUserName: TUniEdit
       Left = 90
@@ -40,7 +39,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #30495#23454#22995#21517'*'
-      TabOrder = 4
     end
     object edtRealName: TUniEdit
       Left = 90
@@ -57,7 +55,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #37038#31665'*'
-      TabOrder = 6
     end
     object edtEmail: TUniEdit
       Left = 90
@@ -74,7 +71,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #25163#26426
-      TabOrder = 8
     end
     object edtPhone: TUniEdit
       Left = 90
@@ -91,7 +87,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #23494#30721
-      TabOrder = 14
     end
     object edtPassword: TUniEdit
       Left = 90
@@ -109,7 +104,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #30830#35748#23494#30721
-      TabOrder = 15
     end
     object edtConfirmPassword: TUniEdit
       Left = 90
@@ -127,7 +121,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #35282#33394
-      TabOrder = 10
     end
     object cmbRole: TUniComboBox
       Left = 90
@@ -146,7 +139,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 11
     end
     object chkStatus: TUniCheckBox
       Left = 90
@@ -165,7 +157,6 @@ object UserEditForm: TUserEditForm
       Height = 13
       Hint = ''
       Caption = #22791#27880
-      TabOrder = 14
     end
     object memRemark: TUniMemo
       Left = 90

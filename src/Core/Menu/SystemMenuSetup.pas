@@ -193,6 +193,12 @@ begin
   AddItem('任务日志', 'system:scheduler:log', 'system:scheduler', 'file.png', '/system/scheduler/log',
     'scheduler:log', 175, True, '');
 
+  // ========== 共享组件 ==========
+  AddItem('共享组件', 'system:shared', 'system', 'share.png', '/system/shared',
+    'shared:view', 180, True, '共享组件管理');
+  AddItem('图标选择器', 'system:shared:icon', 'system:shared', 'icon.png', 'TIconSelector',
+    'shared:view', 181, True, '');
+
   Result := LList;
 end;
 
@@ -262,6 +268,9 @@ begin
   AddPerm('scheduler:start', '启动任务', '定时任务', '启动定时任务');
   AddPerm('scheduler:stop', '停止任务', '定时任务', '停止定时任务');
   AddPerm('scheduler:log', '任务日志', '定时任务', '查看任务执行日志');
+
+  // ========== 共享组件权限 ==========
+  AddPerm('shared:view', '查看共享组件', '共享组件', '查看共享组件');
 
   Result := LList;
 end;

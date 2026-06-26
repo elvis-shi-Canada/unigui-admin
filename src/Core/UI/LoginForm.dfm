@@ -41,7 +41,6 @@ object LoginForm: TLoginForm
         Font.Color = 1710618
         Font.Height = -28
         Font.Style = [fsBold]
-        TabOrder = 2
       end
       object LblSubtitle: TUniLabel
         Left = 28
@@ -55,7 +54,6 @@ object LoginForm: TLoginForm
         ParentFont = False
         Font.Color = 10066329
         Font.Height = -13
-        TabOrder = 3
       end
       object LblUserName: TUniLabel
         Left = 28
@@ -69,7 +67,6 @@ object LoginForm: TLoginForm
         Font.Color = 3355443
         Font.Height = -13
         Font.Style = [fsBold]
-        TabOrder = 4
       end
       object EdtUserName: TUniEdit
         Left = 28
@@ -95,7 +92,6 @@ object LoginForm: TLoginForm
         Font.Color = 3355443
         Font.Height = -13
         Font.Style = [fsBold]
-        TabOrder = 6
       end
       object EdtPassword: TUniEdit
         Left = 28
@@ -158,7 +154,6 @@ object LoginForm: TLoginForm
         ParentFont = False
         Font.Color = 10066329
         Font.Height = -11
-        TabOrder = 11
       end
     end
   end

@@ -1,15 +1,16 @@
 inherited RoleUserDialog: TRoleUserDialog
-  PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object pnlMain: TUniPanel
     Left = 0
     Top = 0
-    Width = 692
-    Height = 400
+    Width = 624
+    Height = 441
     Hint = ''
     Align = alClient
-    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
+    Caption = ''
+    ExplicitWidth = 692
+    ExplicitHeight = 400
     object pnlLeft: TUniPanel
       Left = 1
       Top = 1
@@ -17,16 +18,16 @@ inherited RoleUserDialog: TRoleUserDialog
       Height = 358
       Hint = ''
       Align = alLeft
-      Anchors = [akLeft, akTop, akBottom]
       TabOrder = 1
+      Caption = ''
       object lblAvailable: TUniLabel
         Left = 8
         Top = 8
-        Width = 60
+        Width = 52
         Height = 13
         Hint = ''
         Caption = #21487#29992#29992#25143
-        TabOrder = 1
+        TabOrder = 2
       end
       object lstAvailable: TUniListBox
         Left = 8
@@ -47,16 +48,16 @@ inherited RoleUserDialog: TRoleUserDialog
       Height = 358
       Hint = ''
       Align = alRight
-      Anchors = [akTop, akRight, akBottom]
       TabOrder = 2
+      Caption = ''
       object lblAssigned: TUniLabel
         Left = 8
         Top = 8
-        Width = 60
+        Width = 39
         Height = 13
         Hint = ''
         Caption = #24050#20998#37197
-        TabOrder = 1
+        TabOrder = 2
       end
       object lstAssigned: TUniListBox
         Left = 8
@@ -78,6 +79,7 @@ inherited RoleUserDialog: TRoleUserDialog
       Hint = ''
       Align = alClient
       TabOrder = 3
+      Caption = ''
       object btnAdd: TUniButton
         Left = 24
         Top = 60
@@ -126,8 +128,8 @@ inherited RoleUserDialog: TRoleUserDialog
       Height = 40
       Hint = ''
       Align = alBottom
-      Anchors = [akLeft, akRight, akBottom]
       TabOrder = 4
+      Caption = ''
       object btnSave: TUniButton
         Left = 530
         Top = 8
@@ -153,17 +155,16 @@ inherited RoleUserDialog: TRoleUserDialog
       object lblRoleName: TUniLabel
         Left = 8
         Top = 12
-        Width = 36
+        Width = 29
         Height = 13
         Hint = ''
         Caption = #35282#33394':'
-        TabOrder = 2
+        TabOrder = 5
       end
       object edtSearch: TUniEdit
         Left = 250
         Top = 8
         Width = 120
-        Height = 22
         Hint = ''
         TextHint = #25628#32034#29992#25143
         TabOrder = 3

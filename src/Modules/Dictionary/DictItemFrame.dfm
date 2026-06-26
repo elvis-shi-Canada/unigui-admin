@@ -1,40 +1,36 @@
 inherited DictItemFrame: TDictItemFrame
-  PixelsPerInch = 96
-  TextHeight = 13
   object UniPanelTop: TUniPanel
     Left = 0
     Top = 40
-    Width = 800
+    Width = 640
     Height = 40
     Hint = ''
     Align = alTop
-    TabOrder = 0
+    TabOrder = 1
+    Caption = ''
     object UniLabelFilter: TUniLabel
       Left = 8
       Top = 12
-      Width = 60
+      Width = 39
       Height = 13
       Hint = ''
       Caption = #23383#20856#39033
-      TabOrder = 1
     end
     object UniEditFilter: TUniEdit
       Left = 80
       Top = 8
       Width = 150
-      Height = 22
       Hint = ''
-      TextHint = #36755#20837#23383#20856#39033
-      TabOrder = 2
+      Text = ''
+      TabOrder = 1
     end
     object UniLabelStatus: TUniLabel
       Left = 240
       Top = 12
-      Width = 60
+      Width = 26
       Height = 13
       Hint = ''
       Caption = #29366#24577
-      TabOrder = 3
     end
     object UniComboBoxStatus: TUniComboBox
       Left = 310
@@ -42,13 +38,13 @@ inherited DictItemFrame: TDictItemFrame
       Width = 100
       Height = 21
       Hint = ''
-      Style = csDropDown
-      ItemIndex = 0
-      TabOrder = 4
+      Text = ''
       Items.Strings = (
         #20840#37096
         #21551#29992
         #31105#29992)
+      TabOrder = 2
+      IconItems = <>
       OnChange = UniComboBoxStatusChange
     end
     object UniButtonSearch: TUniButton
@@ -58,44 +54,48 @@ inherited DictItemFrame: TDictItemFrame
       Height = 25
       Hint = ''
       Caption = #26597#35810
-      TabOrder = 5
+      TabOrder = 3
       OnClick = UniButtonSearchClick
     end
   end
   object UniPageControl: TUniPageControl
     Left = 0
     Top = 80
-    Width = 800
-    Height = 520
+    Width = 640
+    Height = 400
     Hint = ''
     ActivePage = UniTabItemList
     Align = alClient
-    TabOrder = 1
+    TabOrder = 2
     object UniTabItemList: TUniTabSheet
+      Hint = ''
       Caption = #23383#20856#39033
       object UniDBGridItems: TUniDBGrid
         Left = 0
         Top = 0
-        Width = 798
-        Height = 498
+        Width = 632
+        Height = 372
         Hint = ''
+        DataSource = UniDataSourceItems
+        LoadMask.Message = #21152#36733#25968#25454'...'
         Align = alClient
         TabOrder = 0
-        DataSource = UniDataSourceItems
         OnDblClick = UniDBGridItemsDblClick
       end
     end
     object UniTabSheetTypes: TUniTabSheet
+      Hint = ''
       Caption = #23383#20856#31867#22411
       object UniDBGridTypes: TUniDBGrid
         Left = 0
         Top = 0
-        Width = 798
-        Height = 498
+        Width = 632
+        Height = 372
         Hint = ''
+        DataSource = UniDataSourceTypes
+        LoadMask.Message = #21152#36733#25968#25454'...'
         Align = alClient
         TabOrder = 0
-        DataSource = UniDataSourceTypes
         OnDblClick = UniDBGridTypesDblClick
       end
     end

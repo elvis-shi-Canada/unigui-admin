@@ -7,7 +7,11 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniPanel, uniMemo, uniComboBox,
-  UniContext, UniPlugin.Types, BaseCrudFrame, UniAdminScheduler;
+  UniContext, UniPlugin.Types, BaseCrudFrame, UniAdminScheduler,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, uniMultiItem,
+  Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>

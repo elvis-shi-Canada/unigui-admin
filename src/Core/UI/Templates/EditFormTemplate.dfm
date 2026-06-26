@@ -29,7 +29,6 @@ object EditFormTemplate: TEditFormTemplate
       Font.Color = clHighlight
       Font.Height = -19
       Font.Style = [fsBold]
-      TabOrder = 1
     end
   end
   object pnlBody: TUniPanel

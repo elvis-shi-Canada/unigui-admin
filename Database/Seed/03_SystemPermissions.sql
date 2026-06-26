@@ -94,7 +94,14 @@ VALUES
   ('scheduler:log', '任务日志', '定时任务', '查看任务执行日志', 707, GETDATE(), 1);
 
 -- =====================================================
--- 8. 初始化系统菜单
+-- 8. 共享组件权限
+-- =====================================================
+INSERT INTO UniAdmin_Permissions (PermissionCode, PermissionName, Category, Description, SortOrder, CreatedDate, CreatedBy)
+VALUES
+  ('shared:view', '查看共享组件', '共享组件', '查看共享组件', 801, GETDATE(), 1);
+
+-- =====================================================
+-- 9. 初始化系统菜单
 -- =====================================================
 
 -- 8.1 系统管理主菜单
@@ -145,8 +152,14 @@ INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, Permi
 VALUES ('定时任务', 'system:scheduler', @SystemMenuID, 'clock.png', '', 'scheduler:view', 170, 1, GETDATE(), GETDATE());
 SET @SchedulerMenuID = SCOPE_IDENTITY();
 
+-- 8.9 共享组件菜单
+DECLARE @SharedMenuID INT;
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('共享组件', 'system:shared', @SystemMenuID, 'share.png', '', 'shared:view', 180, 1, GETDATE(), GETDATE());
+SET @SharedMenuID = SCOPE_IDENTITY();
+
 -- =====================================================
--- 8.9 二级菜单（数据字典 / 日志审计 / 定时任务 子项）
+-- 9.1 二级菜单（数据字典 / 日志审计 / 定时任务 / 共享组件 子项）
 --     RoutePath = 目标 Frame 类名，由 MdiRouter.FindClass 动态加载
 -- =====================================================
 
@@ -170,8 +183,12 @@ VALUES ('任务管理', 'system:scheduler:manage', @SchedulerMenuID, 'list.png',
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
 VALUES ('任务日志', 'system:scheduler:log', @SchedulerMenuID, 'file.png', 'TTaskLogFrame', 'scheduler:log', 172, 1, GETDATE(), GETDATE());
 
+-- 共享组件子菜单
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('图标选择器', 'system:shared:icon', @SharedMenuID, 'icon.png', 'TIconSelector', 'shared:view', 181, 1, GETDATE(), GETDATE());
+
 -- =====================================================
--- 9. 为管理员角色分配所有权限
+-- 10. 为管理员角色分配所有权限
 -- =====================================================
 
 -- 假设管理员角色 ID 为 1，如果不是需要调整
@@ -190,11 +207,12 @@ BEGIN
      OR PermissionCode LIKE 'dictionary:%'
      OR PermissionCode LIKE 'config:%'
      OR PermissionCode LIKE 'log:%'
-     OR PermissionCode LIKE 'scheduler:%';
+     OR PermissionCode LIKE 'scheduler:%'
+     OR PermissionCode LIKE 'shared:%';
 END
 
 -- =====================================================
--- 10. 完成提示
+-- 11. 完成提示
 -- =====================================================
 PRINT '======================================================';
 PRINT '系统权限初始化完成！';

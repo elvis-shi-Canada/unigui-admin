@@ -321,13 +321,58 @@ begin
       'VALUES (1, 0, ''系统管理'', ''system'', ''settings'', ''/system'', 1, 1)');
     LQuery.ExecSQL(
       'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
-      'VALUES (2, 1, ''用户管理'', ''system.user'', ''user'', ''/system/user'', 1, 1)');
+      'VALUES (2, 1, ''用户管理'', ''system.user'', ''user'', ''TUserListFrame'', 1, 1)');
     LQuery.ExecSQL(
       'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
-      'VALUES (3, 1, ''角色管理'', ''system.role'', ''users'', ''/system/role'', 2, 1)');
+      'VALUES (3, 1, ''角色管理'', ''system.role'', ''users'', ''TRoleListFrame'', 2, 1)');
     LQuery.ExecSQL(
       'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
-      'VALUES (4, 1, ''菜单管理'', ''system.menu'', ''list'', ''/system/menu'', 3, 1)');
+      'VALUES (4, 1, ''菜单管理'', ''system.menu'', ''list'', ''TMenuTreeFrame'', 3, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (5, 1, ''数据字典'', ''system.dictionary'', ''book'', '''', 4, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (6, 1, ''系统配置'', ''system.config'', ''cog'', ''TConfigCategoryFrame'', 5, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (7, 1, ''日志审计'', ''system.log'', ''file-text'', '''', 6, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (8, 1, ''定时任务'', ''system.scheduler'', ''clock'', '''', 7, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (9, 1, ''共享组件'', ''system.shared'', ''share'', '''', 8, 1)');
+
+    // 子菜单：为分类节点添加可路由的叶子菜单
+    // 数据字典子菜单
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (10, 5, ''字典类型'', ''system.dictionary:type'', ''list'', ''TDictTypeFrame'', 1, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (11, 5, ''字典项'', ''system.dictionary:item'', ''list'', ''TDictItemFrame'', 2, 1)');
+    // 日志审计子菜单
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (12, 7, ''登录日志'', ''system.log:login'', ''file-text'', ''TLoginLogFrame'', 1, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (13, 7, ''操作日志'', ''system.log:operation'', ''file-text'', ''TOperationLogFrame'', 2, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (14, 7, ''数据变更日志'', ''system.log:data'', ''file-text'', ''TDataChangeLogFrame'', 3, 1)');
+    // 定时任务子菜单
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (15, 8, ''任务管理'', ''system.scheduler:manage'', ''list'', ''TTaskManageFrame'', 1, 1)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (16, 8, ''任务日志'', ''system.scheduler:log'', ''file-text'', ''TTaskLogFrame'', 2, 1)');
+    // 共享组件子菜单
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
+      'VALUES (17, 9, ''图标选择器'', ''system.shared:icon'', ''icon'', ''TIconSelector'', 1, 1)');
 
     // 权限：为所有菜单创建对应权限
     LQuery.ExecSQL(
@@ -339,6 +384,21 @@ begin
     LQuery.ExecSQL(
       'INSERT OR IGNORE INTO UniAdmin_Permissions (PermissionID, PermissionCode, PermissionName, ResourceType, ResourceCode, Action, Description) ' +
       'VALUES (3, ''menu:view'', ''查看菜单'', ''menu'', ''MenuManagement'', ''view'', ''查看菜单列表'')');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Permissions (PermissionID, PermissionCode, PermissionName, ResourceType, ResourceCode, Action, Description) ' +
+      'VALUES (4, ''dictionary:view'', ''查看字典'', ''dictionary'', ''DictionaryManagement'', ''view'', ''查看数据字典'')');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Permissions (PermissionID, PermissionCode, PermissionName, ResourceType, ResourceCode, Action, Description) ' +
+      'VALUES (5, ''config:view'', ''查看配置'', ''config'', ''SystemConfig'', ''view'', ''查看系统配置'')');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Permissions (PermissionID, PermissionCode, PermissionName, ResourceType, ResourceCode, Action, Description) ' +
+      'VALUES (6, ''log:view'', ''查看日志'', ''log'', ''LogManagement'', ''view'', ''查看系统日志'')');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Permissions (PermissionID, PermissionCode, PermissionName, ResourceType, ResourceCode, Action, Description) ' +
+      'VALUES (7, ''scheduler:view'', ''查看任务'', ''scheduler'', ''SchedulerManagement'', ''view'', ''查看定时任务'')');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_Permissions (PermissionID, PermissionCode, PermissionName, ResourceType, ResourceCode, Action, Description) ' +
+      'VALUES (8, ''shared:view'', ''查看共享组件'', ''shared'', ''SharedManagement'', ''view'', ''查看共享组件'')');
 
     // 角色-权限关联：admin 角色拥有所有权限
     LQuery.ExecSQL(
@@ -347,6 +407,16 @@ begin
       'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) VALUES (1, 2)');
     LQuery.ExecSQL(
       'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) VALUES (1, 3)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) VALUES (1, 4)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) VALUES (1, 5)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) VALUES (1, 6)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) VALUES (1, 7)');
+    LQuery.ExecSQL(
+      'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) VALUES (1, 8)');
   finally
     LQuery.Free;
   end;

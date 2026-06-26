@@ -27,7 +27,6 @@ object DialogTemplate: TDialogTemplate
       Hint = ''
       AutoSize = False
       Caption = #23545#35805#26694#20869#23481
-      TabOrder = 1
     end
   end
   object pnlButtons: TUniPanel

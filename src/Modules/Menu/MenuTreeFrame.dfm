@@ -1,34 +1,42 @@
 inherited MenuTreeFrame: TMenuTreeFrame
-  PixelsPerInch = 96
-  TextHeight = 13
+  Width = 788
+  ExplicitWidth = 788
+  inherited UniToolBar: TUniToolBar
+    Width = 788
+    ExplicitWidth = 788
+  end
   object pnlContainer: TUniPanel
     Left = 0
-    Top = 0
-    Width = 900
-    Height = 600
+    Top = 40
+    Width = 788
+    Height = 440
     Hint = ''
     Align = alClient
-    TabOrder = 0
+    TabOrder = 1
+    Caption = ''
+    ExplicitWidth = 640
     object pnlLeft: TUniPanel
       Left = 1
       Top = 1
       Width = 350
-      Height = 598
+      Height = 438
       Hint = ''
       Align = alLeft
       TabOrder = 1
+      Caption = ''
       object pnlTree: TUniPanel
         Left = 1
         Top = 1
         Width = 348
-        Height = 558
+        Height = 398
         Hint = ''
         Align = alClient
         TabOrder = 1
+        Caption = ''
         object lblTree: TUniLabel
           Left = 8
           Top = 8
-          Width = 60
+          Width = 39
           Height = 13
           Hint = ''
           Caption = #33756#21333#26641
@@ -42,20 +50,19 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Hint = ''
           Align = alCustom
           Anchors = [akLeft, akTop, akRight, akBottom]
-          TabOrder = 0
+          Items.FontData = {0100000000}
           OnClick = treeMenusClick
-          OnDragDrop = treeMenusDragDrop
-          OnDragOver = treeMenusDragOver
         end
       end
       object pnlTreeToolbar: TUniPanel
         Left = 1
-        Top = 559
+        Top = 399
         Width = 348
         Height = 38
         Hint = ''
         Align = alBottom
         TabOrder = 2
+        Caption = ''
         object btnExpandAll: TUniButton
           Left = 8
           Top = 6
@@ -63,7 +70,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Height = 25
           Hint = ''
           Caption = #20840#37096#23637#24320
-          TabOrder = 0
+          TabOrder = 1
           OnClick = btnExpandAllClick
         end
         object btnCollapseAll: TUniButton
@@ -73,7 +80,7 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Height = 25
           Hint = ''
           Caption = #20840#37096#25240#21472
-          TabOrder = 1
+          TabOrder = 2
           OnClick = btnCollapseAllClick
         end
       end
@@ -82,43 +89,48 @@ inherited MenuTreeFrame: TMenuTreeFrame
       Left = 351
       Top = 1
       Width = 4
-      Height = 598
+      Height = 438
       Hint = ''
       Align = alLeft
+      ParentColor = False
+      Color = clBtnFace
     end
     object pnlRight: TUniPanel
       Left = 355
       Top = 1
-      Width = 544
-      Height = 598
+      Width = 432
+      Height = 438
       Hint = ''
       Align = alClient
       TabOrder = 3
+      Caption = ''
+      ExplicitWidth = 284
       object pnlSearch: TUniPanel
         Left = 1
         Top = 1
-        Width = 542
+        Width = 430
         Height = 40
         Hint = ''
         Align = alTop
         TabOrder = 1
+        Caption = ''
+        ExplicitWidth = 282
         object lblSearch: TUniLabel
           Left = 8
           Top = 12
-          Width = 60
+          Width = 29
           Height = 13
           Hint = ''
           Caption = #25628#32034':'
-          TabOrder = 1
+          TabOrder = 4
         end
         object edtSearch: TUniEdit
           Left = 70
           Top = 8
           Width = 150
-          Height = 22
           Hint = ''
-          TextHint = #33756#21333#32534#30721#25110#21517#31216
-          TabOrder = 2
+          Text = ''
+          TabOrder = 1
           OnKeyPress = edtSearchKeyPress
         end
         object cmbStatus: TUniComboBox
@@ -127,13 +139,13 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Width = 80
           Height = 21
           Hint = ''
-          Style = csDropDown
-          ItemIndex = 0
-          TabOrder = 3
+          Text = ''
           Items.Strings = (
             #20840#37096
             #21551#29992
             #31105#29992)
+          TabOrder = 2
+          IconItems = <>
           OnChange = cmbStatusChange
         end
         object btnSearch: TUniButton
@@ -143,19 +155,19 @@ inherited MenuTreeFrame: TMenuTreeFrame
           Height = 25
           Hint = ''
           Caption = #25628#32034
-          TabOrder = 4
+          TabOrder = 3
           OnClick = btnSearchClick
         end
       end
       object UniDBGrid: TUniDBGrid
         Left = 1
         Top = 41
-        Width = 542
-        Height = 556
+        Width = 430
+        Height = 396
         Hint = ''
+        LoadMask.Message = #21152#36733#25968#25454'...'
         Align = alClient
-        TabOrder = 0
-        DataSource = UniDataSource
+        TabOrder = 2
         OnDblClick = UniDBGridDblClick
       end
     end

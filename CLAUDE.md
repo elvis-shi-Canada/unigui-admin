@@ -224,6 +224,9 @@ Caption = '#29992#25143'
 | E2003 Undeclared 'UniSession'（MainModule 内） | `UniApplication` 标识符在 TUniGUIMainModule 子类中与 Self.UniApplication 歧义 | 用带单元前缀的 `uniGUIApplication.UniApplication.UniSession.X`（见 LRN-20260626-001） |
 | E2035 Not enough parameters | 参数数量不匹配 | 检查方法声明，确保参数匹配 |
 | Record 字段错误 | 假设字段名 | 使用前查看实际 record 定义 |
+| E2003 Undeclared 'TUniTreeNode' | TUniTreeNode 定义在 `uniGUIAbstractClasses`（**非** uniTreeView，后者用 TWebTreeNode） | uses 加 `uniGUIAbstractClasses`；详见 LRN-20260626-001 |
+| EReadError 'Property TabOrder does not exist'（运行时） | TUniLabel 继承 `TUniControl`（非 TWinControl）无 TabOrder，linter 易批量误加 | DFM 不给 TUniLabel（及 TUniControl 派生控件）写 TabOrder；详见 LRN-20260626-002 |
+| EInvalidPointer 'Invalid pointer operation'（退出时） | `FQuery.Connection` 裸引用 MainModule.Connection，销毁顺序导致悬挂 | Frame destructor 先 `FQuery.Connection := nil` 再 `FQuery.Free`；详见 LRN-20260626-003 |
 
 ### 泛型集合操作 (TList\<T\>)
 

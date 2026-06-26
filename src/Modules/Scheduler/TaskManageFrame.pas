@@ -7,7 +7,11 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar, uniLabel, uniMultiItem, uniComboBox, uniPanel,
-  UniContext, UniPlugin.Types, BaseCrudFrame, UniAdminScheduler;
+  UniContext, UniPlugin.Types, BaseCrudFrame, UniAdminScheduler,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, Vcl.Controls,
+  Vcl.Forms;
 
 type
   /// <summary>
@@ -24,12 +28,12 @@ type
     UniDBGrid: TUniDBGrid;
     UniDataSource: TDataSource;
     qryTasks: TFDQuery;
-    FScheduler: TUniAdminScheduler;
 
     procedure UniButtonSearchClick(Sender: TObject);
     procedure UniButtonRefreshClick(Sender: TObject);
     procedure UniDBGridDblClick(Sender: TObject);
   private
+    FScheduler: TUniAdminScheduler;
     FLastDataSet: TDataSet;
     procedure FreeLastDataSet;
   protected

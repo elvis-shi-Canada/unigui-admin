@@ -26,7 +26,6 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Height = 13
         Hint = ''
         Caption = #21487#29992#26435#38480
-        TabOrder = 1
       end
       object lstAvailable: TUniListBox
         Left = 8
@@ -56,7 +55,6 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Height = 13
         Hint = ''
         Caption = #24050#20998#37197
-        TabOrder = 1
       end
       object lstAssigned: TUniListBox
         Left = 8
@@ -157,7 +155,6 @@ inherited RolePermissionDialog: TRolePermissionDialog
         Height = 13
         Hint = ''
         Caption = #35282#33394':'
-        TabOrder = 2
       end
     end
   end

@@ -59,6 +59,8 @@ uses
 { TLoginForm }
 
 procedure TLoginForm.FormCreate(Sender: TObject);
+var
+  LRememberedUser, LRememberedPwd: string;
 begin
   // 从当前会话的服务容器获取认证服务
   try
@@ -75,6 +77,17 @@ begin
   EdtUserName.Text := '';
   EdtPassword.Text := '';
   ChkRememberMe.Checked := False;
+
+  // 读取"记住我"Cookie，自动填充用户名和密码
+  LRememberedUser := UniApplication.Cookies.GetCookie('UniAdmin_RememberMe');
+  if LRememberedUser <> '' then
+  begin
+    EdtUserName.Text := LRememberedUser;
+    ChkRememberMe.Checked := True;
+    LRememberedPwd := UniApplication.Cookies.GetCookie('UniAdmin_RememberPwd');
+    if LRememberedPwd <> '' then
+      EdtPassword.Text := LRememberedPwd;
+  end;
 
   FLoginResult.Success := False;
   FLoginResult.Message := '';
@@ -146,6 +159,18 @@ begin
 
       if FLoginResult.Success then
       begin
+        // "记住我"功能：勾选则保存用户名和密码到Cookie（有效期30天），否则清除
+        if ChkRememberMe.Checked then
+        begin
+          UniApplication.Cookies.SetCookie('UniAdmin_RememberMe', Trim(EdtUserName.Text), Now + 30);
+          UniApplication.Cookies.SetCookie('UniAdmin_RememberPwd', Trim(EdtPassword.Text), Now + 30);
+        end
+        else
+        begin
+          UniApplication.Cookies.SetCookie('UniAdmin_RememberMe', '', Now - 1);
+          UniApplication.Cookies.SetCookie('UniAdmin_RememberPwd', '', Now - 1);
+        end;
+
         // 将登录结果交由 MainModule（每会话）构造执行上下文，
         // 避免 class var 跨会话共享导致的并发覆盖
         GetMainModule.SetLoginResult(FLoginResult);

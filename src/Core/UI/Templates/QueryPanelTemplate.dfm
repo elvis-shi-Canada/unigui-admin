@@ -23,7 +23,6 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Height = 13
       Hint = ''
       Caption = #20851#38190#35789':'
-      TabOrder = 4
     end
     object edtKeyword: TUniEdit
       Left = 82
@@ -41,7 +40,6 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Height = 13
       Hint = ''
       Caption = #36215#22987#26085#26399':'
-      TabOrder = 5
     end
     object dtpDateFrom: TUniDateTimePicker
       Left = 366
@@ -62,7 +60,6 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Height = 13
       Hint = ''
       Caption = #32467#26463#26085#26399':'
-      TabOrder = 6
     end
     object dtpDateTo: TUniDateTimePicker
       Left = 558
@@ -83,7 +80,6 @@ object QueryPanelTemplate: TQueryPanelTemplate
       Height = 13
       Hint = ''
       Caption = #29366#24577':'
-      TabOrder = 11
     end
     object cboStatus: TUniComboBox
       Left = 82
