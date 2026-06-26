@@ -106,44 +106,69 @@ SET @SystemMenuID = SCOPE_IDENTITY();
 -- 8.2 用户管理菜单
 DECLARE @UserMenuID INT;
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
-VALUES ('用户管理', 'system:user', @SystemMenuID, 'user.png', '/system/user', 'user:view', 110, 1, GETDATE(), GETDATE());
+VALUES ('用户管理', 'system:user', @SystemMenuID, 'user.png', 'TUserListFrame', 'user:view', 110, 1, GETDATE(), GETDATE());
 SET @UserMenuID = SCOPE_IDENTITY();
 
 -- 8.3 角色管理菜单
 DECLARE @RoleMenuID INT;
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
-VALUES ('角色管理', 'system:role', @SystemMenuID, 'users.png', '/system/role', 'role:view', 120, 1, GETDATE(), GETDATE());
+VALUES ('角色管理', 'system:role', @SystemMenuID, 'users.png', 'TRoleListFrame', 'role:view', 120, 1, GETDATE(), GETDATE());
 SET @RoleMenuID = SCOPE_IDENTITY();
 
 -- 8.4 菜单管理菜单
 DECLARE @MenuMenuID INT;
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
-VALUES ('菜单管理', 'system:menu', @SystemMenuID, 'menu.png', '/system/menu', 'menu:view', 130, 1, GETDATE(), GETDATE());
+VALUES ('菜单管理', 'system:menu', @SystemMenuID, 'menu.png', 'TMenuTreeFrame', 'menu:view', 130, 1, GETDATE(), GETDATE());
 SET @MenuMenuID = SCOPE_IDENTITY();
 
 -- 8.5 数据字典菜单
 DECLARE @DictMenuID INT;
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
-VALUES ('数据字典', 'system:dictionary', @SystemMenuID, 'book.png', '/system/dictionary', 'dictionary:view', 140, 1, GETDATE(), GETDATE());
+VALUES ('数据字典', 'system:dictionary', @SystemMenuID, 'book.png', '', 'dictionary:view', 140, 1, GETDATE(), GETDATE());
 SET @DictMenuID = SCOPE_IDENTITY();
 
 -- 8.6 系统配置菜单
 DECLARE @ConfigMenuID INT;
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
-VALUES ('系统配置', 'system:config', @SystemMenuID, 'config.png', '/system/config', 'config:view', 150, 1, GETDATE(), GETDATE());
+VALUES ('系统配置', 'system:config', @SystemMenuID, 'config.png', 'TConfigCategoryFrame', 'config:view', 150, 1, GETDATE(), GETDATE());
 SET @ConfigMenuID = SCOPE_IDENTITY();
 
 -- 8.7 日志审计菜单
 DECLARE @LogMenuID INT;
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
-VALUES ('日志审计', 'system:log', @SystemMenuID, 'file-text.png', '/system/log', 'log:view', 160, 1, GETDATE(), GETDATE());
+VALUES ('日志审计', 'system:log', @SystemMenuID, 'file-text.png', '', 'log:view', 160, 1, GETDATE(), GETDATE());
 SET @LogMenuID = SCOPE_IDENTITY();
 
 -- 8.8 定时任务菜单
 DECLARE @SchedulerMenuID INT;
 INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
-VALUES ('定时任务', 'system:scheduler', @SystemMenuID, 'clock.png', '/system/scheduler', 'scheduler:view', 170, 1, GETDATE(), GETDATE());
+VALUES ('定时任务', 'system:scheduler', @SystemMenuID, 'clock.png', '', 'scheduler:view', 170, 1, GETDATE(), GETDATE());
 SET @SchedulerMenuID = SCOPE_IDENTITY();
+
+-- =====================================================
+-- 8.9 二级菜单（数据字典 / 日志审计 / 定时任务 子项）
+--     RoutePath = 目标 Frame 类名，由 MdiRouter.FindClass 动态加载
+-- =====================================================
+
+-- 数据字典子菜单
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('字典类型', 'system:dictionary:type', @DictMenuID, 'type.png', 'TDictTypeFrame', 'dictionary:view', 141, 1, GETDATE(), GETDATE());
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('字典项', 'system:dictionary:item', @DictMenuID, 'item.png', 'TDictItemFrame', 'dictionary:view', 142, 1, GETDATE(), GETDATE());
+
+-- 日志审计子菜单
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('登录日志', 'system:log:login', @LogMenuID, 'login.png', 'TLoginLogFrame', 'log:login', 161, 1, GETDATE(), GETDATE());
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('操作日志', 'system:log:operation', @LogMenuID, 'operation.png', 'TOperationLogFrame', 'log:operation', 162, 1, GETDATE(), GETDATE());
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('数据变更日志', 'system:log:datachange', @LogMenuID, 'database.png', 'TDataChangeLogFrame', 'log:datachange', 163, 1, GETDATE(), GETDATE());
+
+-- 定时任务子菜单
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('任务管理', 'system:scheduler:manage', @SchedulerMenuID, 'list.png', 'TTaskManageFrame', 'scheduler:view', 171, 1, GETDATE(), GETDATE());
+INSERT INTO UniAdmin_Menus (MenuName, MenuCode, ParentID, Icon, RoutePath, PermissionCode, SortOrder, IsVisible, CreatedDate, ModifiedDate)
+VALUES ('任务日志', 'system:scheduler:log', @SchedulerMenuID, 'file.png', 'TTaskLogFrame', 'scheduler:log', 172, 1, GETDATE(), GETDATE());
 
 -- =====================================================
 -- 9. 为管理员角色分配所有权限

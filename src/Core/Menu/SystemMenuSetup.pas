@@ -112,7 +112,7 @@ begin
     'system:view', 100, True, '系统管理主菜单');
 
   // ========== 用户管理 ==========
-  AddItem('用户管理', 'system:user', 'system', 'user.png', '/system/user',
+  AddItem('用户管理', 'system:user', 'system', 'user.png', 'TUserListFrame',
     'user:view', 110, True, '用户账号管理');
   AddItem('用户列表', 'system:user:list', 'system:user', 'list.png', '/system/user/list',
     'user:view', 111, True, '');
@@ -124,7 +124,7 @@ begin
     'user:delete', 114, True, '');
 
   // ========== 角色管理 ==========
-  AddItem('角色管理', 'system:role', 'system', 'users.png', '/system/role',
+  AddItem('角色管理', 'system:role', 'system', 'users.png', 'TRoleListFrame',
     'role:view', 120, True, '角色权限管理');
   AddItem('角色列表', 'system:role:list', 'system:role', 'list.png', '/system/role/list',
     'role:view', 121, True, '');
@@ -140,7 +140,7 @@ begin
     'role:assign-user', 126, True, '');
 
   // ========== 菜单管理 ==========
-  AddItem('菜单管理', 'system:menu', 'system', 'menu.png', '/system/menu',
+  AddItem('菜单管理', 'system:menu', 'system', 'menu.png', 'TMenuTreeFrame',
     'menu:view', 130, True, '系统菜单管理');
   AddItem('菜单树', 'system:menu:tree', 'system:menu', 'tree.png', '/system/menu/tree',
     'menu:view', 131, True, '');
