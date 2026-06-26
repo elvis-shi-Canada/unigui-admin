@@ -221,6 +221,7 @@ Caption = '#29992#25143'
 |------|------|----------|
 | E2003 Undeclared identifier | 缺少 uses 引用 | 搜索类型定义位置，添加 uses |
 | E2003 'Dispose' | 类实例用 Dispose | 类实例用 `.Free`，Dispose 仅用于 New 分配的指针 |
+| E2003 Undeclared 'UniSession'（MainModule 内） | `UniApplication` 标识符在 TUniGUIMainModule 子类中与 Self.UniApplication 歧义 | 用带单元前缀的 `uniGUIApplication.UniApplication.UniSession.X`（见 LRN-20260626-001） |
 | E2035 Not enough parameters | 参数数量不匹配 | 检查方法声明，确保参数匹配 |
 | Record 字段错误 | 假设字段名 | 使用前查看实际 record 定义 |
 
