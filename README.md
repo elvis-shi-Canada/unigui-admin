@@ -18,6 +18,7 @@
 - **RBAC 权限** — 用户-角色-权限三级模型，支持数据范围控制
 - **任务调度** — Cron 表达式驱动的定时任务，内置健康检查、日志清理、数据库备份
 - **日志审计** — 登录日志、操作日志、数据变更日志，支持 Excel/CSV/JSON/XML 导出
+- **数据驱动 MDI** — 菜单路由零代码，Frame 缓存保状态，新增模块不改主框架
 
 ## 技术栈
 
@@ -76,7 +77,7 @@ src/
 │   ├── Scheduler/     任务调度
 │   ├── Services/      服务定位器
 │   ├── Session/       会话管理
-│   └── UI/            UI 框架（BaseCrudFrame、模板）
+│   └── UI/            UI 框架（BaseCrudFrame、MainFrame、MdiRouter、模板）
 ├── Modules/           业务模块
 │   ├── User/          用户管理
 │   ├── Role/          角色管理
@@ -104,6 +105,32 @@ src/
 | 插件系统 | ✅ 完成 | 生命周期管理、依赖解析、循环检测、示例插件 |
 | UI 模板 | ✅ 完成 | 9 个模板（表单、对话框、网格、向导等） |
 | 辅助工具 | ✅ 完成 | 10 个工具（代码生成、性能分析、日志查看等） |
+
+## MDI 架构（数据驱动路由）
+
+主界面采用**数据驱动的 MDI 路由**：菜单项的 `RoutePath` 字段直接存储目标 Frame/Form 类名，`TUniAdminMdiRouter` 在运行时通过 `FindClass` 动态加载，每个模块作为可关闭标签页（TUniPageControl）打开；切换菜单时标签页状态完整保留（筛选/分页/滚动）。
+
+**新增一个业务模块，主框架零修改——只需 3 步：**
+
+1. 编写 `TUniFrame` 子类，并在单元 `initialization` 段注册类：
+   ```pascal
+   initialization
+     RegisterClass(TMyListFrame);
+   ```
+2. 在 `UniAdmin_Menus` 表中，将该菜单的 `RoutePath` 设为 `'TMyListFrame'`
+3. 完成！点击菜单即自动路由打开
+
+**核心机制：**
+
+| 机制 | 说明 |
+|------|------|
+| 数据驱动路由 | `RoutePath`（类名）→ `FindClass` 动态实例化，告别 if-else 硬编码 |
+| 多标签缓存 | 每模块一个可关闭标签页（TUniPageControl），切换保留状态 |
+| 打开方式推导 | 类名以 `Form` 结尾 → 模态窗口；否则 → 嵌入内容区 |
+| 开闭原则 | 新增模块对扩展开放，对 MainFrame 修改封闭（SOLID-O） |
+
+> 📐 设计参考：**FSThemeCrystal**（Falcon Sistemas 出品的 uniGUI + UniFalcon 水晶主题 Demo），借鉴其 `FindClass` 动态加载与 Panel 缓存模式。
+> 完整方案详见 [MDI 架构设计方案](docs/plans/2026-06-26-mdi-architecture-design.md)。
 
 ## 数据库
 
@@ -137,6 +164,8 @@ cd tests && UniAdminTests.exe
 - [API 文档](docs/API.md) ｜ [中文版](docs/04-API文档.md)
 - [部署指南](docs/DEPLOYMENT.md) ｜ [中文版](docs/05-部署指南.md)
 - [安全指南](docs/Security.md) ｜ [中文版](docs/06-安全指南.md)
+- [MDI 架构设计](docs/plans/2026-06-26-mdi-architecture-design.md) — 数据驱动路由与多标签缓存方案
+- [UniFalcon 接入评估](docs/plans/2026-06-26-unifalcon-integration-assessment.md) — 30 控件 + 11 主题，UI 质感升级方案
 
 扩展资料：[UniGUI 组件参考手册](component-reference-manual.md)、[开发者手册](developer-manual.md)
 
