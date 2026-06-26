@@ -131,4 +131,8 @@ begin
   ShowMessage('导出功能待实现');
 end;
 
+initialization
+  // Register for FindClass-driven MDI routing (UniAdmin_Menus.RoutePath)
+  RegisterClass(TOperationLogFrame);
+
 end.

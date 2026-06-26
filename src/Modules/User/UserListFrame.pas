@@ -193,4 +193,8 @@ begin
     ApplyFilter;
 end;
 
+initialization
+  // Register for FindClass-driven MDI routing (UniAdmin_Menus.RoutePath -> frame)
+  RegisterClass(TUserListFrame);
+
 end.

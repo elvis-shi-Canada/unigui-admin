@@ -202,4 +202,8 @@ begin
   ShowMessage('头像上传功能将在 Phase 4 中实现');
 end;
 
+initialization
+  // Register for FindClass-driven MDI routing (UniAdmin_Menus.RoutePath)
+  RegisterClass(TUserProfileFrame);
+
 end.

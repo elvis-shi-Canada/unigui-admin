@@ -560,4 +560,8 @@ begin
   StatusBar.SimpleText := Format('配置项 %s 已删除', [LKey]);
 end;
 
+initialization
+  // Register for FindClass-driven MDI routing (UniAdmin_Menus.RoutePath)
+  RegisterClass(TConfigManagerFrame);
+
 end.

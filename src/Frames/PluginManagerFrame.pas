@@ -401,4 +401,8 @@ begin
   RefreshUI;
 end;
 
+initialization
+  // Register for FindClass-driven MDI routing (UniAdmin_Menus.RoutePath)
+  RegisterClass(TPluginManagerFrame);
+
 end.

@@ -512,4 +512,8 @@ begin
     BtnEditClick(nil);
 end;
 
+initialization
+  // Register for FindClass-driven MDI routing (UniAdmin_Menus.RoutePath -> frame)
+  RegisterClass(TMenuTreeFrame);
+
 end.
