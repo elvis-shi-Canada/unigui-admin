@@ -65,6 +65,8 @@ uses
   UniAdminPropertyEditor in 'Core\UI\UniAdminPropertyEditor.pas',
   UniAdminTheme in 'Core\UI\UniAdminTheme.pas',
   UniAdminFormStyler in 'Core\UI\UniAdminFormStyler.pas',
+  UniAdminMdiRouter.Intf in 'Core\UI\UniAdminMdiRouter.Intf.pas',
+  UniAdminMdiRouter in 'Core\UI\UniAdminMdiRouter.pas',
   UserListFrame in 'Modules\User\UserListFrame.pas',
   UserEditForm in 'Modules\User\UserEditForm.pas',
   UserDataModule in 'Modules\User\UserDataModule.pas',

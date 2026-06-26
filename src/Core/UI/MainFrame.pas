@@ -1,22 +1,25 @@
-﻿unit MainFrame;
+unit MainFrame;
 
 interface
 
 uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections, System.UITypes,
+  System.StrUtils,
   uniGUIApplication, uniGUIForm, uniLabel, uniButton,
-  uniPanel, uniGUIBaseClasses, uniGUIFrame, uniGUIClasses, Vcl.Menus, uniMainMenu, uniStatusBar,
-  UniContext, UniAdminMenuManager.Intf, Vcl.Controls, Vcl.Forms;
+  uniPanel, uniGUIBaseClasses, uniGUIFrame, uniGUIClasses, uniPageControl, Vcl.Menus,
+  uniMainMenu, uniStatusBar,
+  UniContext, UniAdminMenuManager.Intf, UniAdminMdiRouter.Intf, Vcl.Controls, Vcl.Forms;
 
 type
   /// <summary>
   /// 主窗体框架 - 应用程序主窗口外壳
-  /// 提供菜单栏、内容区域和状态栏
-  /// 集成会话管理和菜单管理
+  /// 提供菜单栏、多标签内容区域（TUniPageControl）和状态栏
+  /// 集成会话管理和数据驱动的 MDI 路由
   /// </summary>
   TMainFrame = class(TUniForm)
     UniMainMenu: TUniMainMenu;
     UniContainerPanel: TUniContainerPanel;
+    pgcContent: TUniPageControl;
     UniStatusBar: TUniStatusBar;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -26,6 +29,7 @@ type
     FMenuManager: IUniAdminMenuManager;
     FMenuItems: TDictionary<string, TUniMenuItem>;
     FContentFrame: TComponent;
+    FMdiRouter: IMdiRouter;
 
     procedure InitializeComponents;
     procedure InitializeMenus;
@@ -64,6 +68,9 @@ type
     /// </summary>
     procedure RefreshStatusBar;
 
+    /// <summary>MDI 路由器（数据驱动菜单路由 + 多标签缓存）</summary>
+    property MdiRouter: IMdiRouter read FMdiRouter;
+
     property Context: IExecutionContext read FContext;
   end;
 
@@ -73,7 +80,7 @@ implementation
 
 uses
   UniAdminServices, uniGUIVars, UniAdminFormStyler, LoginForm, UniAdminAuthService.Intf,
-  UserListFrame, RoleListFrame, MenuTreeFrame, MainModule;
+  UniAdminMdiRouter, MainModule;
 
 { TMainFrame }
 
@@ -85,6 +92,9 @@ end;
 
 destructor TMainFrame.Destroy;
 begin
+  // Release router first: it clears the cached tabs while the host page
+  // control (pgcContent) is still alive, avoiding dangling references.
+  FMdiRouter := nil;
   FMenuItems.Free;
   inherited;
 end;
@@ -98,6 +108,11 @@ begin
   TUniAdminFormStyler.AutoStylePanels(Self);
 
   InitializeComponents;
+
+  // MDI router: binds to the content page control. Each routed frame opens
+  // as a closable tab; reopening a class activates its existing tab.
+  // New modules are routed purely by UniAdmin_Menus.RoutePath (class name).
+  FMdiRouter := TUniAdminMdiRouter.Create(pgcContent);
 end;
 
 procedure TMainFrame.FormShow(Sender: TObject);
@@ -188,6 +203,8 @@ begin
   Result.Visible := MenuData.IsVisible;
   Result.Enabled := True;  // 默认启用
 
+  // Leaf nodes with a routable target (RoutePath = class name) handle clicks;
+  // pure category nodes (RoutePath empty) have no OnClick.
   if MenuData.RoutePath <> '' then
     Result.OnClick := OnMenuClick;
 end;
@@ -197,7 +214,6 @@ var
   LMenuItem: TUniMenuItem;
   LMenuID: Integer;
   LMenuData: UniAdminMenuManager.Intf.TMenuItem;
-  LFrame: TUniFrame;
 begin
   if not (Sender is TUniMenuItem) then
     Exit;
@@ -207,27 +223,30 @@ begin
 
   UpdateStatusBar('正在加载: ' + LMenuItem.Caption);
 
-  // 根据 MenuCode 路由到对应功能模块
-  if Assigned(FMenuManager) then
+  // Data-driven routing: RoutePath stores the target Frame/Form class name.
+  // Adding a new module needs ZERO changes here — just RegisterClass the frame
+  // unit and set its RoutePath in UniAdmin_Menus.
+  // (See docs/plans/2026-06-26-mdi-architecture-design.md)
+  if not Assigned(FMenuManager) then
+    Exit;
+
+  LMenuData := FMenuManager.GetMenuByID(LMenuID);
+
+  if LMenuData.RoutePath = '' then
+    Exit;  // pure category node, nothing to route
+
+  if FMdiRouter.CanRoute(LMenuData.RoutePath) then
   begin
-    LMenuData := FMenuManager.GetMenuByID(LMenuID);
-    LFrame := nil;
-
-    if LMenuData.MenuCode = 'system.user' then
-      LFrame := TUserListFrame.Create(Self)
-    else if LMenuData.MenuCode = 'system.role' then
-      LFrame := TRoleListFrame.Create(Self)
-    else if LMenuData.MenuCode = 'system.menu' then
-      LFrame := TMenuTreeFrame.Create(Self);
-
-    if LFrame <> nil then
-    begin
-      ShowContent(LFrame);
-      UpdateStatusBar(LMenuItem.Caption);
-    end
+    // Open mode is derived from the class-name suffix: *Form -> modal, else embed.
+    // Embedded frames become closable tabs; the menu caption is the tab title.
+    if AnsiEndsText('Form', LMenuData.RoutePath) then
+      FMdiRouter.Open(LMenuData.RoutePath, '', omModal)
     else
-      UpdateStatusBar('功能开发中: ' + LMenuItem.Caption);
-  end;
+      FMdiRouter.Open(LMenuData.RoutePath, LMenuItem.Caption, omEmbed);
+    UpdateStatusBar(LMenuItem.Caption);
+  end
+  else
+    UpdateStatusBar('无法路由: ' + LMenuData.RoutePath + '（Frame 类未注册 RegisterClass）');
 end;
 
 procedure TMainFrame.CreateDefaultMenus;

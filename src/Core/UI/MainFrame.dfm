@@ -19,6 +19,16 @@ object MainFrame: TMainFrame
     ParentColor = False
     Align = alClient
     TabOrder = 0
+    object pgcContent: TUniPageControl
+      Left = 0
+      Top = 0
+      Width = 900
+      Height = 580
+      Hint = ''
+      Align = alClient
+      TabHeight = 25
+      TabOrder = 0
+    end
   end
   object UniStatusBar: TUniStatusBar
     Left = 0
