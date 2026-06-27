@@ -11,8 +11,6 @@ uses
 type
   TUniAdminAuthService = class(TInterfacedObject, IUniAdminAuthService)
   private
-    class var FInstance: IUniAdminAuthService;
-    class var FLock: TObject;
     FConnection: TFDConnection;
     FActiveSessions: TDictionary<string, TLoginResult>;
 
@@ -28,28 +26,11 @@ type
     function ValidateToken(const Token: string): Boolean;
     function ChangePassword(const UserID: Integer; const OldPassword, NewPassword: string): Boolean;
     function ValidatePassword(const Password: string): Boolean;
-
-    class function GetInstance(const Connection: TFDConnection): IUniAdminAuthService; static;
   end;
 
 implementation
 
 { TUniAdminAuthService }
-
-class function TUniAdminAuthService.GetInstance(const Connection: TFDConnection): IUniAdminAuthService;
-begin
-  if FInstance = nil then
-  begin
-    TMonitor.Enter(FLock);
-    try
-      if FInstance = nil then
-        FInstance := TUniAdminAuthService.Create(Connection);
-    finally
-      TMonitor.Exit(FLock);
-    end;
-  end;
-  Result := FInstance;
-end;
 
 constructor TUniAdminAuthService.Create(const Connection: TFDConnection);
 begin
@@ -279,12 +260,5 @@ begin
     LList.Free;
   end;
 end;
-
-initialization
-  TUniAdminAuthService.FLock := TObject.Create;
-
-finalization
-  TUniAdminAuthService.FInstance := nil;
-  FreeAndNil(TUniAdminAuthService.FLock);
 
 end.

@@ -14,8 +14,6 @@ type
   /// </summary>
   TUniAdminMetadataCache = class(TInterfacedObject, IUniAdminMetadataCache)
   private
-    class var FInstance: IUniAdminMetadataCache;
-    class var FLock: TObject;
     FTables: TDictionary<string, TTableMetadata>;
     FConnection: TFDConnection;
 
@@ -32,33 +30,11 @@ type
     function GetAllTables: TArray<string>;
     procedure Refresh;
     procedure Clear;
-
-    /// <summary>
-    /// 获取元数据缓存实例
-    /// 注意: 当前实现为全局单例，不支持多连接场景
-    /// TODO: 未来版本考虑支持按连接管理的多实例模式
-    /// </summary>
-    class function GetInstance(const Connection: TFDConnection): IUniAdminMetadataCache; static;
   end;
 
 implementation
 
 { TUniAdminMetadataCache }
-
-class function TUniAdminMetadataCache.GetInstance(const Connection: TFDConnection): IUniAdminMetadataCache;
-begin
-  if FInstance = nil then
-  begin
-    TMonitor.Enter(FLock);
-    try
-      if FInstance = nil then
-        FInstance := TUniAdminMetadataCache.Create(Connection);
-    finally
-      TMonitor.Exit(FLock);
-    end;
-  end;
-  Result := FInstance;
-end;
 
 constructor TUniAdminMetadataCache.Create(const Connection: TFDConnection);
 begin
@@ -257,12 +233,5 @@ begin
     LPair.Value.Clear;
   FTables.Clear;
 end;
-
-initialization
-  TUniAdminMetadataCache.FLock := TObject.Create;
-
-finalization
-  TUniAdminMetadataCache.FInstance := nil;
-  FreeAndNil(TUniAdminMetadataCache.FLock);
 
 end.

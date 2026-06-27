@@ -14,7 +14,6 @@ type
   /// </summary>
   TUniAdminPermissionManager = class(TInterfacedObject, IUniAdminPermissionManager)
   private
-    class var FInstance: IUniAdminPermissionManager;
     class var FLock: TObject;
     FConnection: TFDConnection;
     FPermissionCache: TDictionary<Integer, TArray<TPermissionInfo>>;
@@ -58,31 +57,11 @@ type
     function RemoveRoleFromUser(const UserID, RoleID: Integer): Boolean;
     function GetDataScope(const UserID: Integer; const Resource: string): TDataScopeType;
     function HasRole(const UserID: Integer; const RoleCode: string): Boolean;
-
-    /// <summary>
-    /// 获取权限管理器实例
-    /// </summary>
-    class function GetInstance(const Connection: TFDConnection): IUniAdminPermissionManager; static;
   end;
 
 implementation
 
 { TUniAdminPermissionManager }
-
-class function TUniAdminPermissionManager.GetInstance(const Connection: TFDConnection): IUniAdminPermissionManager;
-begin
-  if FInstance = nil then
-  begin
-    TMonitor.Enter(FLock);
-    try
-      if FInstance = nil then
-        FInstance := TUniAdminPermissionManager.Create(Connection);
-    finally
-      TMonitor.Exit(FLock);
-    end;
-  end;
-  Result := FInstance;
-end;
 
 constructor TUniAdminPermissionManager.Create(const Connection: TFDConnection);
 begin
@@ -530,7 +509,6 @@ initialization
   TUniAdminPermissionManager.FLock := TObject.Create;
 
 finalization
-  TUniAdminPermissionManager.FInstance := nil;
   FreeAndNil(TUniAdminPermissionManager.FLock);
 
 end.
