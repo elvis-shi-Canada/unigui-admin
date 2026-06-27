@@ -2,7 +2,7 @@ inherited UserListFrame: TUserListFrame
   inherited UniToolBar: TUniToolBar
     ExplicitTop = 2
   end
-  object UniDBGrid: TUniDBGrid
+  inherited UniDBGrid: TUniDBGrid
     Left = 0
     Top = 40
     Width = 640
@@ -40,7 +40,7 @@ inherited UserListFrame: TUserListFrame
     TabOrder = 2
     OnClick = btnSearchClick
   end
-  object UniDataSource: TDataSource
+  inherited UniDataSource: TDataSource
     Left = 8
     Top = 8
   end
