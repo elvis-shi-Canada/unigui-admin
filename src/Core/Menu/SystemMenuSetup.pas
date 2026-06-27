@@ -48,9 +48,25 @@ type
 
     /// <summary>获取权限定义</summary>
     class function GetPermissionDefinitions: TList<TPermissionInfo>;
+
+    /// <summary>合并 ModelAdmin 注册中心的声明到菜单定义
+    /// 已手写的菜单（按 MenuCode 匹配）不会被覆盖，保证向后兼容。
+    /// </summary>
+    class function BuildMenusFromRegistry(
+      const ABaseList: TList<TMenuItemInfo>): TList<TMenuItemInfo>;
+
+    /// <summary>合并 ModelAdmin 注册中心的声明到权限定义
+    /// 为每个 ModelAdmin 派生 view/add/edit/delete 四件套权限。
+    /// 已手写的权限（按 PermissionCode 匹配）不会被覆盖。
+    /// </summary>
+    class function BuildPermissionsFromRegistry(
+      const ABaseList: TList<TPermissionInfo>): TList<TPermissionInfo>;
   end;
 
 implementation
+
+uses
+  UniModelAdmin.Intf, UniModelAdmin;
 
 { TSystemMenuSetup }
 
@@ -199,7 +215,8 @@ begin
   AddItem('图标选择器', 'system:shared:icon', 'system:shared', 'icon.png', 'TIconSelector',
     'shared:view', 181, True, '');
 
-  Result := LList;
+  // 合并 ModelAdmin 注册中心的声明式菜单（单一真值源）
+  Result := BuildMenusFromRegistry(LList);
 end;
 
 class function TSystemMenuSetup.GetPermissionDefinitions: TList<TPermissionInfo>;
@@ -272,7 +289,95 @@ begin
   // ========== 共享组件权限 ==========
   AddPerm('shared:view', '查看共享组件', '共享组件', '查看共享组件');
 
-  Result := LList;
+  // 合并 ModelAdmin 注册中心的声明式权限（单一真值源）
+  Result := BuildPermissionsFromRegistry(LList);
+end;
+
+class function TSystemMenuSetup.BuildMenusFromRegistry(
+  const ABaseList: TList<TMenuItemInfo>): TList<TMenuItemInfo>;
+var
+  LAdmin: TModelAdmin;
+  LItem: TMenuItemInfo;
+  LExistingCodes: TDictionary<string, Boolean>;
+  LItem2: TMenuItemInfo;
+begin
+  Result := TList<TMenuItemInfo>.Create;
+  LExistingCodes := TDictionary<string, Boolean>.Create;
+  try
+    // 先拷贝基线菜单，记录已有 MenuCode（值类型 record 自动深拷贝）
+    for LItem2 in ABaseList do
+    begin
+      Result.Add(LItem2);
+      LExistingCodes.Add(LowerCase(LItem2.MenuCode), True);
+    end;
+
+    // 遍历注册中心，为每个 ModelAdmin 补一个菜单项
+    for LAdmin in TModelAdminRegistry.CreateInstance.GetAll do
+    begin
+      LItem.MenuCode := 'system:' + LAdmin.AdminID;
+      if LExistingCodes.ContainsKey(LowerCase(LItem.MenuCode)) then
+        Continue;  // 已手写定义则尊重，不重复
+
+      LItem.MenuName := LAdmin.DisplayName;
+      LItem.ParentCode := LAdmin.ParentMenuCode;
+      if LItem.ParentCode = '' then
+        LItem.ParentCode := 'system';
+      LItem.Icon := LAdmin.Icon;
+      // RoutePath 用类名，交给 MdiRouter 的 FindClass 解析
+      if LAdmin.FrameClassName <> '' then
+        LItem.RoutePath := LAdmin.FrameClassName
+      else
+        LItem.RoutePath := 'TAutoCrudFrame';
+      LItem.PermissionCode := LAdmin.PermissionPrefix + ':view';
+      LItem.SortOrder := LAdmin.SortOrder;
+      LItem.IsVisible := True;
+      LItem.Description := LAdmin.DisplayName + '（自动注册）';
+      Result.Add(LItem);
+      LExistingCodes.Add(LowerCase(LItem.MenuCode), True);
+    end;
+  finally
+    LExistingCodes.Free;
+  end;
+end;
+
+class function TSystemMenuSetup.BuildPermissionsFromRegistry(
+  const ABaseList: TList<TPermissionInfo>): TList<TPermissionInfo>;
+const
+  // 标准 CRUD 权限后缀
+  CRUD_SUFFIXES: array[0..3] of string = ('view', 'add', 'edit', 'delete');
+var
+  LAdmin: TModelAdmin;
+  LSuffix: string;
+  LPerm: TPermissionInfo;
+  LExistingCodes: TDictionary<string, Boolean>;
+  LItem: TPermissionInfo;
+begin
+  Result := TList<TPermissionInfo>.Create;
+  LExistingCodes := TDictionary<string, Boolean>.Create;
+  try
+    for LItem in ABaseList do
+    begin
+      Result.Add(LItem);
+      LExistingCodes.Add(LowerCase(LItem.PermissionCode), True);
+    end;
+
+    for LAdmin in TModelAdminRegistry.CreateInstance.GetAll do
+    begin
+      for LSuffix in CRUD_SUFFIXES do
+      begin
+        LPerm.PermissionCode := LAdmin.PermissionPrefix + ':' + LSuffix;
+        if LExistingCodes.ContainsKey(LowerCase(LPerm.PermissionCode)) then
+          Continue;
+        LPerm.PermissionName := LAdmin.DisplayName + ' ' + LSuffix;
+        LPerm.Category := LAdmin.DisplayName;
+        LPerm.Description := LAdmin.DisplayName + ' 的 ' + LSuffix + ' 权限';
+        Result.Add(LPerm);
+        LExistingCodes.Add(LowerCase(LPerm.PermissionCode), True);
+      end;
+    end;
+  finally
+    LExistingCodes.Free;
+  end;
 end;
 
 end.
