@@ -360,10 +360,11 @@ A: 参考 `DictionaryPlugin.pas` 实现示例：
 
 ### Q: 如何扩展权限系统?
 
-A: 实现 `IUniAdminPermissionManager` 接口并注册：
+A: 实现 `IUniAdminPermissionManager` 接口，在 `TUniAdminServices` 构造时替换为自定义实现（构造注入，非注册表）：
 
 ```pascal
-TUniAdminServices.RegisterService<IUniAdminPermissionManager>(TCustomPermissionManager);
+// UniAdminServices.pas 构造函数中替换默认实现
+FPermissionManager := TCustomPermissionManager.Create(FConnection);
 ```
 
 ### Q: 数据库连接失败怎么办?

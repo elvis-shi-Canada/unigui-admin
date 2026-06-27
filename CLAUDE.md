@@ -173,7 +173,9 @@ type
 TUniAdminModuleRegistry.GetInstance.RegisterPluginClass(TMyPlugin, 'my-plugin', LPluginInfo);
 ```
 
-### 服务层模式
+### 服务层模式（构造注入）
+
+UniAdmin 核心服务采用**构造注入**，不存在 `RegisterService<T>` 注册表 API。接口定义在 `.Intf.pas`，实现类在 `.pas`，由每会话的 `TUniAdminServices` 在构造时直接创建并持有。
 
 ```pascal
 // 接口定义 (.Intf.pas)
@@ -182,9 +184,16 @@ IMyService = interface(IInterface)
   function GetData(const ID: Integer): TData;
 end;
 
-// 注册到服务定位器
-TUniAdminServices.RegisterService<IMyService>(TMyService);
+// 实现类 (.pas)
+TUniAdminMyService = class(TInterfacedObject, IMyService)
+  constructor Create(const Connection: TFDConnection);
+end;
+
+// 由 TUniAdminServices 构造注入（每会话，见 UniAdminServices.pas）
+FMyService := TUniAdminMyService.Create(FConnection);
 ```
+
+> 全局单例（`GetInstance`）仅用于 ConfigService / ConnectionManager / ModuleRegistry；Auth / Metadata / Menu / Permission 均为每会话实例。
 
 ---
 
