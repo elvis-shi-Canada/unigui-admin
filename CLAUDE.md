@@ -228,6 +228,14 @@ Caption = '#29992#25143'
 | EReadError 'Property TabOrder does not exist'（运行时） | TUniLabel 继承 `TUniControl`（非 TWinControl）无 TabOrder，linter 易批量误加 | DFM 不给 TUniLabel（及 TUniControl 派生控件）写 TabOrder；详见 LRN-20260626-002 |
 | EInvalidPointer 'Invalid pointer operation'（退出时） | `FQuery.Connection` 裸引用 MainModule.Connection，销毁顺序导致悬挂 | Frame destructor 先 `FQuery.Connection := nil` 再 `FQuery.Free`；详见 LRN-20260626-003 |
 
+### 运行时生命周期与内存陷阱
+
+| 现象 | 原因 | 解决方案 |
+|------|------|----------|
+| 应用退出内存泄漏：活动会话 MainModule/Services/Manager/连接全泄漏 | uniGUI VCL 退出时不销毁活动会话（`TUniGUISessionManager.Destroy` 不调 `Sessions.Clear`，`TUniGUISessions.Destroy` 只 Free 列表容器）| ServerModule 注册 `OnBeforeShutdown`（`FSessionManager.Free` 前触发），主动 `SessionManager.Sessions.Clear` 强制销毁活动会话；详见 LRN-20260627-001 |
+| 单例 finalization 的 `FInstance := nil` 释放不掉对象 | `TInterfacedObject` 单例被其他对象（如 `TUniAdminServices`）持有接口引用时引用计数 ≥ 1，finalization 置空无效 | 保证持有者先销毁（OnBeforeShutdown Clear 会话→`MainModule.OnDestroy`→`FServices := nil`→引用归零）；详见 LRN-20260627-002 |
+| 启动连接泄漏（`GetDefaultConnection` 返回的连接不被释放）| 所有权契约不一致：`GetDefaultConnection` 转移所有权（连接不在池），但 `ReleaseConnection` 假设在池（`Remove` 找不到不释放）| `ReleaseConnection` 改为 `if FConnections.Remove(Connection) < 0 then Connection.Free`；详见 LRN-20260627-003 |
+
 ### 泛型集合操作 (TList\<T\>)
 
 ```pascal
