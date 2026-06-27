@@ -110,7 +110,11 @@ uses
   SampleTasks in 'Modules\Scheduler\SampleTasks.pas',
   TaskLogFrame in 'Modules\Scheduler\TaskLogFrame.pas',
   TaskManageFrame in 'Modules\Scheduler\TaskManageFrame.pas',
-  BaseCrudFrame in 'Core\UI\BaseCrudFrame.pas';
+  BaseCrudFrame in 'Core\UI\BaseCrudFrame.pas',
+  UniModelAdmin.Intf in 'Core\Admin\UniModelAdmin.Intf.pas',
+  UniModelAdmin in 'Core\Admin\UniModelAdmin.pas',
+  UniQueryBuilder in 'Core\Admin\UniQueryBuilder.pas',
+  AutoCrudFrame in 'Core\UI\AutoCrudFrame.pas' {AutoCrudFrame: TUniFrame};
 
 {$R *.res}
 {$IFNDEF UNIGUI_VCL}
