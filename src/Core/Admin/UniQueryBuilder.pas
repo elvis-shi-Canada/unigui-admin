@@ -86,19 +86,22 @@ begin
   if not IsValidIdentifier(AParamBase) then
     raise Exception.CreateFmt('非法参数名: %s', [AParamBase]);
 
-  // 同一 ParamBase 的 LIKE-OR 组共享一个参数（参数名 = ParamBase + '0'）
   LParam := AParamBase + '0';
-  if not FParams.Contains(LParam) then
-    FParams.Add(LParam);
 
   LParts := TStringList.Create;
   try
+    // 先校验全部列名，全部通过后才注册参数和子句，
+    // 避免中途 raise 导致 builder 处于"已注册参数但无子句"的不一致状态。
     for LField in AFields do
     begin
       if not IsValidIdentifier(LField) then
         raise Exception.CreateFmt('非法列名: %s', [LField]);
       LParts.Add(Format('%s LIKE :%s', [LField, LParam]));
     end;
+
+    if not FParams.Contains(LParam) then
+      FParams.Add(LParam);
+
     LJoined := String.Join(' OR ', LParts.ToStringArray);
     FClauses.Add('(' + LJoined + ')');
   finally
