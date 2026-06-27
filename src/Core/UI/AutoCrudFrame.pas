@@ -27,8 +27,10 @@ type
     btnDelete: TUniButton;
     btnRefresh: TUniButton;
     edtSearch: TUniEdit;
-    UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
+    // 注意：不重新声明 UniDBGrid / UniDataSource —— 它们已在 TBaseCrudFrame
+    // 中作为 protected 字段存在。子类若重新声明会"隐藏"基类字段，
+    // 导致 BuildGridFromMetadata/Refresh 等基类方法引用基类 nil 字段（而非
+    // DFM 实例化的子类字段），AutoGridFromMeta 会静默失效。
     // DFM 事件处理方法必须在 published 区（默认可见性），否则 DFM 流读取器经 RTTI 找不到
     procedure btnRefreshClick(Sender: TObject);
     procedure edtSearchKeyPress(Sender: TObject; var Key: Char);
@@ -63,6 +65,8 @@ begin
   inherited;
   // FModelAdmin 已在基类构造中创建
   FQuery := TFDQuery.Create(Self);
+  // 与 UserListFrame 一致：共享 MainModule 的会话连接
+  FQuery.Connection := ModelAdmin.Connection;
 end;
 
 destructor TAutoCrudFrame.Destroy;
@@ -99,8 +103,9 @@ begin
   // 先让基类从元数据派生网格列（需要 MetadataCache 已就绪）
   inherited;  // 触发 BuildGridFromMetadata
 
-  // 绑定数据源
+  // 绑定数据源（UniDBGrid/UniDataSource 是继承自基类的字段）
   UniDataSource.DataSet := FQuery;
+  UniDBGrid.DataSource := UniDataSource;
 
   // 把工具栏按钮挂到基类字段，使 CheckPermissions/UpdateButtonStates 生效
   Self.BtnAdd := btnAdd;
