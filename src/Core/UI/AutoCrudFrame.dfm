@@ -53,7 +53,7 @@ object AutoCrudFrame: TAutoCrudFrame
       OnKeyPress = edtSearchKeyPress
     end
   end
-  object UniDBGrid: TUniDBGrid
+  inherited UniDBGrid: TUniDBGrid
     Left = 0
     Top = 41
     Width = 800
@@ -61,7 +61,7 @@ object AutoCrudFrame: TAutoCrudFrame
     Align = alClient
     TabOrder = 1
   end
-  object UniDataSource: TDataSource
+  inherited UniDataSource: TDataSource
     Left = 24
     Top = 72
   end
