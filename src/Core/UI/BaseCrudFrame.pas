@@ -217,7 +217,8 @@ begin
     end;
   end;
 
-  LMeta.Clear; // TTableMetadata.Fields 是 TList<>,需释放
+  // 注意：不要调用 LMeta.Clear —— Fields 指向缓存内部的 TList<>,
+  // 由 TUniAdminMetadataCache.Destroy/Clear 负责释放。此处释放会导致缓存悬空。
 end;
 
 procedure TBaseCrudFrame.DoFinalize;
