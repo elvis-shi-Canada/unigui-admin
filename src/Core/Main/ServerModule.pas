@@ -85,6 +85,11 @@ end;
 
 procedure TServerModule.OnCreate(Sender: TObject);
 begin
+  // Register pre-shutdown hook FIRST, before any init that may raise, so cleanup
+  // runs even if InitializeConfigService/LoadApplicationConfig fail mid-OnCreate.
+  // uniGUI does not destroy active sessions on exit (see DoBeforeShutdown).
+  OnBeforeShutdown := DoBeforeShutdown;
+
   // 切换工作目录到 exe 目录（bin/），确保 SQLite 库文件、config 等相对路径稳定
   // （IDE 运行时 cwd 默认是项目根，会导致库文件/config 落错位置）
   SetCurrentDir(ExtractFilePath(ParamStr(0)));
@@ -103,9 +108,6 @@ begin
   InitializeModuleRegistry;
   LoadApplicationConfig;
   InitializeDatabaseServices;
-
-  // Register pre-shutdown hook: uniGUI does not destroy active sessions on exit (see DoBeforeShutdown)
-  OnBeforeShutdown := DoBeforeShutdown;
 
   // 记录启动日志
   LogInfo('UniGUI Server Module initialized successfully.');
@@ -133,8 +135,14 @@ begin
   // leaking TUniAdminServices and its Manager/connection graph.
   // OnBeforeShutdown fires before SessionManager.Free (SessionManager still alive),
   // so we Clear here to force-destroy active sessions and trigger MainModule.OnDestroy.
-  // RemoveSession wraps each session free in try-except, so a single failing session
-  // does not block the rest.
+  //
+  // CAVEAT: Clear -> FreeSession -> TUniGUISession.Destroy blocks on
+  // `while FActiveRequests > 0 do Sleep(5)` (uniGUIApplication.pas) with NO timeout.
+  // A session with a stuck in-flight request (slow SQL, deadlocked call) will hang
+  // Clear and the process won't exit cleanly. The try-except below catches exceptions
+  // only, NOT this sleep loop, so it cannot interrupt a hang. Trade-off accepted:
+  // clearing avoids the leak (OS reclaims memory on forced kill); avoid shutting down
+  // while long requests are in flight.
   if (SessionManager = nil) or (SessionManager.Sessions = nil) then
     Exit;
   try
