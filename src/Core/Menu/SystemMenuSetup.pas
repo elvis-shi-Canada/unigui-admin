@@ -102,6 +102,7 @@ end;
 class function TSystemMenuSetup.GetSystemMenuDefinitions: TList<TMenuItemInfo>;
 var
   LList: TList<TMenuItemInfo>;
+  LMerged: TList<TMenuItemInfo>;
   LItem: TMenuItemInfo;
 
   procedure AddItem(const MenuName, MenuCode, ParentCode, Icon, RoutePath,
@@ -216,12 +217,15 @@ begin
     'shared:view', 181, True, '');
 
   // 合并 ModelAdmin 注册中心的声明式菜单（单一真值源）
-  Result := BuildMenusFromRegistry(LList);
+  LMerged := BuildMenusFromRegistry(LList);
+  LList.Free;   // 基线列表内容已深拷贝进 LMerged，释放原列表避免泄漏
+  Result := LMerged;
 end;
 
 class function TSystemMenuSetup.GetPermissionDefinitions: TList<TPermissionInfo>;
 var
   LList: TList<TPermissionInfo>;
+  LMerged: TList<TPermissionInfo>;
   LItem: TPermissionInfo;
 
   procedure AddPerm(const Code, Name, Category, Description: string);
@@ -290,7 +294,9 @@ begin
   AddPerm('shared:view', '查看共享组件', '共享组件', '查看共享组件');
 
   // 合并 ModelAdmin 注册中心的声明式权限（单一真值源）
-  Result := BuildPermissionsFromRegistry(LList);
+  LMerged := BuildPermissionsFromRegistry(LList);
+  LList.Free;   // 基线列表内容已深拷贝进 LMerged，释放原列表避免泄漏
+  Result := LMerged;
 end;
 
 class function TSystemMenuSetup.BuildMenusFromRegistry(
