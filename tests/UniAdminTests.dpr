@@ -28,7 +28,10 @@ uses
   UniPlugin.Types in '..\src\Core\Plugin\UniPlugin.Types.pas',
   UniContext in '..\src\Core\Context\UniContext.pas',
   UniAdminModuleRegistry in '..\src\Core\Plugin\UniAdminModuleRegistry.pas',
-  UniAdminModuleRegistry.Intf in '..\src\Core\Plugin\UniAdminModuleRegistry.Intf.pas';
+  UniAdminModuleRegistry.Intf in '..\src\Core\Plugin\UniAdminModuleRegistry.Intf.pas',
+  UniModelAdmin.Intf in '..\src\Core\Admin\UniModelAdmin.Intf.pas',
+  UniModelAdmin in '..\src\Core\Admin\UniModelAdmin.pas',
+  UniModelAdminTest in 'Core\Admin\UniModelAdminTest.pas';
 
 var
   {$IFNDEF TESTINSIGHT}
