@@ -31,7 +31,9 @@ uses
   UniAdminModuleRegistry.Intf in '..\src\Core\Plugin\UniAdminModuleRegistry.Intf.pas',
   UniModelAdmin.Intf in '..\src\Core\Admin\UniModelAdmin.Intf.pas',
   UniModelAdmin in '..\src\Core\Admin\UniModelAdmin.pas',
-  UniModelAdminTest in 'Core\Admin\UniModelAdminTest.pas';
+  UniModelAdminTest in 'Core\Admin\UniModelAdminTest.pas',
+  UniQueryBuilder in '..\src\Core\Admin\UniQueryBuilder.pas',
+  UniQueryBuilderTest in 'Core\Admin\UniQueryBuilderTest.pas';
 
 var
   {$IFNDEF TESTINSIGHT}
