@@ -171,7 +171,8 @@ initialization
         TAdminFieldConfig.Create('RealName', '真实姓名', 100),
         TAdminFieldConfig.Create('Email', '邮箱', 150),
         TAdminFieldConfig.Create('Phone', '手机', 100),
-        TAdminFieldConfig.Create('Status', '状态', 60)
+        TAdminFieldConfig.Create('Status', '状态', 60),
+        TAdminFieldConfig.Create('LastLoginDate', '最后登录', 120)
       ])
       .WithSearchFields(['UserName', 'RealName', 'Email'])
       .WithFilterFields(['Status'])
