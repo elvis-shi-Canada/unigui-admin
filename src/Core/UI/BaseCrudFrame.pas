@@ -7,7 +7,8 @@ uses
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniBasicGrid, uniDBGrid,
   uniToolBar, uniGUIForm, uniGUIFrame,
-  UniContext, UniPlugin.Types, UniAdminModel, Vcl.Controls, Vcl.Forms;
+  UniContext, UniPlugin.Types, UniAdminModel, Vcl.Controls, Vcl.Forms,
+  UniFieldMetadata, UniAdminMetadataCache.Intf;
 
 type
   /// <summary>
@@ -18,6 +19,9 @@ type
   private
     FModelAdmin: TUniAdminModel;
     FContext: IExecutionContext;
+    FAutoGridFromMeta: Boolean;
+    FModelTableName: string;
+    FMetadataCache: IUniAdminMetadataCache;
 
     procedure UpdateButtonStates;
     procedure CheckPermissions;
@@ -71,6 +75,13 @@ type
     /// </summary>
     procedure DoRefresh; virtual;
 
+    /// <summary>
+    /// 从元数据缓存自动构建网格列
+    /// 仅当 AutoGridFromMeta=True 且 UniDBGrid.Columns 为空时生效。
+    /// 子类已手写列则尊重之，不覆盖。
+    /// </summary>
+    procedure BuildGridFromMetadata; virtual;
+
     // 工具栏按钮事件（protected，子类可调用）
     procedure BtnEditClick(Sender: TObject);
     procedure BtnDeleteClick(Sender: TObject);
@@ -101,9 +112,16 @@ type
     property ModelAdmin: TUniAdminModel read FModelAdmin;
     property Context: IExecutionContext read FContext;
     property PermissionPrefix: string read FPermissionPrefix write FPermissionPrefix;
+    // 声明式网格派生开关
+    property AutoGridFromMeta: Boolean read FAutoGridFromMeta write FAutoGridFromMeta;
+    property ModelTableName: string read FModelTableName write FModelTableName;
+    property MetadataCache: IUniAdminMetadataCache read FMetadataCache write FMetadataCache;
   end;
 
 implementation
+
+uses
+  uniGUIApplication, MainModule;
 
 {$R *.dfm}
 
@@ -115,6 +133,8 @@ begin
   FModelAdmin := TUniAdminModel.Create(Self);
   FModelAdmin.OnStateChange := DoStateChange;
   FPermissionPrefix := ''; // 子类设置
+  FAutoGridFromMeta := False; // 默认关闭：保持既有手写列模块的行为不变
+  FModelTableName := '';
 end;
 
 destructor TBaseCrudFrame.Destroy;
@@ -144,7 +164,60 @@ end;
 
 procedure TBaseCrudFrame.DoInitialize;
 begin
-  // 子类重写 - 初始化自定义组件
+  // 自动从元数据派生网格列（若启用且未手写）。子类 override 时若需开启，
+  // 应在调用 inherited 之前设置 AutoGridFromMeta := True 和 ModelTableName。
+  BuildGridFromMetadata;
+  // 子类可在 override 后继续追加自定义初始化
+end;
+
+procedure TBaseCrudFrame.BuildGridFromMetadata;
+var
+  LMeta: TTableMetadata;
+  LField: TFieldMetadata;
+begin
+  if (not FAutoGridFromMeta) or (FModelTableName = '') then
+    Exit;
+  if not Assigned(UniDBGrid) then
+    Exit;
+  if UniDBGrid.Columns.Count > 0 then
+    Exit; // 尊重子类已手写的列
+
+  // 惰性注入 MetadataCache：若外部未显式赋值，尝试从当前会话 MainModule 取
+  if (not Assigned(FMetadataCache)) and Assigned(UniApplication) and
+     Assigned(UniApplication.UniMainModule) and
+     (UniApplication.UniMainModule is TMainModule) then
+    FMetadataCache := TMainModule(UniApplication.UniMainModule).Services.MetadataCache;
+
+  if not Assigned(FMetadataCache) then
+    Exit; // 无元数据源则放弃派生（不阻断 UI）
+
+  try
+    LMeta := FMetadataCache.GetTableMetadata(FModelTableName);
+  except
+    // 元数据查询失败（如 SQLite 不支持 INFORMATION_SCHEMA）：降级为空网格，不阻断
+    Exit;
+  end;
+
+  for LField in LMeta.Fields do
+  begin
+    // 跳过敏感/审计字段（通常不在列表展示）
+    if SameText(LField.FieldName, 'Password') or
+       SameText(LField.FieldName, 'CreatedBy') or
+       SameText(LField.FieldName, 'ModifiedBy') then
+      Continue;
+
+    with UniDBGrid.Columns.Add do
+    begin
+      FieldName := LField.FieldName;
+      if LField.DisplayName <> '' then
+        Title.Caption := LField.DisplayName
+      else
+        Title.Caption := LField.FieldName;
+      Width := 100;
+    end;
+  end;
+
+  LMeta.Clear; // TTableMetadata.Fields 是 TList<>,需释放
 end;
 
 procedure TBaseCrudFrame.DoFinalize;
