@@ -37,7 +37,8 @@ type
     procedure InitializeModuleRegistry;
     /// <summary>加载应用配置</summary>
     procedure LoadApplicationConfig;
-    /// <summary>初始化数据库连接与核心服务（Auth/Metadata/Menu/Permission）</summary>
+    /// <summary>初始化数据库 Schema：建基础表 + 应用增量迁移脚本（不创建核心服务实例）</summary>
+    /// <remarks>核心服务（Auth/Metadata/Menu/Permission）由每会话 TUniAdminServices 创建，非此处</remarks>
     procedure InitializeDatabaseServices;
     /// <summary>Application pre-shutdown hook: clears active sessions so MainModule.OnDestroy runs</summary>
     procedure DoBeforeShutdown(Sender: TObject);

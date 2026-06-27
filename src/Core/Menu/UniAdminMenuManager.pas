@@ -14,7 +14,6 @@ type
   /// </summary>
   TUniAdminMenuManager = class(TInterfacedObject, IUniAdminMenuManager)
   private
-    class var FInstance: IUniAdminMenuManager;
     class var FLock: TObject;
     FConnection: TFDConnection;
     FMenuCache: TDictionary<Integer, TMenuItem>;
@@ -84,31 +83,11 @@ type
     function DeleteMenu(const MenuID: Integer): Boolean;
     function GetUserMenus(const UserID: Integer): TArray<TMenuItem>;
     procedure RefreshCache;
-
-    /// <summary>
-    /// 获取菜单管理器实例
-    /// </summary>
-    class function GetInstance(const Connection: TFDConnection): IUniAdminMenuManager; static;
   end;
 
 implementation
 
 { TUniAdminMenuManager }
-
-class function TUniAdminMenuManager.GetInstance(const Connection: TFDConnection): IUniAdminMenuManager;
-begin
-  if FInstance = nil then
-  begin
-    TMonitor.Enter(FLock);
-    try
-      if FInstance = nil then
-        FInstance := TUniAdminMenuManager.Create(Connection);
-    finally
-      TMonitor.Exit(FLock);
-    end;
-  end;
-  Result := FInstance;
-end;
 
 constructor TUniAdminMenuManager.Create(const Connection: TFDConnection);
 begin
@@ -695,7 +674,6 @@ initialization
   TUniAdminMenuManager.FLock := TObject.Create;
 
 finalization
-  TUniAdminMenuManager.FInstance := nil;
   FreeAndNil(TUniAdminMenuManager.FLock);
 
 end.
