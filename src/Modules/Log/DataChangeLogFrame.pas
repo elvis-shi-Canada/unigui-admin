@@ -29,8 +29,6 @@ type
     UniDateTimePickerEnd: TUniDateTimePicker;
     UniButtonSearch: TUniButton;
     UniButtonExport: TUniButton;
-    UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
     qryDataChangeLogs: TFDQuery;
 
     procedure UniButtonSearchClick(Sender: TObject);

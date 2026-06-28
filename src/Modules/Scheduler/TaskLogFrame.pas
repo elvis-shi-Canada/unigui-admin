@@ -22,8 +22,6 @@ type
     UniLabelTask: TUniLabel;
     UniComboBoxTask: TUniComboBox;
     UniButtonSearch: TUniButton;
-    UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
     qryLogs: TFDQuery;
     UniPanelDetail: TUniPanel;
     UniLabelDetail: TUniLabel;

@@ -24,8 +24,6 @@ type
     UniLabelStatus: TUniLabel;
     UniComboBoxStatus: TUniComboBox;
     UniButtonSearch: TUniButton;
-    UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
     qryDictTypes: TFDQuery;
 
     procedure UniButtonSearchClick(Sender: TObject);

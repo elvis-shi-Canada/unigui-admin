@@ -31,7 +31,6 @@ type
     edtSearch: TUniEdit;
     cmbStatus: TUniComboBox;
     btnSearch: TUniButton;
-    UniDBGrid: TUniDBGrid;
     splitter: TUniSplitter;
 
     procedure DoInitialize; override;

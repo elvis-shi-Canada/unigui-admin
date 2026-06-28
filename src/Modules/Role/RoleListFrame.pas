@@ -23,8 +23,6 @@ type
     edtSearch: TUniEdit;
     cmbStatus: TUniComboBox;
     btnSearch: TUniButton;
-    UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
 
     procedure DoInitialize; override;
     procedure DoFinalize; override;

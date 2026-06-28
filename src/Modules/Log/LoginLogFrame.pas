@@ -31,8 +31,6 @@ type
     UniComboBoxStatus: TUniComboBox;
     UniButtonSearch: TUniButton;
     UniButtonExport: TUniButton;
-    UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
     qryLoginLogs: TFDQuery;
 
     procedure UniButtonSearchClick(Sender: TObject);

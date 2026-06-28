@@ -16,6 +16,18 @@ type
   /// 子类继承此窗体可获得标准的 CRUD 功能
   /// </summary>
   TBaseCrudFrame = class(TUniFrame)
+    // 工具栏与数据组件：必须在 published 区，DFM 流读取器才能通过 RTTI
+    // 绑定到这些字段（protected/private 字段对 DFM 不可见，会导致组件创建后
+    // 无法绑定、字段悬空，引发 Access Violation）。
+    UniToolBar: TUniToolBar;
+    BtnAdd: TUniButton;
+    BtnEdit: TUniButton;
+    BtnDelete: TUniButton;
+    BtnSave: TUniButton;
+    BtnCancel: TUniButton;
+    BtnRefresh: TUniButton;
+    UniDBGrid: TUniDBGrid;
+    UniDataSource: TDataSource;
   private
     FModelAdmin: TUniAdminModel;
     FContext: IExecutionContext;
@@ -35,19 +47,6 @@ type
     procedure DoStateChange(Sender: TObject);
   protected
     FPermissionPrefix: string;
-
-    // 工具栏组件
-    UniToolBar: TUniToolBar;
-    BtnAdd: TUniButton;
-    BtnEdit: TUniButton;
-    BtnDelete: TUniButton;
-    BtnSave: TUniButton;
-    BtnCancel: TUniButton;
-    BtnRefresh: TUniButton;
-
-    // 数据组件
-    UniDBGrid: TUniDBGrid;
-    UniDataSource: TDataSource;
 
     // 子类可重写的方法
     /// <summary>
@@ -132,8 +131,8 @@ begin
   inherited;
   FModelAdmin := TUniAdminModel.Create(Self);
   FModelAdmin.OnStateChange := DoStateChange;
-  FPermissionPrefix := ''; // 子类设置
-  FAutoGridFromMeta := False; // 默认关闭：保持既有手写列模块的行为不变
+  FPermissionPrefix := '';
+  FAutoGridFromMeta := False;
   FModelTableName := '';
 end;
 
