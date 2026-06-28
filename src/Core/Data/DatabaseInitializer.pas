@@ -18,6 +18,11 @@ type
     class function TableExists(const AConn: TFDConnection; const ATableName: string): Boolean;
     class procedure CreateAllTables(const AConn: TFDConnection);
     class procedure SeedInitialData(const AConn: TFDConnection);
+    /// <summary>从 TModelAdminRegistry 派生菜单/权限并幂等写入 DB。
+    /// 每次启动都执行，确保新声明的模块自动进入系统（已存在则跳过）。</summary>
+    class procedure SeedFromRegistry(const AConn: TFDConnection);
+    /// <summary>按 MenuCode 查 MenuID（用于解析父子关系）</summary>
+    class function GetMenuIDByCode(const AConn: TFDConnection; const AMenuCode: string): Integer;
   public
     class procedure Initialize(const AConn: TFDConnection);
   end;
@@ -25,7 +30,8 @@ type
 implementation
 
 uses
-  System.Hash, UniAdminLogger;
+  System.Hash, UniAdminLogger,
+  UniModelAdmin.Intf, UniModelAdmin;
 
 { TDatabaseInitializer }
 
@@ -441,9 +447,116 @@ begin
     end
     else
       LogInfo('[DB-Init] 表已存在，跳过初始化');
+
+    // 声明式播种：每次启动都执行，从 TModelAdminRegistry 派生菜单/权限。
+    // 幂等（INSERT OR IGNORE），新增声明的模块会自动补入已存在的库。
+    SeedFromRegistry(AConn);
   except
     on E: Exception do
       LogError('[DB-Init] 初始化失败: ' + E.Message);
+  end;
+end;
+
+class function TDatabaseInitializer.GetMenuIDByCode(const AConn: TFDConnection;
+  const AMenuCode: string): Integer;
+var
+  LQuery: TFDQuery;
+begin
+  Result := 0;
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := AConn;
+    LQuery.Open('SELECT MenuID FROM UniAdmin_Menus WHERE MenuCode = :C', [AMenuCode]);
+    if not LQuery.Eof then
+      Result := LQuery.FieldByName('MenuID').AsInteger;
+  finally
+    LQuery.Free;
+  end;
+end;
+
+class procedure TDatabaseInitializer.SeedFromRegistry(const AConn: TFDConnection);
+const
+  // 标准 CRUD 权限四件套后缀
+  CRUD_ACTIONS: array[0..3] of string = ('view', 'add', 'edit', 'delete');
+var
+  LAdmins: TArray<TModelAdmin>;
+  LAdmin: TModelAdmin;
+  LAction: string;
+  LQuery: TFDQuery;
+  LParentID: Integer;
+  LMenuCode: string;
+  LPermCode: string;
+  LRoutePath: string;
+begin
+  LAdmins := TModelAdminRegistry.CreateInstance.GetAll;
+  if Length(LAdmins) = 0 then
+    Exit;
+
+  LQuery := TFDQuery.Create(nil);
+  try
+    LQuery.Connection := AConn;
+
+    for LAdmin in LAdmins do
+    begin
+      // 1. 解析父菜单 MenuID（声明用 MenuCode，DB 用 MenuID）
+      LParentID := 0;
+      if LAdmin.ParentMenuCode <> '' then
+        LParentID := GetMenuIDByCode(AConn, LAdmin.ParentMenuCode);
+      // 未找到父菜单则挂到根（ParentID=0）
+      if LParentID = 0 then
+        LParentID := GetMenuIDByCode(AConn, 'system');
+      // 连系统根都没有则挂根
+      if LParentID = 0 then
+        LParentID := 0;
+
+      // 2. 幂等写入菜单（MenuCode 唯一约束 + INSERT OR IGNORE）
+      LMenuCode := 'system:' + LAdmin.AdminID;
+      if LAdmin.FrameClassName <> '' then
+        LRoutePath := LAdmin.FrameClassName
+      else
+        LRoutePath := 'TAutoCrudFrame';
+
+      LQuery.SQL.Text :=
+        'INSERT OR IGNORE INTO UniAdmin_Menus ' +
+        '(ParentID, MenuName, MenuCode, Icon, RoutePath, PermissionCode, SortOrder, IsVisible) ' +
+        'VALUES (:ParentID, :MenuName, :MenuCode, :Icon, :RoutePath, :PermissionCode, :SortOrder, 1)';
+      LQuery.ParamByName('ParentID').AsInteger := LParentID;
+      LQuery.ParamByName('MenuName').AsString := LAdmin.DisplayName;
+      LQuery.ParamByName('MenuCode').AsString := LMenuCode;
+      LQuery.ParamByName('Icon').AsString := LAdmin.Icon;
+      LQuery.ParamByName('RoutePath').AsString := LRoutePath;
+      LQuery.ParamByName('PermissionCode').AsString := LAdmin.PermissionPrefix + ':view';
+      LQuery.ParamByName('SortOrder').AsInteger := LAdmin.SortOrder;
+      LQuery.ExecSQL;
+
+      // 3. 幂等写入权限四件套（view/add/edit/delete）
+      for LAction in CRUD_ACTIONS do
+      begin
+        LPermCode := LAdmin.PermissionPrefix + ':' + LAction;
+        LQuery.SQL.Text :=
+          'INSERT OR IGNORE INTO UniAdmin_Permissions ' +
+          '(PermissionCode, PermissionName, ResourceType, ResourceCode, Action, Description) ' +
+          'VALUES (:Code, :Name, :Res, :ResCode, :Act, :Desc)';
+        LQuery.ParamByName('Code').AsString := LPermCode;
+        LQuery.ParamByName('Name').AsString := LAdmin.DisplayName + ' ' + LAction;
+        LQuery.ParamByName('Res').AsString := LAdmin.AdminID;
+        LQuery.ParamByName('ResCode').AsString := LAdmin.TableName;
+        LQuery.ParamByName('Act').AsString := LAction;
+        LQuery.ParamByName('Desc').AsString := LAdmin.DisplayName + ' 的 ' + LAction + ' 权限';
+        LQuery.ExecSQL;
+
+        // 4. admin 角色（RoleID=1）自动获得该权限
+        LQuery.SQL.Text :=
+          'INSERT OR IGNORE INTO UniAdmin_RolePermissions (RoleID, PermissionID) ' +
+          'SELECT 1, PermissionID FROM UniAdmin_Permissions WHERE PermissionCode = :C';
+        LQuery.ParamByName('C').AsString := LPermCode;
+        LQuery.ExecSQL;
+      end;
+    end;
+
+    LogInfo(Format('[DB-Init] 声明式播种完成：%d 个 ModelAdmin 已同步菜单/权限', [Length(LAdmins)]));
+  finally
+    LQuery.Free;
   end;
 end;
 
