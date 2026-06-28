@@ -45,7 +45,6 @@ uses
   UniAdminPermissionManager in 'Core\Permission\UniAdminPermissionManager.pas',
   UniAdminMenuManager.Intf in 'Core\Menu\UniAdminMenuManager.Intf.pas',
   UniAdminMenuManager in 'Core\Menu\UniAdminMenuManager.pas',
-  SystemMenuSetup in 'Core\Menu\SystemMenuSetup.pas',
   UniPlugin.Intf in 'Core\Plugin\UniPlugin.Intf.pas',
   UniPlugin.Types in 'Core\Plugin\UniPlugin.Types.pas',
   UniPlugin in 'Core\Plugin\UniPlugin.pas',
