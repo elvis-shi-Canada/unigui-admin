@@ -160,8 +160,8 @@ begin
 end;
 
 initialization
-  // 声明式注册：UserListFrame 的菜单/权限由 ModelAdminRegistry 驱动
-  // （SystemMenuSetup.BuildMenusFromRegistry 会读取此声明）
+  // 声明式注册：菜单/权限由 DatabaseInitializer.SeedFromRegistry 读取本声明，
+  // 幂等写入 UniAdmin_Menus / UniAdmin_Permissions 表（每次启动执行）。
   TModelAdminRegistry.CreateInstance.Register(
     TModelAdmin.Create('user', 'UniAdmin_Users', '用户管理')
       .WithFrame('TUserListFrame')
