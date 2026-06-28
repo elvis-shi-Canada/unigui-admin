@@ -324,9 +324,10 @@ begin
     // 系统根菜单（让主界面至少有一个可见菜单结构）
     // 注：根菜单 'system' 是声明式模块的公共父节点，必须由这里播种，
     //     因为它不属于任何具体业务模块的声明。
+    //     RoutePath 留空：根菜单是分类节点，点击仅展开/折叠子菜单，不路由（见 MainFrame.trmMenuClick）。
     LQuery.ExecSQL(
       'INSERT OR IGNORE INTO UniAdmin_Menus (MenuID, ParentID, MenuName, MenuCode, Icon, RoutePath, SortOrder, IsVisible) ' +
-      'VALUES (1, 0, ''系统管理'', ''system'', ''settings'', ''/system'', 1, 1)');
+      'VALUES (1, 0, ''系统管理'', ''system'', ''settings'', '''', 1, 1)');
     // 注：用户管理(system:user)由 UserListFrame 的 TModelAdmin 声明驱动，
     //     不再在此硬编码。见 SeedFromRegistry。
     LQuery.ExecSQL(

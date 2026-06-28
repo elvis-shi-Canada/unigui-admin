@@ -220,41 +220,65 @@ end;
 
 function TUniAdminMenuManager.BuildMenuTree(const FlatMenus: TArray<TMenuItem>): TArray<TMenuItem>;
 var
+  LResult: TList<TMenuItem>;
+  LIndexMap: TDictionary<Integer, Integer>;  // MenuID → 在 LResult 中的索引
   LRootMenus: TArray<TMenuItem>;
   LMenuQueue: TQueue<TMenuItem>;
   LCurrent: TMenuItem;
   LChildren: TArray<TMenuItem>;
   LChild: TMenuItem;
+  I: Integer;
+  LCurrentIdx: Integer;
 begin
-  // 找到所有根菜单（ParentID = 0 或 ParentID 不存在于列表中）
-  LRootMenus := FindChildren(0, FlatMenus);
+  // 关键：TMenuItem 是 record（值类型）。若用 TQueue<TMenuItem> 直接 Enqueue/Dequeue
+  // 再给 LCurrent.Children 赋值，修改的是局部副本，结果数组中的元素不会更新，
+  // 导致所有子节点关系丢失（根节点 Children 永远为空）。
+  // 解法：维护 MenuID→索引 映射，通过索引直接回写 LResult 列表中的 record。
 
-  // 构建树形结构 - 使用队列代替栈+Delete(0)以获得O(n)性能
+  LResult := TList<TMenuItem>.Create;
+  LIndexMap := TDictionary<Integer, Integer>.Create;
   LMenuQueue := TQueue<TMenuItem>.Create;
   try
-    // 初始化：将所有根菜单加入队列
+    // 1. 根菜单先入列表与队列，记录索引
+    LRootMenus := FindChildren(0, FlatMenus);
     for LChild in LRootMenus do
+    begin
+      LIndexMap.Add(LChild.MenuID, LResult.Count);
+      LResult.Add(LChild);
       LMenuQueue.Enqueue(LChild);
+    end;
 
+    // 2. BFS：对每个出队节点查找子菜单，通过索引回写 Children
     while LMenuQueue.Count > 0 do
     begin
       LCurrent := LMenuQueue.Dequeue;
+      if not LIndexMap.TryGetValue(LCurrent.MenuID, LCurrentIdx) then
+        Continue;  // 不应发生
 
-      // 查找当前菜单的子菜单
       LChildren := FindChildren(LCurrent.MenuID, FlatMenus);
-      if Length(LChildren) > 0 then
+      if Length(LChildren) = 0 then
+        Continue;
+
+      // 子菜单入列表与索引，并加入队列继续处理
+      for I := 0 to High(LChildren) do
       begin
-        LCurrent.Children := LChildren;
-        // 将子菜单加入队列继续处理
-        for LChild in LChildren do
-          LMenuQueue.Enqueue(LChild);
+        LIndexMap.Add(LChildren[I].MenuID, LResult.Count);
+        LResult.Add(LChildren[I]);
+        LMenuQueue.Enqueue(LChildren[I]);
       end;
+
+      // 关键：通过索引回写 Children 数组到结果列表中的 record
+      LCurrent := LResult[LCurrentIdx];
+      LCurrent.Children := LChildren;
+      LResult[LCurrentIdx] := LCurrent;
     end;
+
+    Result := LResult.ToArray;
   finally
     LMenuQueue.Free;
+    LIndexMap.Free;
+    LResult.Free;
   end;
-
-  Result := LRootMenus;
 end;
 
 function TUniAdminMenuManager.GetUserPermissionCodes(const UserID: Integer): TArray<string>;

@@ -94,7 +94,8 @@ object MainFrame: TMainFrame
       Hint = ''
       Align = alClient
       Items.FontData = {0100000000}
-      OnClick = trmMenuClick
+      ExpanderOnly = False
+      OnSelectionChange = trmMenuSelectionChange
       ExplicitLeft = -6
       ExplicitTop = -1
       ExplicitHeight = 484

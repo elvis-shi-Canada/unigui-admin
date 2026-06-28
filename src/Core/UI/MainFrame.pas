@@ -32,7 +32,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure btnToggleMenuClick(Sender: TObject);
     procedure btnLogoutClick(Sender: TObject);
-    procedure trmMenuClick(Sender: TObject);
+    procedure trmMenuSelectionChange(Sender: TObject);
   private
     FContext: IExecutionContext;
     FMenuManager: IUniAdminMenuManager;
@@ -198,14 +198,21 @@ begin
     trmMenu.Items[0].Expand(True);
 end;
 
-procedure TMainFrame.trmMenuClick(Sender: TObject);
+procedure TMainFrame.trmMenuSelectionChange(Sender: TObject);
 var
   LNode: TUniTreeNode;
   LMenuID: Integer;
   LMenuData: UniAdminMenuManager.Intf.TMenuItem;
 begin
+  // OnSelectionChange 是 TUniTreeMenu 的标准事件（ExtJS selectionchange），
+  // 比 OnClick(itemclick) 更可靠——官方 UniTreeMenu demo 即用此事件。
   LNode := trmMenu.Selected;
   if (LNode = nil) or (LNode.Data = nil) then
+    Exit;
+
+  // 分类节点（有子菜单）不参与路由：ExpanderOnly=False 时点击文字即可
+  // 展开/折叠子节点，由 TUniTreeMenu 内置处理。
+  if not LNode.IsLeaf then
     Exit;
 
   LMenuID := Integer(NativeInt(LNode.Data));
@@ -218,7 +225,11 @@ begin
   LMenuData := FMenuManager.GetMenuByID(LMenuID);
 
   if LMenuData.RoutePath = '' then
-    Exit;  // pure category node, nothing to route
+  begin
+    // 叶子节点但无路由路径：恢复状态栏，避免"正在加载"卡住
+    UpdateStatusBar;
+    Exit;
+  end;
 
   if FMdiRouter.CanRoute(LMenuData.RoutePath) then
   begin
