@@ -180,31 +180,136 @@ initialization
 | `PermissionPrefix` | `prefix:view/add/edit/delete` 四件套权限 + 按钮可见性 |
 | `ParentMenuCode` + `SortOrder` + `FrameClassName` | 菜单项（`RoutePath` 指向类名，MdiRouter 解析） |
 
-**新增一个声明式业务模块——主框架与菜单零修改，只需 2 步：**
+### 快速开始（端到端开发一个声明式模块）
 
-1. 编写继承 `TBaseCrudFrame` 的 Frame，在 `initialization` 段 `Register` 声明 + `RegisterClass`：
-   ```pascal
-   initialization
-     TModelAdminRegistry.CreateInstance.Register(
-       TModelAdmin.Create('product', 'Products', '商品管理')
-         .WithFrame('TProductListFrame')
-         .WithSearchFields(['Name', 'SKU'])
-         .WithPermissionPrefix('product')
-         .WithParentMenuCode('system')
-     );
-     RegisterClass(TProductListFrame);
-   ```
-2. 在 Frame 的 `DoInitialize` 里打开派生开关：
-   ```pascal
-   procedure TProductListFrame.DoInitialize;
-   begin
-     AutoGridFromMeta := True;      // 从 Products 元数据自动建列
-     ModelTableName := 'Products';
-     inherited;                      // 触发 BuildGridFromMetadata
-     UniDataSource.DataSet := FQuery;
-   end;
-   ```
-   或者直接继承 `TAutoCrudFrame`，调用 `BindAdmin('product')` 一行完成全部绑定。
+以"商品管理"为例，从零到菜单自动出现，完整 5 步。主框架、菜单表、权限表零手改。
+
+**第 1 步：建数据库表**
+
+在 `Database/Schema/` 加建表 SQL，或直接在 DB 执行。表名 `Products`：
+
+```sql
+CREATE TABLE Products (
+  ProductID  INTEGER PRIMARY KEY AUTOINCREMENT,
+  Name       TEXT NOT NULL,
+  SKU        TEXT,
+  Price      NUMERIC(10,2),
+  Status     INTEGER NOT NULL DEFAULT 1,
+  CreatedDate DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**第 2 步：编写 Frame 单元（.pas）**
+
+新建 `src/Modules/Product/ProductListFrame.pas`。继承 `TAutoCrudFrame`，搜索框/网格/数据源已内置，只需声明字段配置：
+
+```pascal
+unit ProductListFrame;
+
+interface
+
+uses
+  System.SysUtils, System.Classes,
+  Data.DB, FireDAC.Comp.Client,
+  uniGUIBaseClasses, uniGUIClasses, uniEdit, uniButton,
+  uniBasicGrid, uniDBGrid, uniPanel, uniGUIFrame,
+  BaseCrudFrame, UniModelAdmin.Intf;
+
+type
+  TProductListFrame = class(TAutoCrudFrame)
+  public
+    constructor Create(AOwner: TComponent); override;
+  end;
+
+implementation
+
+uses
+  UniModelAdmin;
+
+{$R *.dfm}
+
+constructor TProductListFrame.Create(AOwner: TComponent);
+begin
+  inherited;
+  BindAdmin('product');   // 一行绑定：读注册中心声明，开启网格/查询/权限派生
+end;
+
+initialization
+  // 声明：菜单/权限由 DatabaseInitializer.SeedFromRegistry 幂等写入 DB
+  TModelAdminRegistry.CreateInstance.Register(
+    TModelAdmin.Create('product', 'Products', '商品管理')
+      .WithFrame('TProductListFrame')
+      .WithListDisplay([
+        TAdminFieldConfig.Create('ProductID', 'ID', 50),
+        TAdminFieldConfig.Create('Name', '商品名', 150),
+        TAdminFieldConfig.Create('SKU', 'SKU', 100),
+        TAdminFieldConfig.Create('Price', '价格', 80),
+        TAdminFieldConfig.Create('Status', '状态', 60)
+      ])
+      .WithSearchFields(['Name', 'SKU'])
+      .WithFilterFields(['Status'])
+      .WithPermissionPrefix('product')
+      .WithSortOrder(200)
+      .WithParentMenuCode('system')
+  );
+
+  RegisterClass(TProductListFrame);   // MdiRouter 路由必需
+
+end.
+```
+
+**第 3 步：编写 Frame DFM（.dfm）**
+
+新建 `src/Modules/Product/ProductListFrame.dfm`。继承内置工具栏与网格，中文用 `#编码` 转义、不加引号（见 AGENTS.md 规则 9/10）：
+
+```dfm
+inherited ProductListFrame: TProductListFrame
+  Width = 800
+  Height = 600
+end
+```
+
+> `TAutoCrudFrame` 的工具栏、搜索框、网格、数据源都在基类 DFM 里，子类通常无需新增控件。
+
+**第 4 步：加入项目（dpr）**
+
+在 `src/UniAdmin.dpr` 的 `uses` 子句追加一行：
+
+```pascal
+  ProductListFrame in 'Modules\Product\ProductListFrame.pas' {ProductListFrame: TUniFrame};
+```
+
+**第 5 步：构建并运行**
+
+```bash
+.vscode/CompileOmniPascalServerProject.bat test
+```
+
+启动后用 `admin` / `admin123` 登录。**"商品管理"菜单自动出现**，点击即路由到 Frame：
+
+| 自动产出 | 来源 |
+|---------|------|
+| 菜单项"商品管理" | `SeedFromRegistry` 写入 `UniAdmin_Menus`（`MenuCode='system:product'`） |
+| `product:view/add/edit/delete` 权限 | 写入 `UniAdmin_Permissions`，admin 角色自动获得 |
+| 网格列（ID/商品名/SKU/价格/状态） | `ListDisplay` 声明（MSSQL 下也可走元数据派生） |
+| 搜索框 LIKE 查询 | `SearchFields` 声明 → `TQueryClauseBuilder` |
+| 增删改按钮可见性 | `PermissionPrefix='product'` → 按角色权限过滤 |
+
+> 💡 **SQLite 开发环境提示**：若用 SQLite 且未声明 `ListDisplay`，网格列会派生失败（SQLite 不支持 `INFORMATION_SCHEMA`，`BuildGridFromMetadata` 静默降级为空网格）。声明 `ListDisplay` 可绕过此限制。生产用 MSSQL 则无此问题。
+
+### 进阶：自定义查询逻辑
+
+继承 `TBaseCrudFrame`（而非 `TAutoCrudFrame`）可获得完全控制权，仍享受元数据派生网格列 + 权限挂钩：
+
+```pascal
+procedure TProductListFrame.DoInitialize;
+begin
+  AutoGridFromMeta := True;      // 从 Products 元数据自动建列
+  ModelTableName := 'Products';
+  inherited;                      // 触发 BuildGridFromMetadata
+  UniDataSource.DataSet := FQuery;
+end;
+```
 
 > 📐 设计理念：Django 的 `admin.site.register(Model, ModelAdmin)` 单一真值源——本项目用 `TModelAdminRegistry` 实现同样的声明即配置，菜单/权限/查询从声明派生而非各自硬编码。
 > 完整设计与 TDD 落地步骤详见 [声明式 Admin 引擎实现计划](docs/superpowers/plans/2026-06-27-declarative-admin-engine.md)。
