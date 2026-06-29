@@ -27,6 +27,8 @@ type
     function VariantToJSON(const Value: Variant; ValueType: TConfigValueType): TJSONValue;
     function JSONToVariant(const JSONValue: TJSONValue; out ValueType: TConfigValueType): Variant;
     procedure InternalClear;
+    /// <summary>无锁取原始字符串值：完整键 + 点号路径解析嵌套 JSON，供 Get* 共享</summary>
+    function TryGetRawStringUnlocked(const Key: string; out RawValue: string): Boolean;
   public
     constructor Create(const ModuleName, ConfigFile: string);
     destructor Destroy; override;
@@ -311,48 +313,60 @@ begin
   end;
 end;
 
-function TModuleConfig.GetString(const Key: string; const DefaultValue: string): string;
+function TModuleConfig.TryGetRawStringUnlocked(const Key: string;
+  out RawValue: string): Boolean;
 var
   Value: Variant;
   Parts: TArray<string>;
   RootJSON, Node: TJSONValue;
   i: Integer;
 begin
+  // 无锁内部方法：完整键 + 点号路径解析嵌套 JSON，供所有 Get* 共享。
+  // LoadFromFile 只存顶层键（嵌套对象存为 JSON 字符串），故 server.port 等
+  // 嵌套键需逐段深入解析。返回 False 表示键不存在（调用方用默认值）。
+  Result := False;
+  RawValue := '';
+
+  // 1. 直接查完整键（向后兼容：已被展平存储或顶层标量键）
+  if FConfigValues.TryGetValue(Key, Value) then
+  begin
+    RawValue := VarToStr(Value);
+    Exit(True);
+  end;
+
+  // 2. 点号路径：解析嵌套 JSON 对象（如 'database.connectionString' / 'server.port'）
+  if Pos('.', Key) = 0 then
+    Exit;
+  Parts := Key.Split(['.']);
+  if not FConfigValues.TryGetValue(Parts[0], Value) then
+    Exit;
+
+  RootJSON := TJSONObject.ParseJSONValue(VarToStr(Value));
+  try
+    Node := RootJSON;
+    for i := 1 to High(Parts) do
+    begin
+      if (Node is TJSONObject) and (TJSONObject(Node).Values[Parts[i]] <> nil) then
+        Node := TJSONObject(Node).Values[Parts[i]]
+      else
+        Exit;
+    end;
+    if Node <> nil then
+    begin
+      RawValue := Node.Value;
+      Result := True;
+    end;
+  finally
+    RootJSON.Free;
+  end;
+end;
+
+function TModuleConfig.GetString(const Key: string; const DefaultValue: string): string;
+begin
   FCriticalSection.Enter;
   try
-    // 1. 直接查完整键（向后兼容）
-    if FConfigValues.TryGetValue(Key, Value) then
-      Exit(VarToStr(Value));
-
-    // 2. 点号路径：解析嵌套 JSON 对象（如 'database.connectionString'）
-    //    LoadFromFile 把嵌套对象存为顶层键→JSON 字符串，需逐段深入
-    if Pos('.', Key) > 0 then
-    begin
-      Parts := Key.Split(['.']);
-      if FConfigValues.TryGetValue(Parts[0], Value) then
-      begin
-        RootJSON := TJSONObject.ParseJSONValue(VarToStr(Value));
-        try
-          Node := RootJSON;
-          for i := 1 to High(Parts) do
-          begin
-            if (Node is TJSONObject) and (TJSONObject(Node).Values[Parts[i]] <> nil) then
-              Node := TJSONObject(Node).Values[Parts[i]]
-            else
-            begin
-              Node := nil;
-              Break;
-            end;
-          end;
-          if Node <> nil then
-            Exit(Node.Value);
-        finally
-          RootJSON.Free;
-        end;
-      end;
-    end;
-
-    Result := DefaultValue;
+    if not TryGetRawStringUnlocked(Key, Result) then
+      Result := DefaultValue;
   finally
     FCriticalSection.Leave;
   end;
@@ -360,16 +374,14 @@ end;
 
 function TModuleConfig.GetInteger(const Key: string; const DefaultValue: Integer): Integer;
 var
-  Value: Variant;
+  RawValue: string;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Value) then
-      Result := DefaultValue
-    else if VarType(Value) <> varInteger then
-      Result := StrToIntDef(VarToStr(Value), DefaultValue)
+    if TryGetRawStringUnlocked(Key, RawValue) then
+      Result := StrToIntDef(RawValue, DefaultValue)
     else
-      Result := Value;
+      Result := DefaultValue;
   finally
     FCriticalSection.Leave;
   end;
@@ -377,16 +389,14 @@ end;
 
 function TModuleConfig.GetBoolean(const Key: string; const DefaultValue: Boolean): Boolean;
 var
-  Value: Variant;
+  RawValue: string;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Value) then
-      Result := DefaultValue
-    else if VarType(Value) <> varBoolean then
-      Result := StrToBoolDef(VarToStr(Value), DefaultValue)
+    if TryGetRawStringUnlocked(Key, RawValue) then
+      Result := StrToBoolDef(RawValue, DefaultValue)
     else
-      Result := Value;
+      Result := DefaultValue;
   finally
     FCriticalSection.Leave;
   end;
@@ -394,16 +404,14 @@ end;
 
 function TModuleConfig.GetFloat(const Key: string; const DefaultValue: Double): Double;
 var
-  Value: Variant;
+  RawValue: string;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Value) then
-      Result := DefaultValue
-    else if VarType(Value) <> varDouble then
-      Result := StrToFloatDef(VarToStr(Value), DefaultValue)
+    if TryGetRawStringUnlocked(Key, RawValue) then
+      Result := StrToFloatDef(RawValue, DefaultValue)
     else
-      Result := Value;
+      Result := DefaultValue;
   finally
     FCriticalSection.Leave;
   end;
@@ -411,26 +419,12 @@ end;
 
 function TModuleConfig.GetDateTime(const Key: string; const DefaultValue: TDateTime): TDateTime;
 var
-  StrValue: string;
-  Value: Variant;
+  RawValue: string;
 begin
   FCriticalSection.Enter;
   try
-    if not FConfigValues.TryGetValue(Key, Value) then
-      Result := DefaultValue
-    else
-    begin
-      if VarType(Value) = varDate then
-        Result := Value
-      else
-      begin
-        StrValue := VarToStr(Value);
-        if TryStrToDateTime(StrValue, Result) then
-          Exit
-        else
-          Result := DefaultValue;
-      end;
-    end;
+    if not (TryGetRawStringUnlocked(Key, RawValue) and TryStrToDateTime(RawValue, Result)) then
+      Result := DefaultValue;
   finally
     FCriticalSection.Leave;
   end;

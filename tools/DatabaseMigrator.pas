@@ -141,9 +141,10 @@ end;
 
 function TDatabaseMigrator.ExecuteSQLFile(const FileName: string): Boolean;
 var
-  SQL: TStringList;
+  SQL, CleanSQL: TStringList;
   Statements: TArray<string>;
-  RawStmt, Stmt: string;
+  RawStmt, Stmt, Line: string;
+  i: Integer;
 begin
   Result := False;
 
@@ -154,11 +155,21 @@ begin
   end;
 
   SQL := TStringList.Create;
+  CleanSQL := TStringList.Create;
   try
     SQL.LoadFromFile(FileName);
+    // 先剥离 -- 注释行与空行，再做分号分割。
+    // 注释中的引号 / ':identifier' 会干扰 FireDAC 的 SQL 预解析（命名参数识别、
+    // 字符串边界配对），触发 near "xxx" syntax error。剥离后只把纯 SQL 喂给 ExecSQL。
+    for i := 0 to SQL.Count - 1 do
+    begin
+      Line := Trim(SQL[i]);
+      if (Line = '') or Line.StartsWith('--') then
+        Continue;
+      CleanSQL.Add(SQL[i]);
+    end;
     // 按分号分割多语句（SQLite/MSSQL 通用，兼容单语句文件）。
-    // 跳过空语句和纯注释行，避免 ExecSQL 收到空串报错。
-    Statements := SQL.Text.Split([';']);
+    Statements := CleanSQL.Text.Split([';']);
     for RawStmt in Statements do
     begin
       Stmt := Trim(RawStmt);
@@ -167,14 +178,15 @@ begin
     end;
     Result := True;
   finally
+    CleanSQL.Free;
     SQL.Free;
   end;
 end;
 
 function TDatabaseMigrator.ExecuteMigration(const Migration: TMigration): Boolean;
 var
-  SQL: string;
   DirectionStr: string;
+  Query: TFDQuery;
 begin
   Result := False;
 
@@ -186,17 +198,26 @@ begin
     Exit;
   end;
 
-  // 记录迁移状态
+  // 记录迁移状态（参数化：Description 取自迁移文件首行注释，可能含单引号
+  // 如 'system'，Format 拼接会破坏 SQL 字符串字面量 → near "xxx" syntax error）
   if Migration.Direction = mdUp then
     DirectionStr := 'UP'
   else
     DirectionStr := 'DOWN';
 
-  SQL := Format('INSERT INTO SchemaMigrations (Version, Description, FileName, Direction) ' +
-                'VALUES (''%s'', ''%s'', ''%s'', ''%s'')',
-                [Migration.Version, Migration.Description, Migration.FileName, DirectionStr]);
-
-  FConnection.ExecSQL(SQL);
+  Query := TFDQuery.Create(nil);
+  try
+    Query.Connection := FConnection;
+    Query.SQL.Text := 'INSERT INTO SchemaMigrations (Version, Description, FileName, Direction) ' +
+                      'VALUES (:Version, :Description, :FileName, :Direction)';
+    Query.ParamByName('Version').AsString := Migration.Version;
+    Query.ParamByName('Description').AsString := Migration.Description;
+    Query.ParamByName('FileName').AsString := Migration.FileName;
+    Query.ParamByName('Direction').AsString := DirectionStr;
+    Query.ExecSQL;
+  finally
+    Query.Free;
+  end;
   Result := True;
 end;
 
