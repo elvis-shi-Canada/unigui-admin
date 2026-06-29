@@ -68,8 +68,13 @@ begin
   except
     on E: Exception do
     begin
+      // 认证服务初始化失败（常见于 MainModule.OnCreate 中数据库连接失败、
+      // 或 Services 未就绪）。此时 FAuthService 保持 nil。
+      // 必须阻断后续流程——否则窗体照常显示，用户点登录会对 nil 接口
+      // 调用 Login，触发 "Access violation, Read of address 00000000"。
       ShowMessage('无法初始化认证服务: ' + E.Message);
       ModalResult := mrCancel;
+      Exit;
     end;
   end;
 
@@ -148,8 +153,15 @@ begin
   if not ValidateInput then
     Exit;
 
+  // 防御：认证服务未就绪时给出明确提示，而非对 nil 接口调用触发 AV。
+  // （正常情况下 FormCreate 已阻断；此处兜底应对会话期内服务被释放等边缘情况）
+  if not Assigned(FAuthService) then
+  begin
+    ShowMessage('认证服务未初始化，无法登录。请检查数据库连接是否正常。');
+    Exit;
+  end;
+
   try
-    // Screen.Cursor := crHourGlass;  // UniGUI 不支持 VCL Screen 对象
     try
       // 调用认证服务进行登录
       FLoginResult := FAuthService.Login(
@@ -173,10 +185,19 @@ begin
 
         // 将登录结果交由 MainModule（每会话）构造执行上下文，
         // 避免 class var 跨会话共享导致的并发覆盖
-        GetMainModule.SetLoginResult(FLoginResult);
+        try
+          GetMainModule.SetLoginResult(FLoginResult);
+        except
+          on E: Exception do
+          begin
+            // SetLoginResult 失败（如权限查询失败）不应吞掉登录态，
+            // 但需明确告知用户是"建立会话上下文"环节的问题。
+            ShowMessage('登录成功，但建立会话上下文失败: ' + E.Message);
+            Exit;
+          end;
+        end;
+
         ModalResult := mrOk;
-        // 登录成功，可以选择显示欢迎消息
-        // ShowMessage('登录成功！欢迎, ' + FLoginResult.RealName);
       end
       else
       begin
@@ -185,7 +206,6 @@ begin
         EdtPassword.SetFocus;
       end;
     finally
-      // Screen.Cursor := crDefault;  // UniGUI 不支持 VCL Screen 对象
     end;
   except
     on E: Exception do

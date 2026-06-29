@@ -5,6 +5,8 @@ object RoleEditForm: TRoleEditForm
   ClientWidth = 500
   Caption = #35282#33394#32534#36753
   OldCreateOrder = False
+  OnCreate = FormCreate
+  OnShow = FormShow
   MonitoredKeys.Keys = <>
   TextHeight = 15
   object pnlMain: TUniPanel
@@ -139,7 +141,7 @@ object RoleEditForm: TRoleEditForm
       Height = 25
       Hint = ''
       Caption = #20445#23384
-      ModalResult = 1
+      OnClick = btnSaveClick
       TabOrder = 1
     end
     object btnCancel: TUniButton
@@ -149,7 +151,7 @@ object RoleEditForm: TRoleEditForm
       Height = 25
       Hint = ''
       Caption = #21462#28040
-      ModalResult = 2
+      OnClick = btnCancelClick
       TabOrder = 2
     end
   end

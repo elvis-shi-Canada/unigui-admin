@@ -116,6 +116,10 @@ end;
 procedure TLoginLogFrame.Initialize;
 begin
   inherited;
+  // 登录日志为纯只读，隐藏无意义的新增/编辑/删除按钮
+  if Assigned(BtnAdd) then BtnAdd.Visible := False;
+  if Assigned(BtnEdit) then BtnEdit.Visible := False;
+  if Assigned(BtnDelete) then BtnDelete.Visible := False;
   // 设置默认时间范围为最近7天
   UniDateTimePickerStart.DateTime := Now - 7;
   UniDateTimePickerEnd.DateTime := Now;

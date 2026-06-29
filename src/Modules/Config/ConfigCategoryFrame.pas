@@ -3,11 +3,12 @@
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants, Data.DB, FireDAC.Comp.Client,
+  System.SysUtils, System.Classes, System.Variants, System.UITypes,
+  Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniStringGrid, uniToolBar, uniLabel, uniMultiItem,
   uniComboBox, uniPanel, uniPageControl, UniContext, UniPlugin.Types,
-  BaseCrudFrame, ConfigDataModule, ConfigService.Intf, MainModule,
+  BaseCrudFrame, ConfigDataModule, ConfigService.Intf, ConfigEditForm, MainModule,
   FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
   FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
   FireDAC.Stan.Async, FireDAC.DApt, FireDAC.Comp.DataSet, Vcl.Controls,
@@ -45,6 +46,11 @@ type
     procedure DoBindControls; override;
     procedure DoUnbindControls; override;
     procedure DoRefresh; override;
+
+    // —— CRUD 钩子重写 ——
+    function DoAdd: Boolean; override;
+    function DoEdit(const AID: Variant): Boolean; override;
+    function GetSelectedID: Variant; override;
   public
     procedure Initialize; override;
     procedure RefreshCategories;
@@ -110,6 +116,54 @@ begin
   RefreshCategories;
   if FSelectedCategory <> '' then
     RefreshConfigs;
+end;
+
+function TConfigCategoryFrame.GetSelectedID: Variant;
+begin
+  // 配置列表的主键在 FLastDataSet 的 ConfigID 字段
+  Result := Null;
+  if Assigned(FLastDataSet) and FLastDataSet.Active and not FLastDataSet.Eof then
+    Result := FLastDataSet.FieldByName('ConfigID').AsInteger;
+end;
+
+function TConfigCategoryFrame.DoAdd: Boolean;
+var
+  LForm: TConfigEditForm;
+begin
+  Result := False;
+  try
+    // ConfigEditForm 用 reintroduce 构造：Create(owner, Context, ConfigID)
+    // ConfigID <= 0 表示新增模式
+    LForm := TConfigEditForm.Create(UniApplication, Context, -1);
+    try
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开新增配置窗体失败: ' + E.Message);
+  end;
+end;
+
+function TConfigCategoryFrame.DoEdit(const AID: Variant): Boolean;
+var
+  LForm: TConfigEditForm;
+begin
+  Result := False;
+  try
+    LForm := TConfigEditForm.Create(UniApplication, Context, Integer(AID));
+    try
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开编辑配置窗体失败: ' + E.Message);
+  end;
 end;
 
 procedure TConfigCategoryFrame.Initialize;

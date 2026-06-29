@@ -224,6 +224,40 @@ Caption = 'OK'
 Caption = '#29992#25143'
 ```
 
+### 对象生命周期所有权规则（强制）
+
+**核心原则**：每个对象实例必须有**唯一、明确的所有者**，由所有者负责释放——无主对象、所有权模糊、隐式泄漏均属违规。高内聚、低耦合。
+
+**① 成员管理（内聚）**：类通过字段（`FMember`）持有的成员，必须由**该类自己**释放（析构 `Free` 或 Owner 机制），不得让外部代劳（暴露成员让别人 Free、析构后成员成孤儿）。
+
+**② 所有权转移（合法契约）**：方法创建对象并**返回**、所有权**显式移交**调用方——**合规**，前提是契约清晰：
+- 返回**强类型**（具体类 / `TObjectList<T>`），非弱类型（`TObject`）
+- 遵循语言/框架惯例（Delphi 惯例：拿到 `TObjectList` 即 `try-finally Free`）
+- **单一释放点**（`TObjectList.OwnsObjects=True`，Free 列表即释放全部内部对象）
+- **对象自洽**（不依赖外部资源的悬挂指针）
+
+**禁止的反模式 —— 不得返回不自洽的资源句柄**：禁止返回**依赖外部资源、契约隐晦**的对象（典型：`TDataSet`/`TFDQuery`——持有外部 `Connection` 引用、需懂 Open/Close 状态机、销毁顺序敏感易触发悬挂，见 LRN-20260626-003）。这类对象即使"所有权转移"也自带陷阱。
+
+**Delphi/UniGUI 落地手段**（按优先级）：
+1. **首选 —— 值类型/接口（零管理）**：返回 `record`/`TArray<T>`/基本类型，或接口（引用计数自动释放）。调用方无需 Free。
+2. **次选 —— 显式所有权转移（合规契约）**：返回自洽的强类型对象（如 `TObjectList<T>`，OwnsObjects=True），调用方 `try-finally Free`。
+3. **成员管理**：`TComponent` 派生用 Owner 机制（成员 `Create(Self)`）；`TInterfacedObject` 派生在析构手动 `Free` 成员。
+4. **借而不拥有**：使用外部资源（如 `MainModule.Connection`）但不 Create/Free = 合规；引用方须在自身析构前断开引用防悬挂。
+
+**判定速查**：
+
+| 场景 | 合规 |
+|------|:---:|
+| `FQuery := TFDQuery.Create(Self)`（Owner=Self） | ✅ 成员管理 |
+| Service 析构 `FDataModule.Free` | ✅ 成员管理 |
+| 返回 `IUserService`（接口引用计数） | ✅ 值类型/接口 |
+| 返回 `TUserInfo`（record） | ✅ 值类型 |
+| 返回 `TObjectList<TCustomer>`（OwnsObjects=True，调用方 Free） | ✅ 所有权转移 |
+| 方法内 `try-finally Free` 临时对象 | ✅ 自闭环 |
+| 借用 `MainModule.Connection` 不 Create/Free | ✅ 借而不拥有 |
+| 返回 `TDataSet`/`TFDQuery`（连接依赖+销毁陷阱） | ❌ 不自洽句柄 |
+| 暴露 `FMember` 让外部 Free | ❌ 成员泄漏 |
+
 ### 常见编译错误预防
 
 | 错误 | 原因 | 解决方案 |

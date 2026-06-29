@@ -234,10 +234,11 @@ begin
   if FMdiRouter.CanRoute(LMenuData.RoutePath) then
   begin
     // *Form -> modal; otherwise embedded as a closable tab.
+    // 注入当前会话 Context，供新建的 CRUD Frame 初始化（SetContext + Initialize）。
     if AnsiEndsText('Form', LMenuData.RoutePath) then
       FMdiRouter.Open(LMenuData.RoutePath, '', omModal)
     else
-      FMdiRouter.Open(LMenuData.RoutePath, LNode.Text, omEmbed);
+      FMdiRouter.Open(LMenuData.RoutePath, LNode.Text, omEmbed, Context);
     UpdateStatusBar(LNode.Text);
   end
   else

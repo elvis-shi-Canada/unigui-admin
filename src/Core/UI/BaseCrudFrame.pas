@@ -8,14 +8,14 @@ uses
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniBasicGrid, uniDBGrid,
   uniToolBar, uniGUIForm, uniGUIFrame,
   UniContext, UniPlugin.Types, UniAdminModel, Vcl.Controls, Vcl.Forms,
-  UniFieldMetadata, UniAdminMetadataCache.Intf;
+  UniFieldMetadata, UniAdminMetadataCache.Intf, UniAdminMdiRouter.Intf;
 
 type
   /// <summary>
   /// CRUD 基类窗体 - 提供标准 CRUD 操作界面
   /// 子类继承此窗体可获得标准的 CRUD 功能
   /// </summary>
-  TBaseCrudFrame = class(TUniFrame)
+  TBaseCrudFrame = class(TUniFrame, IMdiInitializable)
     // 工具栏与数据组件：必须在 published 区，DFM 流读取器才能通过 RTTI
     // 绑定到这些字段（protected/private 字段对 DFM 不可见，会导致组件创建后
     // 无法绑定、字段悬空，引发 Access Violation）。
@@ -28,6 +28,15 @@ type
     BtnRefresh: TUniButton;
     UniDBGrid: TUniDBGrid;
     UniDataSource: TDataSource;
+
+    // 工具栏按钮事件：DFM 通过 OnXxx 绑定，必须在 published 区（RTTI 可见）
+    // 否则 DFM 找不到方法，报 "Invalid property value" 或静默不执行。
+    procedure BtnAddClick(Sender: TObject);
+    procedure BtnEditClick(Sender: TObject);
+    procedure BtnDeleteClick(Sender: TObject);
+    procedure BtnSaveClick(Sender: TObject);
+    procedure BtnCancelClick(Sender: TObject);
+    procedure BtnRefreshClick(Sender: TObject);
   private
     FModelAdmin: TUniAdminModel;
     FContext: IExecutionContext;
@@ -37,12 +46,6 @@ type
 
     procedure UpdateButtonStates;
     procedure CheckPermissions;
-
-    // 工具栏按钮事件
-    procedure BtnAddClick(Sender: TObject);
-    procedure BtnSaveClick(Sender: TObject);
-    procedure BtnCancelClick(Sender: TObject);
-    procedure BtnRefreshClick(Sender: TObject);
 
     procedure DoStateChange(Sender: TObject);
   protected
@@ -81,9 +84,29 @@ type
     /// </summary>
     procedure BuildGridFromMetadata; virtual;
 
-    // 工具栏按钮事件（protected，子类可调用）
-    procedure BtnEditClick(Sender: TObject);
-    procedure BtnDeleteClick(Sender: TObject);
+    // —— CRUD 业务钩子 ——
+    // BtnAdd/BtnEdit/BtnDelete 点击后调用这些钩子。子类重写以打开各自的编辑窗体
+    // 或执行删除。基类默认实现为"什么都不做"（返回 False），让只读模块（日志/调度
+    // 等）的按钮即使被点击也无副作用。
+    // 绕过 FModelAdmin 的 Insert/Edit/Delete 状态机——该状态机依赖 FDataSet，
+    // 而子类普遍只赋 UniDataSource.DataSet，FModelAdmin.DataSet 长期为 nil，
+    // 走状态机会 AV。改为钩子直接处理业务，更直接也更安全。
+
+    /// <summary>新增记录。返回 True 表示已处理且需要刷新列表（如新增成功）。</summary>
+    function DoAdd: Boolean; virtual;
+
+    /// <summary>编辑指定记录。AID 为主键值（由 GetSelectedID 提供）。</summary>
+    function DoEdit(const AID: Variant): Boolean; virtual;
+
+    /// <summary>删除指定记录。基类已做 MessageDlg 确认，子类只需执行删除。</summary>
+    function DoDelete(const AID: Variant): Boolean; virtual;
+
+    /// <summary>
+    /// 获取当前选中记录的主键值。基类默认从 UniDataSource.DataSet 取
+    /// 字段名 'ID'；子类按各自主键名（RoleID/MenuID/UserID...）重写。
+    /// 无选中时返回 Null/Unassigned。
+    /// </summary>
+    function GetSelectedID: Variant; virtual;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -120,6 +143,7 @@ type
 implementation
 
 uses
+  System.UITypes,
   uniGUIApplication, MainModule;
 
 {$R *.dfm}
@@ -240,6 +264,33 @@ begin
   // 子类重写 - 自定义刷新逻辑
 end;
 
+{ CRUD 业务钩子默认实现 —— 只读模块（日志/调度等）无需重写，按钮无副作用 }
+
+function TBaseCrudFrame.DoAdd: Boolean;
+begin
+  // 默认：无新增能力（如只读模块）。子类重写以打开编辑窗体。
+  Result := False;
+end;
+
+function TBaseCrudFrame.DoEdit(const AID: Variant): Boolean;
+begin
+  // 默认：无编辑能力。子类重写以打开编辑窗体。
+  Result := False;
+end;
+
+function TBaseCrudFrame.DoDelete(const AID: Variant): Boolean;
+begin
+  // 默认：无删除能力。子类重写以调用 DataModule.DeleteXxx。
+  Result := False;
+end;
+
+function TBaseCrudFrame.GetSelectedID: Variant;
+begin
+  // 默认：返回 Null。各模块主键字段名不统一（RoleID/MenuID/UserID...），
+  // 子类必须重写以返回正确主键；不重写则 BtnEdit/BtnDelete 会提示"请先选择"。
+  Result := Null;
+end;
+
 procedure TBaseCrudFrame.Refresh;
 var
   LQuery: TFDQuery;
@@ -259,6 +310,9 @@ begin
     else
       UniDataSource.DataSet.Refresh;
   end;
+
+  // 数据加载后刷新按钮状态（编辑/删除按钮依赖"有选中记录"）
+  UpdateButtonStates;
 end;
 
 procedure TBaseCrudFrame.CheckPermissions;
@@ -294,27 +348,45 @@ begin
 end;
 
 procedure TBaseCrudFrame.UpdateButtonStates;
+var
+  LHasRecord: Boolean;
 begin
-  if not Assigned(FModelAdmin) then
-    Exit;
+  // 新增/编辑/删除已改为 DoAdd/DoEdit/DoDelete 钩子模式（模态窗体），
+  // 不再依赖 FModelAdmin 的 Insert/Edit/Delete 状态机。因此按钮的 Enabled
+  // 不应再由 FModelAdmin.CanXxx 控制（那些方法依赖 FModelAdmin.DataSet，
+  // 而子类普遍只赋 UniDataSource.DataSet，FModelAdmin.DataSet 长期为 nil，
+  // 会导致 CanInsert/CanEdit/CanDelete 返回 False，按钮被禁用、点击无响应）。
+  //
+  // 新规则：
+  //   - 新增：永远可用（不依赖当前数据）
+  //   - 编辑/删除：仅当列表有选中记录时可用
+  //   - 刷新：永远可用
+  //   - 保存/取消：行内编辑场景保留原 FModelAdmin 状态机逻辑（模态窗体不用这两个按钮）
+
+  LHasRecord := Assigned(UniDataSource) and Assigned(UniDataSource.DataSet) and
+                UniDataSource.DataSet.Active and not UniDataSource.DataSet.IsEmpty;
 
   if Assigned(BtnAdd) then
-    BtnAdd.Enabled := FModelAdmin.CanInsert;
+    BtnAdd.Enabled := True;
 
   if Assigned(BtnEdit) then
-    BtnEdit.Enabled := FModelAdmin.CanEdit;
+    BtnEdit.Enabled := LHasRecord;
 
   if Assigned(BtnDelete) then
-    BtnDelete.Enabled := FModelAdmin.CanDelete;
-
-  if Assigned(BtnSave) then
-    BtnSave.Enabled := FModelAdmin.CanSave;
-
-  if Assigned(BtnCancel) then
-    BtnCancel.Enabled := FModelAdmin.CanCancel;
+    BtnDelete.Enabled := LHasRecord;
 
   if Assigned(BtnRefresh) then
-    BtnRefresh.Enabled := FModelAdmin.State = csBrowse;
+    BtnRefresh.Enabled := True;
+
+  // Save/Cancel 属于行内编辑状态机，保留 FModelAdmin 判定（与模态窗体互不干扰）
+  if Assigned(FModelAdmin) then
+  begin
+    if Assigned(BtnSave) then
+      BtnSave.Enabled := FModelAdmin.CanSave;
+
+    if Assigned(BtnCancel) then
+      BtnCancel.Enabled := FModelAdmin.CanCancel;
+  end;
 end;
 
 procedure TBaseCrudFrame.DoStateChange(Sender: TObject);
@@ -324,46 +396,38 @@ end;
 
 procedure TBaseCrudFrame.BtnAddClick(Sender: TObject);
 begin
-  try
-    FModelAdmin.Insert;
-    DoBindControls;
-    UpdateButtonStates;
-  except
-    on E: Exception do
-    begin
-      UpdateButtonStates;
-      raise;
-    end;
-  end;
+  if DoAdd then
+    Refresh;
 end;
 
 procedure TBaseCrudFrame.BtnEditClick(Sender: TObject);
+var
+  LID: Variant;
 begin
-  try
-    FModelAdmin.Edit;
-    DoBindControls;
-    UpdateButtonStates;
-  except
-    on E: Exception do
-    begin
-      UpdateButtonStates;
-      raise;
-    end;
+  LID := GetSelectedID;
+  if VarIsEmpty(LID) or VarIsNull(LID) or (LID = 0) then
+  begin
+    ShowMessage('请先选择一条记录');
+    Exit;
   end;
+  if DoEdit(LID) then
+    Refresh;
 end;
 
 procedure TBaseCrudFrame.BtnDeleteClick(Sender: TObject);
+var
+  LID: Variant;
 begin
-  try
-    FModelAdmin.Delete;
-    UpdateButtonStates;
-  except
-    on E: Exception do
-    begin
-      UpdateButtonStates;
-      raise;
-    end;
+  LID := GetSelectedID;
+  if VarIsEmpty(LID) or VarIsNull(LID) or (LID = 0) then
+  begin
+    ShowMessage('请先选择一条记录');
+    Exit;
   end;
+  // UniGUI 的 MessageDlg 是异步回调，无法在同步流程里等待用户确认。
+  // 因此删除确认由子类的 DoDelete 内部用 MessageDlg + 回调完成，
+  // 回调成功后再调用 Refresh 刷新。基类此处只触发 DoDelete。
+  DoDelete(LID);
 end;
 
 procedure TBaseCrudFrame.BtnSaveClick(Sender: TObject);

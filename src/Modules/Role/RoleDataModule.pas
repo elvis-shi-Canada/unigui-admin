@@ -221,7 +221,7 @@ begin
 
     if LWhereList.Count > 0 then
     begin
-      LWhere := ' WHERE ' + LWhereList.Text.Replace(#13#10, ' AND ');
+      LWhere := ' WHERE ' + LWhereList.Text.Trim.Replace(#13#10, ' AND ');
       LSQL := LSQL + LWhere;
     end;
 
@@ -332,7 +332,7 @@ begin
 
     LSQL := TStringList.Create;
     try
-      LSQL.Add('UPDATE UniAdmin_Roles SET ' + LUpdates.Text.Replace(#13#10, ', '));
+      LSQL.Add('UPDATE UniAdmin_Roles SET ' + LUpdates.Text.Trim.Replace(#13#10, ', '));
       LSQL.Add('WHERE RoleID = :RoleID');
 
       LQuery.SQL.Text := LSQL.Text.Replace(#13#10, ' ');

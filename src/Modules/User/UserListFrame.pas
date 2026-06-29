@@ -3,7 +3,7 @@ unit UserListFrame;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Variants,
+  System.SysUtils, System.Classes, System.Variants, System.UITypes,
   Data.DB, FireDAC.Comp.Client, FireDAC.Stan.Param,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton,
   uniBasicGrid, uniDBGrid, uniToolBar,
@@ -34,6 +34,13 @@ type
     procedure LoadUsers;
     procedure ApplyFilter;
     function ParseStatusFilter(const AText: string): Integer;
+
+    // —— CRUD 钩子重写 ——
+    function DoAdd: Boolean; override;
+    function DoEdit(const AID: Variant): Boolean; override;
+    function DoDelete(const AID: Variant): Boolean; override;
+    function GetSelectedID: Variant; override;
+    function GetSelectedUserID: Integer;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -42,7 +49,8 @@ type
 implementation
 
 uses
-  UniModelAdmin.Intf, UniModelAdmin, UniQueryBuilder;
+  UniModelAdmin.Intf, UniModelAdmin, UniQueryBuilder,
+  UserEditForm, UserService;
 
 {$R *.dfm}
 
@@ -103,6 +111,79 @@ begin
     Result := 0
   else
     Result := -1;  // 全部
+end;
+
+function TUserListFrame.GetSelectedUserID: Integer;
+begin
+  Result := 0;
+  if Assigned(FQuery) and FQuery.Active and not FQuery.Eof then
+    Result := FQuery.FieldByName('UserID').AsInteger;
+end;
+
+function TUserListFrame.GetSelectedID: Variant;
+begin
+  Result := GetSelectedUserID;
+end;
+
+function TUserListFrame.DoAdd: Boolean;
+var
+  LForm: TUserEditForm;
+begin
+  Result := False;
+  try
+    LForm := TUserEditForm.Create(UniApplication);
+    try
+      LForm.SetContext(Context);
+      LForm.SetAsAddMode;
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开新增用户窗体失败: ' + E.Message);
+  end;
+end;
+
+function TUserListFrame.DoEdit(const AID: Variant): Boolean;
+var
+  LForm: TUserEditForm;
+begin
+  Result := False;
+  try
+    LForm := TUserEditForm.Create(UniApplication);
+    try
+      LForm.SetContext(Context);
+      LForm.SetAsEditMode(Integer(AID));
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开编辑用户窗体失败: ' + E.Message);
+  end;
+end;
+
+function TUserListFrame.DoDelete(const AID: Variant): Boolean;
+var
+  LService: TUserService;
+begin
+  Result := False;
+  try
+    LService := TUserService.Create(Context);
+    try
+      LService.DeleteUser(Integer(AID));
+    finally
+      LService.Free;
+    end;
+    Result := True;
+  except
+    on E: Exception do
+      ShowMessage('删除用户失败: ' + E.Message);
+  end;
 end;
 
 procedure TUserListFrame.LoadUsers;

@@ -101,6 +101,9 @@ type
 
 implementation
 
+uses
+  uniGUIApplication, MainModule;
+
 { TUniAdminModel }
 
 constructor TUniAdminModel.Create(AOwner: TComponent);
@@ -300,11 +303,27 @@ begin
 end;
 
 function TUniAdminModel.GetConnection: TFDCustomConnection;
+var
+  LMain: TMainModule;
 begin
   Result := nil;
-    
+
+  // 优先从已绑定 DataSet 取连接（显式绑定的子类）
   if (FDataSet <> nil) and (FDataSet is TFDQuery) then
     Result := TFDQuery(FDataSet).Connection;
+
+  // 兜底：从当前会话 MainModule 取每会话连接。
+  // 多数 CRUD 子类在构造期即调用 ModelAdmin.Connection 绑定自己的 FQuery，
+  // 而此时 FDataSet 尚未赋值（DoInitialize 里才赋）。若不兜底，会返回 nil，
+  // 导致子类 FQuery.Connection 为 nil，Open 时抛
+  // [FireDAC][Comp][Clnt]-512. Connection is not defined for [].
+  // 参见 AGENTS.md 连接管理：每会话连接由 TMainModule 持有。
+  if Result = nil then
+  begin
+    LMain := GetMainModule;
+    if LMain <> nil then
+      Result := LMain.Connection;
+  end;
 end;
 
 end.

@@ -113,7 +113,7 @@ begin
 
     if LWhereList.Count > 0 then
     begin
-      LWhere := ' WHERE ' + LWhereList.Text.Replace(#13#10, ' AND ');
+      LWhere := ' WHERE ' + LWhereList.Text.Trim.Replace(#13#10, ' AND ');
       LSQL := LSQL + LWhere;
     end;
 
@@ -393,7 +393,7 @@ begin
 
     if LWhereList.Count > 0 then
     begin
-      LWhere := ' WHERE ' + LWhereList.Text.Replace(#13#10, ' AND ');
+      LWhere := ' WHERE ' + LWhereList.Text.Trim.Replace(#13#10, ' AND ');
       LSQL := LSQL + LWhere;
     end;
 

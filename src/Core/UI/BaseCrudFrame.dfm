@@ -21,6 +21,7 @@ object BaseCrudFrame: TBaseCrudFrame
       Hint = ''
       Caption = #26032#22686
       TabOrder = 1
+      OnClick = BtnAddClick
     end
     object BtnEdit: TUniButton
       Left = 88
@@ -30,6 +31,7 @@ object BaseCrudFrame: TBaseCrudFrame
       Hint = ''
       Caption = #32534#36753
       TabOrder = 2
+      OnClick = BtnEditClick
     end
     object BtnDelete: TUniButton
       Left = 168
@@ -39,6 +41,7 @@ object BaseCrudFrame: TBaseCrudFrame
       Hint = ''
       Caption = #21024#38500
       TabOrder = 3
+      OnClick = BtnDeleteClick
     end
     object BtnRefresh: TUniButton
       Left = 248
@@ -48,6 +51,7 @@ object BaseCrudFrame: TBaseCrudFrame
       Hint = ''
       Caption = #21047#26032
       TabOrder = 4
+      OnClick = BtnRefreshClick
     end
   end
 end

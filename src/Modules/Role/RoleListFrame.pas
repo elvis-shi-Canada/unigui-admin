@@ -8,7 +8,7 @@ uses
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniBasicGrid, uniDBGrid, uniToolBar, uniPanel,
   uniMultiItem, uniComboBox, uniLabel, uniGUIApplication,
   UniContext, UniPlugin.Types, UniAdminModel,
-  BaseCrudFrame, RoleDataModule,
+  BaseCrudFrame, RoleDataModule, RoleEditForm,
   RolePermissionDialog, RoleUserDialog, Vcl.Dialogs, MainModule, Vcl.Controls,
   Vcl.Forms;
 
@@ -45,6 +45,12 @@ type
     procedure BtnUserClick(Sender: TObject);
     function GetSelectedRoleID: Integer;
     function GetStatusText(Status: Integer): string;
+
+    // —— CRUD 钩子重写 ——
+    function DoAdd: Boolean; override;
+    function DoEdit(const AID: Variant): Boolean; override;
+    function DoDelete(const AID: Variant): Boolean; override;
+    function GetSelectedID: Variant; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -228,8 +234,11 @@ begin
       LWhereParts.Add('r.Status = :Status');
 
     // 构建 WHERE 子句
+    // 注意：TStringList.Text 在每条后都带 CRLF（含末条），
+    // 必须先 Trim 去掉末尾 CRLF，再 Replace 为 ' AND '，
+    // 否则末尾会多出 ' AND '，拼接 ORDER BY 时报 "near ORDER: syntax error"。
     if LWhereParts.Count > 0 then
-      LSQL := LSQL + ' WHERE ' + LWhereParts.Text.Replace(#13#10, ' AND ');
+      LSQL := LSQL + ' WHERE ' + LWhereParts.Text.Trim.Replace(#13#10, ' AND ');
 
     LSQL := LSQL + ' ORDER BY r.SortOrder ASC, r.RoleID ASC';
 
@@ -261,6 +270,65 @@ begin
   Result := 0;
   if Assigned(FQuery) and FQuery.Active and not FQuery.Eof then
     Result := FQuery.FieldByName('RoleID').AsInteger;
+end;
+
+function TRoleListFrame.GetSelectedID: Variant;
+begin
+  Result := GetSelectedRoleID;
+end;
+
+function TRoleListFrame.DoAdd: Boolean;
+var
+  LForm: TRoleEditForm;
+begin
+  Result := False;
+  try
+    LForm := TRoleEditForm.Create(UniApplication);
+    try
+      LForm.SetContext(Context);
+      LForm.SetAsAddMode;
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开新增角色窗体失败: ' + E.Message);
+  end;
+end;
+
+function TRoleListFrame.DoEdit(const AID: Variant): Boolean;
+var
+  LForm: TRoleEditForm;
+begin
+  Result := False;
+  try
+    LForm := TRoleEditForm.Create(UniApplication);
+    try
+      LForm.SetContext(Context);
+      LForm.SetAsEditMode(Integer(AID));
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开编辑角色窗体失败: ' + E.Message);
+  end;
+end;
+
+function TRoleListFrame.DoDelete(const AID: Variant): Boolean;
+begin
+  Result := False;
+  try
+    FRoleDM.DeleteRole(Integer(AID));
+    Result := True;
+  except
+    on E: Exception do
+      ShowMessage('删除角色失败: ' + E.Message);
+  end;
 end;
 
 function TRoleListFrame.GetStatusText(Status: Integer): string;

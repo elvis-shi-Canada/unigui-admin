@@ -4,11 +4,12 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Variants, System.Generics.Collections,
+  System.UITypes,
   Data.DB, FireDAC.Comp.Client,
   uniGUIBaseClasses, uniGUIClasses, uniGUImClasses, uniEdit, uniButton, uniToolBar,
   uniPanel, uniTreeMenu, uniLabel, uniComboBox, uniSplitter, uniGUIAbstractClasses,
   UniContext, UniPlugin.Types, UniAdminModel,
-  BaseCrudFrame, MenuDataModule, uniDBGrid, uniBasicGrid,
+  BaseCrudFrame, MenuDataModule, MenuEditForm, uniDBGrid, uniBasicGrid,
   Vcl.Controls, uniMultiItem, uniTreeView, Vcl.Forms;
 
 type
@@ -62,6 +63,12 @@ type
     function GetSelectedNodeID: Integer;
     procedure HandleNodeSelect(Sender: TObject);
     procedure SetupDragDrop;
+
+    // —— CRUD 钩子重写 ——
+    function DoAdd: Boolean; override;
+    function DoEdit(const AID: Variant): Boolean; override;
+    function DoDelete(const AID: Variant): Boolean; override;
+    function GetSelectedID: Variant; override;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -267,9 +274,9 @@ begin
     // 父节点条件
     LWhereParts.Add('ParentID = :ParentID');
 
-    // 构建 WHERE 子句
+    // 构建 WHERE 子句（先 Trim 去末尾 CRLF，避免 Replace 后多出 ' AND '）
     if LWhereParts.Count > 0 then
-      LSQL := LSQL + ' WHERE ' + LWhereParts.Text.Replace(#13#10, ' AND ');
+      LSQL := LSQL + ' WHERE ' + LWhereParts.Text.Trim.Replace(#13#10, ' AND ');
 
     LSQL := LSQL + ' ORDER BY SortOrder ASC, MenuID ASC';
 
@@ -361,7 +368,7 @@ begin
       LWhereParts.Add('m.MenuID = :MenuID');
 
     if LWhereParts.Count > 0 then
-      LSQL := LSQL + ' WHERE ' + LWhereParts.Text.Replace(#13#10, ' AND ');
+      LSQL := LSQL + ' WHERE ' + LWhereParts.Text.Trim.Replace(#13#10, ' AND ');
 
     LSQL := LSQL + ' ORDER BY m.ParentID, m.SortOrder, m.MenuID';
 
@@ -390,6 +397,66 @@ begin
   Result := 0;
   if Assigned(treeMenus.Selected) and Assigned(treeMenus.Selected.Data) then
     Result := Integer(treeMenus.Selected.Data);
+end;
+
+function TMenuTreeFrame.GetSelectedID: Variant;
+begin
+  Result := GetSelectedNodeID;
+end;
+
+function TMenuTreeFrame.DoAdd: Boolean;
+var
+  LForm: TMenuEditForm;
+begin
+  Result := False;
+  try
+    LForm := TMenuEditForm.Create(UniApplication);
+    try
+      LForm.SetContext(Context);
+      // 在当前选中节点下新增子菜单；无选中则新增顶级菜单
+      LForm.SetAsAddMode(FSelectedMenuID);
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开新增菜单窗体失败: ' + E.Message);
+  end;
+end;
+
+function TMenuTreeFrame.DoEdit(const AID: Variant): Boolean;
+var
+  LForm: TMenuEditForm;
+begin
+  Result := False;
+  try
+    LForm := TMenuEditForm.Create(UniApplication);
+    try
+      LForm.SetContext(Context);
+      LForm.SetAsEditMode(Integer(AID));
+      if LForm.ShowModal = mrOK then
+        Result := True;
+    finally
+      LForm.Free;
+    end;
+  except
+    on E: Exception do
+      ShowMessage('打开编辑菜单窗体失败: ' + E.Message);
+  end;
+end;
+
+function TMenuTreeFrame.DoDelete(const AID: Variant): Boolean;
+begin
+  Result := False;
+  try
+    FMenuDM.DeleteMenu(Integer(AID));
+    Result := True;
+  except
+    on E: Exception do
+      ShowMessage('删除菜单失败: ' + E.Message);
+  end;
 end;
 
 procedure TMenuTreeFrame.HandleNodeSelect(Sender: TObject);

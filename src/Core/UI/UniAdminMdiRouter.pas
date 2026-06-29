@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Classes,
   uniGUIApplication, uniGUIForm, uniPanel, uniGUIBaseClasses, uniGUIFrame,
   uniGUIClasses, uniPageControl, Vcl.Controls,
-  UniAdminMdiRouter.Intf;
+  UniContext, UniAdminMdiRouter.Intf;
 
 type
   /// <summary>
@@ -29,7 +29,8 @@ type
     /// <summary>Find an existing tab whose Name equals the class name.</summary>
     function FindTab(const AClassName: string): TUniTabSheet;
     /// <summary>Create-or-activate a tab hosting the frame.</summary>
-    procedure ShowFrame(const AClassName, ACaption: string);
+    procedure ShowFrame(const AClassName, ACaption: string;
+      const AContext: IExecutionContext);
     /// <summary>Create and show a modal form (not tabbed).</summary>
     procedure ShowModalForm(const AClassName: string);
     /// <summary>OnClose handler: always allow, tab frees its child frame.</summary>
@@ -38,7 +39,7 @@ type
     constructor Create(AHost: TUniPageControl);
 
     procedure Open(const AClassName: string; const ACaption: string = '';
-      AOpenMode: TMdiOpenMode = omEmbed);
+      AOpenMode: TMdiOpenMode = omEmbed; const AContext: IExecutionContext = nil);
     function CanRoute(const AClassName: string): Boolean;
     procedure Close(const AClassName: string);
     procedure CloseAll;
@@ -94,14 +95,17 @@ begin
       Exit(FHost.Pages[I]);
 end;
 
-procedure TUniAdminMdiRouter.ShowFrame(const AClassName, ACaption: string);
+procedure TUniAdminMdiRouter.ShowFrame(const AClassName, ACaption: string;
+  const AContext: IExecutionContext);
 var
   LTab: TUniTabSheet;
   LFrame: TUniFrame;
   LFrameClass: TUniFrameClass;
   LDisplayCaption: string;
+  LInit: IMdiInitializable;
 begin
-  // 1. Cache hit: activate existing tab, preserving full frame state
+  // 1. Cache hit: activate existing tab, preserving full frame state.
+  // 已初始化过的 Frame 不重复注入 Context / 调 Initialize。
   LTab := FindTab(AClassName);
   if LTab <> nil then
   begin
@@ -132,6 +136,16 @@ begin
   LFrame := LFrameClass.Create(LTab);
   LFrame.Parent := LTab;
   LFrame.Align := alClient;
+
+  // 3. 注入会话上下文并触发初始化（仅新建分支）。
+  // 若 Frame 实现 IMdiInitializable（如 TBaseCrudFrame），Router 负责把
+  // 当前会话 Context 注入并调 Initialize，否则 FContext=nil、DoInitialize
+  // 不执行，下游 DoAdd 等钩子因 Context 缺失触发 AV 被静默吞掉。
+  if Supports(LFrame, IMdiInitializable, LInit) then
+  begin
+    LInit.SetContext(AContext);
+    LInit.Initialize;
+  end;
 
   FHost.ActivePage := LTab;
 end;
@@ -164,13 +178,13 @@ begin
 end;
 
 procedure TUniAdminMdiRouter.Open(const AClassName: string; const ACaption: string;
-  AOpenMode: TMdiOpenMode);
+  AOpenMode: TMdiOpenMode; const AContext: IExecutionContext);
 begin
   if AClassName = '' then
     Exit;
 
   case AOpenMode of
-    omEmbed: ShowFrame(AClassName, ACaption);
+    omEmbed: ShowFrame(AClassName, ACaption, AContext);
     omModal: ShowModalForm(AClassName);
   end;
 end;

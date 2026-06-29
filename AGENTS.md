@@ -173,6 +173,28 @@ end;
 - Use interfaces for cross-module communication
 - **AVOID global variables** - use DataModules or dependency injection
 
+### 对象生命周期所有权规则（强制）
+
+**核心原则**：每个对象实例必须有**唯一、明确的所有者**，由所有者负责释放——无主对象、所有权模糊、隐式泄漏均属违规。高内聚、低耦合。
+
+**① 成员管理（内聚）**：类通过字段（`FMember`）持有的成员，必须由**该类自己**释放（析构 `Free` 或 Owner 机制），不得让外部代劳（暴露成员让别人 Free、析构后成员成孤儿）。
+
+**② 所有权转移（合法契约）**：方法创建对象并**返回**、所有权**显式移交**调用方——**合规**，前提是契约清晰：
+- 返回**强类型**（具体类 / `TObjectList<T>`），非弱类型（`TObject`）
+- 遵循语言/框架惯例（Delphi 惯例：拿到 `TObjectList` 即 `try-finally Free`）
+- **单一释放点**（`TObjectList.OwnsObjects=True`，Free 列表即释放全部内部对象）
+- **对象自洽**（不依赖外部资源的悬挂指针）
+
+**禁止的反模式 —— 不得返回不自洽的资源句柄**：禁止返回**依赖外部资源、契约隐晦**的对象（典型：`TDataSet`/`TFDQuery`——持有外部 `Connection` 引用、需懂 Open/Close 状态机、销毁顺序敏感易触发悬挂，见 LRN-20260626-003）。
+
+**Delphi/UniGUI 落地手段**（按优先级）：
+1. **首选 —— 值类型/接口（零管理）**：返回 `record`/`TArray<T>`/基本类型，或接口（引用计数自动释放）。
+2. **次选 —— 显式所有权转移（合规契约）**：返回自洽强类型对象（如 `TObjectList<T>`，OwnsObjects=True），调用方 `try-finally Free`。
+3. **成员管理**：`TComponent` 派生用 Owner 机制；`TInterfacedObject` 派生析构手动 `Free` 成员。
+4. **借而不拥有**：使用外部资源不 Create/Free = 合规；引用方须析构前断开防悬挂。
+
+**判定速查**：返回 record/接口/`TObjectList<T>`(OwnsObjects) = ✅；返回 `TDataSet`/`TFDQuery`（连接依赖+销毁陷阱）= ❌；暴露成员让外部 Free = ❌。
+
 ## Architecture Guidelines
 
 ### UniGUI-Specific Patterns
@@ -833,3 +855,89 @@ FColorScheme.ShadowColor := $00808080;  // 中等灰色，在有效范围内
 
 ---
 
+
+### 1️⃣9️⃣ 路由创建的 Frame/Form 必须注入 Context 并调用 Initialize（预防：点击无响应 / AV Read of address 00000000）
+
+**触发场景**
+- 通过 MDI 路由（`IMdiRouter.Open` → `FindClass` → `Create`）打开的任何 CRUD Frame
+- 登录后主窗体（MainFrame）加载菜单
+- 任何依赖 `IExecutionContext`（Context）的窗体被创建
+
+**错误模式**
+```pascal
+// Router 创建 Frame 后只设 Parent/Align 就返回，不调 SetContext/Initialize：
+LFrame := LFrameClass.Create(LTab);
+LFrame.Parent := LTab;
+LFrame.Align := alClient;
+// ❌ 从不调用 SetContext → FContext 恒 nil
+// ❌ 从不调用 Initialize → DoInitialize 不执行（数据不加载、按钮不初始化）
+```
+后果：用户点击新增/编辑 → 钩子里 `LForm.SetContext(Context)` 传 nil → 内部 AV 被 except 静默吞掉 → 表现为"点击无响应"。
+
+**此缺陷已复发 2 次**（2026-06-24 MainFrame 菜单不加载、2026-06-28 CRUD Frame 点新增无响应）。
+
+**正确行为**
+路由创建 Frame 后，若 Frame 实现 `IMdiInitializable`（`SetContext` + `Initialize`），Router 必须注入会话 Context 并调用 Initialize：
+```pascal
+LFrame := LFrameClass.Create(LTab);
+LFrame.Parent := LTab;
+LFrame.Align := alClient;
+// ✅ 注入上下文并初始化（仅新建分支，缓存命中不重复）
+if Supports(LFrame, IMdiInitializable, LInit) then
+begin
+  LInit.SetContext(AContext);
+  LInit.Initialize;
+end;
+```
+任何新 Frame 接入路由时，必须：
+1. 继承 `TBaseCrudFrame`（已实现 IMdiInitializable），或
+2. 自行实现 `IMdiInitializable` 接口
+3. 确保 `IMdiRouter.Open` 调用时传入 `Context`
+
+**验证方法**
+- 新增 Frame 后，检查能否正常加载数据（非空列表）、按钮可点击
+- 若点击无反应，优先检查 FContext 是否 nil（而非按钮事件链路）
+- Grep 确认 Router 的 ShowFrame 新建分支含 SetContext+Initialize 调用
+
+---
+
+### 2️⃣0️⃣ except 块必须 Exit 阻断（预防：nil 解引用 AV）
+
+**触发场景**
+- 对象/接口字段初始化失败后的 except 处理
+- 服务获取（`GetXxx`）失败时的兜底
+- 任何 except 块设置状态标志（ModalResult、布尔标志）但不 Exit
+
+**错误模式**
+```pascal
+try
+  FService := GetMainModule.Services.AuthService;
+except
+  on E: Exception do
+  begin
+    ShowMessage('初始化失败: ' + E.Message);
+    ModalResult := mrCancel;   // ❌ 没有 Exit！
+  end;
+end;
+// FService 保持 nil，后续代码继续执行
+// 用户触发 → FService.DoSomething → AV, Read of address 00000000
+```
+`ModalResult := mrCancel` **只在 ShowModal 退出时生效，不阻止当前方法继续执行**。
+
+**正确行为**
+except 块若表示"无法继续"，必须显式 Exit（过程）/ Exit(Value)（函数）/ Abort：
+```pascal
+except
+  on E: Exception do
+  begin
+    ShowMessage('初始化失败: ' + E.Message);
+    Exit;   // ✅ 阻断后续，FService 保持 nil 不会被解引用
+  end;
+end;
+```
+调用方也应防御性检查：`if not Assigned(FService) then Exit;`
+
+**验证方法**
+- 审查所有 except 块：若后续代码依赖被保护的变量，except 必须含 Exit
+- Grep `ModalResult := mrCancel` 后无 Exit 的 except 块
+- 预期输出：无 "Read of address 00000000" 类 AV
