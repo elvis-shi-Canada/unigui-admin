@@ -33,7 +33,15 @@ uses
   UniModelAdmin in '..\src\Core\Admin\UniModelAdmin.pas',
   UniModelAdminTest in 'Core\Admin\UniModelAdminTest.pas',
   UniQueryBuilder in '..\src\Core\Admin\UniQueryBuilder.pas',
-  UniQueryBuilderTest in 'Core\Admin\UniQueryBuilderTest.pas';
+  UniQueryBuilderTest in 'Core\Admin\UniQueryBuilderTest.pas',
+  UniAdminConnectionManagerTest in 'Core\Data\UniAdminConnectionManagerTest.pas',
+  UniAdminConnectionManager in '..\src\Core\Data\UniAdminConnectionManager.pas',
+  UniAdminConnectionManager.Intf in '..\src\Core\Data\UniAdminConnectionManager.Intf.pas',
+  UniAdminConfigService in '..\src\Core\Config\UniAdminConfigService.pas',
+  UniAdminConfigService.Intf in '..\src\Core\Config\UniAdminConfigService.Intf.pas',
+  MVCFramework.ActiveRecord,
+  RoleEntity in '..\src\Modules\Role\Entities\RoleEntity.pas',
+  RoleActiveRecordPoC in 'Modules\RoleActiveRecordPoC.pas';
 
 var
   {$IFNDEF TESTINSIGHT}

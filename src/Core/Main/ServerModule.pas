@@ -60,7 +60,8 @@ implementation
 
 uses
   UniAdminConfigService, UniAdminModuleRegistry, UniAdminLogger,
-  UniAdminConnectionManager, DatabaseInitializer, DatabaseMigrator;
+  UniAdminConnectionManager, DatabaseInitializer, DatabaseMigrator,
+  MVCFramework.ActiveRecord;
 
 { TServerModule }
 
@@ -109,6 +110,13 @@ begin
   InitializeModuleRegistry;
   LoadApplicationConfig;
   InitializeDatabaseServices;
+
+  // Task 2 PoC：DMVC ActiveRecord 连接集成（B 路线命门）
+  // 显式建池化 con_def（UniAdmin_Pooled）+ 注册给 ActiveRecord 全局。
+  // ActiveRecord 的 CurrentConnection 按 per-thread 借还池化物理连接
+  // （FireDAC Pooled 隔离；会话隔离需开 2 并发会话实测确认）。
+  TUniAdminConnectionManager.GetInstance.EnsurePooledConnectionDef;
+  ActiveRecordConnectionsRegistry.AddDefaultConnection('UniAdmin_Pooled');
 
   // 记录启动日志
   LogInfo('UniGUI Server Module initialized successfully.');

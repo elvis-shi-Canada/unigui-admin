@@ -32,6 +32,8 @@ type
     function GetDefaultConnection: TFDConnection;
     procedure ReleaseConnection(var Connection: TFDConnection);
     function TestConnection(const Params: TConnectionParams): Boolean;
+    /// <summary>确保池化连接定义已注册（供启动时显式调用，如 DMVC ActiveRecord 集成）</summary>
+    procedure EnsurePooledConnectionDef;
   end;
 
 implementation
